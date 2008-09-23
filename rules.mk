@@ -20,6 +20,7 @@ clean:
 	$(CC) $(CFLAGS) -c $<
 
 doc:
+	-rm -fr doc
 	mkdir -p doc
 	doxygen doxygen.conf
 

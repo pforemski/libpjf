@@ -3,6 +3,7 @@
  *
  * This file is part of libasn
  * Copyright (C) 2005-2008 by ASN <http://www.asn.pl/>
+ * Author: Pawel Foremski <pjf@asn.pl>
  *
  * libasn is free software; you can redistribute it and/or modify it under
  * the terms of the GNU General Public License as published by the Free
@@ -123,11 +124,11 @@ void *asn_malloc(size_t size)
 {
 	void *mem;
 
-	dbg(11, "tmalloc(%u)\n", size);
+	dbg(11, "asn_malloc(%u)\n", size);
 
 	mem = malloc(size);
 	if (!mem)
-		die("malloc(%u) failed, out of memory\n", (unsigned int) size);
+		die("asn_malloc(%u) failed, out of memory\n", (unsigned int) size);
 
 	return mem;
 }
@@ -141,7 +142,7 @@ char *mmatic_printf(mmatic *mm, const char *fmt, ...)
 }
 
 /* it seems its easier to have code duplication than coping with va_lists */
-char *tmalloc_printf(const char *fmt, ...)
+char *asn_malloc_printf(const char *fmt, ...)
 {
 	va_list args; char *buf;
 	va_start(args, fmt); buf = asn_malloc(1024); vsnprintf(buf, 1024, fmt, args); va_end(args);

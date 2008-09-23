@@ -3,6 +3,7 @@
  *
  * This file is part of libasn
  * Copyright (C) 2005-2008 by ASN <http://www.asn.pl/>
+ * Author: Pawel Foremski <pjf@asn.pl>
  *
  * libasn is free software; you can redistribute it and/or modify it under
  * the terms of the GNU General Public License as published by the Free
@@ -167,8 +168,8 @@ void *asn_malloc(size_t size);
 char *mmatic_printf(mmatic *mm, const char *fmt, ...);
 #define mmprintf(...) (mmatic_printf(mm, __VA_ARGS__))
 
-/** mmatic_printf() using asn_tmalloc() */
-char *asn_tmalloc_printf(const char *fmt, ...);
-#define tmprintf asn_tmalloc_printf
+/** mmatic_printf() using asn_malloc() */
+char *asn_malloc_printf(const char *fmt, ...);
+#define tmprintf asn_malloc_printf
 
 #endif /* _MMATIC_H_ */

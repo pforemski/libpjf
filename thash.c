@@ -3,6 +3,7 @@
  *
  * This file is part of libasn
  * Copyright (C) 2005-2008 by ASN <http://www.asn.pl/>
+ * Author: Pawel Foremski <pjf@asn.pl>
  *
  * libasn is free software; you can redistribute it and/or modify it under
  * the terms of the GNU General Public License as published by the Free

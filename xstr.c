@@ -1,6 +1,9 @@
 /*
  * This file is part of libasn
  * Copyright (C) 2005-2008 by ASN <http://www.asn.pl/>
+ * Authors: Dawid Ciężarkiewicz <dawid.ciezarkiewicz@gmail.com> (original idea)
+ *          Łukasz Zemczak <sil2100@asn.pl>
+ *          Pawel Foremski <pjf@asn.pl>
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
