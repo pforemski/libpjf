@@ -159,7 +159,7 @@ static inline char *_mmatic_strdup(const char *s, mmatic *mgr, const char *cfile
  *
  * @param size same as in stdlib's malloc()
  */
-void *tmalloc(size_t size);
+void *asn_malloc(size_t size);
 
 /** An in-place snprintf()
  * @return allocated buffer, filled using snprintf()
@@ -167,8 +167,8 @@ void *tmalloc(size_t size);
 char *mmatic_printf(mmatic *mm, const char *fmt, ...);
 #define mmprintf(...) (mmatic_printf(mm, __VA_ARGS__))
 
-/** mmatic_printf() using tmalloc() */
-char *tmalloc_printf(const char *fmt, ...);
-#define tmprintf(...) (tmalloc_printf(__VA_ARGS__))
+/** mmatic_printf() using asn_tmalloc() */
+char *asn_tmalloc_printf(const char *fmt, ...);
+#define tmprintf asn_tmalloc_printf
 
 #endif /* _MMATIC_H_ */

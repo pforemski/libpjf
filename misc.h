@@ -55,22 +55,24 @@ void _die(const char *file, unsigned int line, char *msg, ...);
  *
  * @param path directory path
  */
-void changedir(const char *path);
+void asn_cd(const char *path);
 
-/** Checks if file/dir exists
+/** Checks if file exists
  *
  * @param  path path to file/dir
- * @retval 1    exists
- * @retval 0    doesn't exist
+ * @retval  1   exists, is a file
+ * @retval  2   exists, is a link
+ * @retval -1   does not exist
+ * @retval -2   exists, but is not a file nor a link
  */
-int fexists(const char *path);
+int asn_isfile(const char *path);
 
 /** Parse path into a tlist
  *
  * @param path   path to parse
  * @param lpath  a tlist to save in (already initialized)
  */
-void parsepath(const char *path, tlist *lpath, mmatic *mm);
+void asn_parsepath(const char *path, tlist *lpath, mmatic *mm);
 
 /** Parse "../" in paths, trim double slashes ("//"), ie. a realpath() on
  * virtual paths
@@ -78,29 +80,29 @@ void parsepath(const char *path, tlist *lpath, mmatic *mm);
  * @param vcwd   absolute virtual current working directory
  * @param vpath  virtual path to translate, may be relative
  */
-char *parsedoubleslashes(const char *vcwd, const char *vpath, mmatic *mm);
+char *asn_parsedoubleslashes(const char *vcwd, const char *vpath, mmatic *mm);
 
-/** Creates a path from a parsepath() list
- * @param pathparts list from parsepath()
+/** Creates a path from a asn_parsepath() list
+ * @param pathparts list from asn_parsepath()
  */
-char *makepath(tlist *pathparts, mmatic *mm);
+char *asn_makepath(tlist *pathparts, mmatic *mm);
 
 /** Check if path is a directory
  *
  * @param path   path to check
  * @retval 1     is a dir
- * @retval -1    not a dir
- * @retval -2    not a dir, check errno
+ * @retval -1    does not exist
+ * @retval -2    exists, but not a dir
  */
-int isdir(const char *path);
+int asn_isdir(const char *path);
 
 /** mkdir(1) -p
  * @param path   path to create
- * @param filter if !NULL, a function which will stop mkdirp() if it returns 1
+ * @param filter if !NULL, a function which will stop asn_mkdir() if it returns 1
  * @retval 0 error
  * @retval 1 success
  */
-int mkdirp(const char *path, mmatic *mm, int (*filter)(const char *part));
+int asn_mkdir(const char *path, mmatic *mm, int (*filter)(const char *part));
 
 /** rmdir(1) -r
  * @param path  path to remove
@@ -108,7 +110,7 @@ int mkdirp(const char *path, mmatic *mm, int (*filter)(const char *part));
  * @retval 0 error
  * @retval 1 success
  */
-int rmdirr(const char *path, const char *skip);
+int asn_rmdir(const char *path, const char *skip);
 
 /** Returns 1 if str is a number, 0 otherwise */
 int isnumber(const char *str);
@@ -116,7 +118,7 @@ int isnumber(const char *str);
 /** Fast double slash trimmer
  * @param path   path to remove "//"s in
  */
-char *sanepath(const char *path, mmatic *mm);
+char *asn_sanepath(const char *path, mmatic *mm);
 
 /** Read whole file
  * @param path   path to file

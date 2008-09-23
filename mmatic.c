@@ -34,9 +34,9 @@ mmatic *mmatic_create(void)
 {
 	mmatic *mgr;
 
-	mgr = tmalloc(sizeof(mmatic));
+	mgr = asn_malloc(sizeof(mmatic));
 	mgr->totalloc = 0;
-	mgr->first = mgr->last = tmalloc(sizeof(mmchunk));
+	mgr->first = mgr->last = asn_malloc(sizeof(mmchunk));
 	bzero(mgr->first, sizeof(mmchunk));
 
 	return mgr;
@@ -119,7 +119,7 @@ void *mmatic_realloc(void *mem, size_t size, mmatic *mgr)
 	return newmem;
 }
 
-void *tmalloc(size_t size)
+void *asn_malloc(size_t size)
 {
 	void *mem;
 
@@ -144,6 +144,6 @@ char *mmatic_printf(mmatic *mm, const char *fmt, ...)
 char *tmalloc_printf(const char *fmt, ...)
 {
 	va_list args; char *buf;
-	va_start(args, fmt); buf = tmalloc(1024); vsnprintf(buf, 1024, fmt, args); va_end(args);
+	va_start(args, fmt); buf = asn_malloc(1024); vsnprintf(buf, 1024, fmt, args); va_end(args);
 	return buf;
 }

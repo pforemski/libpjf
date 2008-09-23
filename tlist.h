@@ -145,10 +145,10 @@ void *tlist_remove(tlist *list);
 
 /** Returns the number of elements in the list */
 int tlist_size(tlist *list);
-#define tlist_count(a) tlist_size((a))
+#define tlist_count tlist_size
 
 /***/
-#define mmtlist_create(fn) (tlist_create((fn), mm))
+#define MMTLIST_CREATE(fn) (tlist_create((fn), mm))
 
 #endif
 

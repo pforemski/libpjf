@@ -28,7 +28,7 @@
  * @retval  0 didn't math
  * @retval -1 pattern error
  */
-int regex_match(char *regex, char *str);
+int asn_match(char *regex, char *str);
 
 /** Simple regex replace
  *
@@ -37,6 +37,6 @@ int regex_match(char *regex, char *str);
  * @param rep   replacement
  * @return      new char *, always succeeds
  */
-char *regex_replace(char *regex, char *str, char *rep, mmatic *mm);
+char *asn_replace(char *regex, char *str, char *rep, mmatic *mm);
 
 #endif /* _REGEX_H_ */

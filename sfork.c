@@ -32,7 +32,7 @@
 #include "mmatic.h"
 #include "sfork.h"
 
-pid_t sfork(const char *cmd, const char *args, thash *env,
+pid_t asn_fork(const char *cmd, const char *args, thash *env,
 		int *fd_stdin, int *fd_stdout, int *fd_stderr)
 {
 	int i, rc, script = 0;
@@ -68,7 +68,7 @@ pid_t sfork(const char *cmd, const char *args, thash *env,
 		/* set environment */
 		if (env) {
 			thash_reset(env);
-			while ((val = THASH_ITER_STR(env, &key)))
+			while ((val = thash_iter(env, &key)))
 				putenv(tmprintf("%s=%s", key, val));
 		}
 
@@ -128,7 +128,7 @@ writefailed:
 	return child_pid;
 }
 
-int swait(pid_t child)
+int asn_wait(pid_t child)
 {
 	int status;
 
@@ -143,7 +143,7 @@ int swait(pid_t child)
 		129;
 }
 
-pid_t swaitany(int *code)
+pid_t asn_waitany(int *code)
 {
 	int pid, status;
 
@@ -158,7 +158,7 @@ pid_t swaitany(int *code)
 	return pid;
 }
 
-int sexec(const char *cmd, const char *args, thash *env,
+int asn_cmd(const char *cmd, const char *args, thash *env,
 	char *in,  int inlen,
 	char *out, int outlen,
 	char *err, int errlen)
@@ -166,8 +166,8 @@ int sexec(const char *cmd, const char *args, thash *env,
 	int rc = -1, e = 0, c, pin = 0, pout = 0, perr = 0;
 	pid_t child;
 
-	if (!(child = sfork(cmd, args, env, &pin, &pout, &perr))) {
-		e = 1; dbg(2, "sexec(): sfork() failed\n");
+	if (!(child = asn_fork(cmd, args, env, &pin, &pout, &perr))) {
+		e = 1; dbg(2, "sexec(): asn_fork() failed\n");
 		goto end;
 	}
 
@@ -195,7 +195,7 @@ int sexec(const char *cmd, const char *args, thash *env,
 	}
 	close(perr);
 
-	rc = swait(child);
+	rc = asn_wait(child);
 	dbg((rc) ? 2 : 5, "sexec(): error code: %d\n", rc);
 
 end:

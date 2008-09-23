@@ -86,14 +86,17 @@ void _die(const char *file, unsigned int line, char *msg, ...)
 	abort();
 }
 
-int fexists(const char *path)
+int asn_isfile(const char *path)
 {
-	static struct stat foobar;
+	struct stat stats;
 
-	return (stat(path, &foobar) == 0);
+	if (stat(path, &stats)) return -1;
+	if (S_ISREG(stats.st_mode)) return 1;
+	if (S_ISLNK(stats.st_mode)) return 2;
+	return -2;
 }
 
-void changedir(const char *path)
+void asn_cd(const char *path)
 {
 	dbg(11, "changedir(%s)\n", path);
 
@@ -103,7 +106,7 @@ void changedir(const char *path)
 	}
 }
 
-void parsepath(const char *path, tlist *lpath, mmatic *mm)
+void asn_parsepath(const char *path, tlist *lpath, mmatic *mm)
 {
 	char *part, *ptr;
 
@@ -139,19 +142,19 @@ void parsepath(const char *path, tlist *lpath, mmatic *mm)
 	}
 }
 
-char *parsedoubleslashes(const char *vcwd, const char *vpath, mmatic *mm)
+char *asn_parsedoubleslashes(const char *vcwd, const char *vpath, mmatic *mm)
 {
 	tlist *list;
 
 	/* get new path in form of a list */
-	list = mmtlist_create(NULL);
-	if (vpath[0] != '/') parsepath(vcwd, list, mm);
-	parsepath(vpath, list, mm);
+	list = MMTLIST_CREATE(NULL);
+	if (vpath[0] != '/') asn_parsepath(vcwd, list, mm);
+	asn_parsepath(vpath, list, mm);
 
-	return makepath(list, mm);
+	return asn_makepath(list, mm);
 }
 
-char *makepath(tlist *pathparts, mmatic *mm)
+char *asn_makepath(tlist *pathparts, mmatic *mm)
 {
 	char *part;
 	xstr *ret = xstr_create("", mm);
@@ -168,7 +171,7 @@ char *makepath(tlist *pathparts, mmatic *mm)
 	return ret->s;
 }
 
-int isdir(const char *path)
+int asn_isdir(const char *path)
 {
 	struct stat dirstat;
 
@@ -177,13 +180,13 @@ int isdir(const char *path)
 	return 1;
 }
 
-int mkdirp(const char *path, mmatic *mm, int (*filter)(const char *part))
+int asn_mkdir(const char *path, mmatic *mm, int (*filter)(const char *part))
 {
 	tlist *list;
 	char *curdir, *part;
 
-	list = mmtlist_create(NULL);
-	parsepath(path, list, mm);
+	list = MMTLIST_CREATE(NULL);
+	asn_parsepath(path, list, mm);
 
 	curdir = mmalloc(strlen(path) + 2);
 	curdir[0] = 0;
@@ -193,7 +196,7 @@ int mkdirp(const char *path, mmatic *mm, int (*filter)(const char *part))
 		strcat(curdir, "/");
 		strcat(curdir, part);
 
-		switch (isdir(curdir)) {
+		switch (asn_isdir(curdir)) {
 			case 1:  continue;  /* exists, is a directory */
 			case -2: return 0;  /* exists, is NOT a directory */
 		}
@@ -209,7 +212,7 @@ int mkdirp(const char *path, mmatic *mm, int (*filter)(const char *part))
 	return 1;
 }
 
-int rmdirr(const char *path, const char *skip)
+int asn_rmdir(const char *path, const char *skip)
 {
 	struct stat statbuf;
 	struct dirent *dirp;
@@ -228,11 +231,11 @@ int rmdirr(const char *path, const char *skip)
 			if (streq(dirp->d_name, "..")) continue;
 			if (skip && streq(dirp->d_name, skip)) continue;
 
-			newpath = tmalloc(strlen(path) + strlen(dirp->d_name) + 2);
+			newpath = asn_malloc(strlen(path) + strlen(dirp->d_name) + 2);
 			strcpy(newpath, path);
 			strcat(newpath, "/");
 			strcat(newpath, dirp->d_name);
-			upret = rmdirr(newpath, skip);
+			upret = asn_rmdir(newpath, skip);
 			free(newpath);
 			if (!upret) return 0;
 		}
@@ -258,7 +261,7 @@ int isnumber(const char *str)
 	return 1;
 }
 
-char *sanepath(const char *path, mmatic *mm)
+char *asn_sanepath(const char *path, mmatic *mm)
 {
 	int i, j;
 	char *ret, prev = 0;

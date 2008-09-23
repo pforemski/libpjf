@@ -339,7 +339,7 @@ static void walk_tree (struct item *root, int (*action) (struct item *))
 		recurse_tree(root->right, action);
 }
 
-int tsort(tlist *input, tlist *output, mmatic *mm)
+int asn_tsort(tlist *input, tlist *output, mmatic *mm)
 {
 	int ok = 1;
 	struct item *root;

@@ -36,7 +36,7 @@ static inline int _thash_compare(const void *key1, const void *key2)
 	return (((unsigned long) key1) != ((unsigned long) key2));
 }
 
-#define _thash_alloc(hash, size) (((hash)->mm) ? mmatic_alloc((size), (hash)->mm) : tmalloc(size));
+#define _thash_alloc(hash, size) (((hash)->mm) ? mmatic_alloc((size), (hash)->mm) : asn_malloc(size));
 #define _thash_free(hash, ptr)   (((hash)->mm) ? mmfreeptr(ptr) : free(ptr));
 
 thash *thash_create(unsigned int (*hash_func)(const void *key),
@@ -48,7 +48,7 @@ thash *thash_create(unsigned int (*hash_func)(const void *key),
 	if (mm)
 		hash = mmalloc(sizeof(thash));
 	else
-		hash = tmalloc(sizeof(thash));
+		hash = asn_malloc(sizeof(thash));
 
 	hash->size = THASH_DEFAULT_SIZE;
 	hash->used = 0;
@@ -142,7 +142,7 @@ inline void *thash_get(const thash *hash, const void *key)
 	return val;
 }
 
-void *thash_iter(thash *hash, void **key)
+void *_thash_iter(thash *hash, void **key)
 {
 	unsigned int i;
 	thash_el *el;

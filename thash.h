@@ -128,7 +128,8 @@ void thash_reset(thash *hash);
  *               set to NULL if you don't want this
  * @return table entry
  * @retval NULL  end of table reached */
-void *thash_iter(thash *hash, void **key);
+void *_thash_iter(thash *hash, void **key);
+#define thash_iter(a, b) (_thash_iter((a), ((void **) (b))))
 
 /** Sets value of an element to given value.
  *
@@ -150,9 +151,8 @@ unsigned int thash_count(thash *hash);
 /*
  * Handy shortcuts
  */
-#define MMTHASH_NEW_STR(ffn) (thash_create(NULL, NULL, (ffn), 1, mm))
-#define MMTHASH_NEW_PTR(ffn) (thash_create(thash_ptr_hash, NULL, (ffn), 0, mm))
-#define THASH_ITER_STR(a, b) (thash_iter((a), ((void **) (b))))
+#define MMTHASH_CREATE_STR(ffn) (thash_create(NULL, NULL, (ffn), 1, mm))
+#define MMTHASH_CREATE_PTR(ffn) (thash_create(thash_ptr_hash, NULL, (ffn), 0, mm))
 
 /*
  * Hashing functions

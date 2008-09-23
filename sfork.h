@@ -42,7 +42,7 @@
  * @return child PID
  * @retval 0 error
  */
-pid_t sfork(const char *cmd, const char *args, thash* env,
+pid_t asn_fork(const char *cmd, const char *args, thash* env,
 		int *fd_stdin, int *fd_stdout, int *fd_stderr);
 
 /** Waits for termination of child
@@ -53,7 +53,7 @@ pid_t sfork(const char *cmd, const char *args, thash* env,
  * @retval 130+termsignal child terminated
  * @retval 129            other error
  */
-int swait(pid_t child);
+int asn_wait(pid_t child);
 
 /** Waits for termination of any child
  *
@@ -61,9 +61,9 @@ int swait(pid_t child);
  * @return          child pid
  * @retval 0        no child exited so far
  */
-pid_t swaitany(int *code);
+pid_t asn_waitany(int *code);
 
-/** Wrapper around sfork()
+/** Wrapper around asn_fork()
  *
  * @param cmd      command to execute (may be a shell script code)
  * @param args     optional arguments
@@ -76,9 +76,9 @@ pid_t swaitany(int *code);
  * @param errlen   length of err
  *
  * @returns exit code of the command
- * @retval  -1      error in sexec()
+ * @retval  -1      error in asn_cmd()
  */
-int sexec(const char *cmd, const char *args,
+int asn_cmd(const char *cmd, const char *args,
 	thash *envh,
 	char *in, int inlen,
 	char *out, int outlen,

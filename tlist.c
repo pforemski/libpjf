@@ -44,7 +44,7 @@ tlist *tlist_listify(void (*free_func)(void *val), mmatic *mm, ...)
 	const void *arg;
 	tlist *ret;
 
-	ret = mmtlist_create(free_func);
+	ret = MMTLIST_CREATE(free_func);
 	if (!ret) return NULL;
 
 	va_start(args, mm);
