@@ -80,29 +80,29 @@ void tlist_reset(tlist *list) { list->current = list->head; }
 void tlist_resetend(tlist *list) { list->current = list->tail; }
 int tlist_size(tlist *list) { return list->size; }
 
-void *tlist_iter(tlist *list)
+void *tlist_iter_inc(tlist *list, int i)
 {
 	void *val;
 
-	if (!list->current)
-		return NULL;
+	while (list->current && --i > 0) list->current = list->current->next;
+	if (!list->current) return NULL;
 
 	val = list->current->val;
-	list->current = list->current->next;
 
+	if (i >= 0) list->current = list->current->next;
 	return val;
 }
 
-void *tlist_iterback(tlist *list)
+void *tlist_iter_dec(tlist *list, int i)
 {
 	void *val;
 
-	if (!list->current)
-		return NULL;
+	while (list->current && --i > 0) list->current = list->current->prev;
+	if (!list->current) return NULL;
 
 	val = list->current->val;
-	list->current = list->current->prev;
 
+	if (i >= 0) list->current = list->current->prev;
 	return val;
 }
 
@@ -199,7 +199,14 @@ void *tlist_remove(tlist *list)
 
 void tlist_insertbefore(tlist *list, const void *val)
 {
+	if (!list->current) tlist_reset(list);
 	INSERT_EL(list->current, list->current->prev, list->head);
+}
+
+void tlist_insertafter(tlist *list, const void *val)
+{
+	/* XXX: assuming dereference of list->current->next AFTER checking if list->current != NULL */
+	INSERT_EL(list->current->next, list->current, list->tail);
 }
 
 /*

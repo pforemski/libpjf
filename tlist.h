@@ -64,14 +64,12 @@ struct _tlist_el {
 };
 
 /** Creates a list
- *
  * @param  free_func function to use to free an element; if NULL, then memory won't be freed
  * @note   always succeeds
  */
 tlist *tlist_create(void (*free_func)(void *val), mmatic *mm);
 
 /** Wrapper around tlist_create() which tlist_push()es given arguments
- *
  * @param  free_func function to use to free an element; if NULL, then memory won't be freed
  * @param  ...       arguments to tlist_push(); REMEMBER to end the list with \0
  * @remark the last argument should be \0
@@ -79,42 +77,42 @@ tlist *tlist_create(void (*free_func)(void *val), mmatic *mm);
 tlist *tlist_listify(void (*free_func)(void *val), mmatic *mm, ...);
 
 /** Flushes a list
- *
  * @param list the list to flush
  */
 void tlist_flush(tlist *list);
 
 /** Frees a list
- *
  * @param list the list
  */
 void tlist_free(tlist *list);
 
 /** Resets internal iterator to list beginning
- *
  * @param list the list
  */
 void tlist_reset(tlist *list);
 
 /** Resets internal iterator to list end
- *
  * @param list the list
  */
 void tlist_resetend(tlist *list);
 
-/** Iterate through list entries
- *
- * @param list the list
- * @retval NULL  end of list reached
+/** Iterate through list entries in forward direction
+ * @param  list  the list
+ * @param  i     step
+ * @retval NULL  end of the list reached
  */
-void *tlist_iter(tlist *list);
+void *tlist_iter_inc(tlist *list, int i);
 
-/** Iterates back
- *
- * @param list  the list
- * @retval NULL beginning of list reached
+/** Iterate through list entries in backward direction
+ * @param  list  the list
+ * @param  i     step
+ * @retval NULL  beginning of the list reached
  */
-void *tlist_iterback(tlist *list);
+void *tlist_iter_dec(tlist *list, int i);
+
+#define tlist_peek(list)      (tlist_iter_inc((list), 0))
+#define tlist_iter(list)      (tlist_iter_inc((list), 1))
+#define tlist_iterback(list)  (tlist_iter_dec((list), 1))
 
 /** Pushes a value at the end */
 void tlist_push(tlist *list, const void *val);
@@ -123,14 +121,14 @@ void tlist_push(tlist *list, const void *val);
 void *tlist_pop(tlist *list);
 
 /** Insert value before the element pointed by the iterator
- *  If current iterator is NULL, push the value at the end
+ *  If current iterator is NULL, push the value at the beginning
  *
  * @param list the list
  * @param val  value of the element
  */
 void tlist_insertbefore(tlist *list, const void *val);
 
-/** Insert value after the element
+/** Insert value after the element pointed by the iterator
  *  If current iterator is NULL, push the value at the end
  *
  * @param list the list
@@ -138,7 +136,7 @@ void tlist_insertbefore(tlist *list, const void *val);
  */
 void tlist_insertafter(tlist *list, const void *val);
 
-/** Remove value from the position pointed at by the iterator - 1
+/** Remove value from the position pointed by the iterator-1
  *
  * @param list the list
  * @retval NULL if iterator not set properly

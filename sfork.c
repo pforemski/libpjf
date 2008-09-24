@@ -41,25 +41,25 @@ pid_t asn_fork(const char *cmd, const char *args, thash *env,
 	pid_t child_pid;
 	char *key, *val;
 
-	dbg(10, "sfork('%s', '%s')\n", cmd, args);
+	dbg(10, "asn_fork('%s', '%s')\n", cmd, args);
 
 	if (!strncmp(cmd, "#!/bin/sh", 9)) {
-		dbg(6, "sfork(): interpreting as inline shell script\n");
+		dbg(6, "asn_fork(): interpreting as inline shell script\n");
 		script = 1;
 	}
 
 	if (pipe(fd_in) < 0) return 0;
-	dbg(11, "sfork(): pipe(fd_in): %d %d\n", fd_in[0], fd_in[1]);
+	dbg(11, "asn_fork(): pipe(fd_in): %d %d\n", fd_in[0], fd_in[1]);
 
 	if (pipe(fd_out) < 0) return 0;
-	dbg(11, "sfork(): pipe(fd_out): %d %d\n", fd_out[0], fd_out[1]);
+	dbg(11, "asn_fork(): pipe(fd_out): %d %d\n", fd_out[0], fd_out[1]);
 
 	if (pipe(fd_err) < 0) return 0;
-	dbg(11, "sfork(): pipe(fd_err): %d %d\n", fd_err[0], fd_err[1]);
+	dbg(11, "asn_fork(): pipe(fd_err): %d %d\n", fd_err[0], fd_err[1]);
 
 	if (script) {
 		if (pipe(fd_in2) < 0) return 0;
-		dbg(11, "sfork(): pipe(fd_in2): %d %d\n", fd_in2[0], fd_in2[1]);
+		dbg(11, "asn_fork(): pipe(fd_in2): %d %d\n", fd_in2[0], fd_in2[1]);
 	}
 
 	child_pid = fork();
@@ -82,7 +82,7 @@ pid_t asn_fork(const char *cmd, const char *args, thash *env,
 			) continue;
 
 			if (!close(i)) /* XXX: after closing(2) dbg() wont work */
-				dbg(11, "sfork(): closed FD %d\n", i);
+				dbg(11, "asn_fork(): closed FD %d\n", i);
 		}
 
 		if (dup2(fd_in[0],  0) == -1) _exit(123);
@@ -100,7 +100,7 @@ pid_t asn_fork(const char *cmd, const char *args, thash *env,
 	}
 
 	/* parent */
-	dbg(7, "sfork(): forked PID %u\n", child_pid);
+	dbg(7, "asn_fork(): forked PID %u\n", child_pid);
 
 	close(fd_in[0]);
 	close(fd_out[1]);
@@ -113,7 +113,7 @@ pid_t asn_fork(const char *cmd, const char *args, thash *env,
 	if (script) {
 		close(fd_in2[0]);
 
-#		define CHECKRC(a) if (rc < 0) { dbg(4, "sfork(): write(%s): %m\n", (a)); goto writefailed; }
+#		define CHECKRC(a) if (rc < 0) { dbg(4, "asn_fork(): write(%s): %m\n", (a)); goto writefailed; }
 		rc = write(fd_in[1], "#!/bin/sh\n", 10); CHECKRC("shabang");
 //		rc = write(fd_in[1], "exec <&3\n", 9); CHECKRC("fd3 hack"); /* TODO: BUG: does not work */
 		rc = write(fd_in[1], cmd, strlen(cmd) + 1); CHECKRC("command");
@@ -135,7 +135,7 @@ int asn_wait(pid_t child)
 
 	if (!child) return 128;
 
-	dbg(7, "swait(): waiting for PID %u\n", child);
+	dbg(7, "asn_wait(): waiting for PID %u\n", child);
 	waitpid(child, &status, 0);
 
 	return
@@ -168,14 +168,14 @@ int asn_cmd(const char *cmd, const char *args, thash *env,
 	pid_t child;
 
 	if (!(child = asn_fork(cmd, args, env, &pin, &pout, &perr))) {
-		e = 1; dbg(2, "sexec(): asn_fork() failed\n");
+		e = 1; dbg(2, "asn_cmd(): asn_fork() failed\n");
 		goto end;
 	}
 
 	/* write stdin to child from in */
 	if (in) {
 		rc = write(pin, in, inlen);
-#		define CHECKRC2(arg) if (rc < 0) { e = 1; dbg(4, "sexec(): %s: %m\n", arg); }
+#		define CHECKRC2(arg) if (rc < 0) { e = 1; dbg(4, "asn_cmd(): %s: %m\n", arg); }
 		CHECKRC2("write(pin)");
 	}
 	close(pin);
@@ -184,7 +184,7 @@ int asn_cmd(const char *cmd, const char *args, thash *env,
 	if (out) {
 		for (c = 0; (rc = read(pout, out+c, outlen-c-1)) > 0; c += rc); out[c] = 0;
 		CHECKRC2("read(pout)");
-		if (out[0]) dbg(6, "sexec(): stdout: %s", out);
+		if (out[0]) dbg(6, "asn_cmd(): stdout: %s", out);
 	}
 	close(pout);
 
@@ -192,12 +192,12 @@ int asn_cmd(const char *cmd, const char *args, thash *env,
 	if (err) {
 		for (c = 0; (rc = read(perr, err+c, errlen-c-1)) > 0; c += rc); err[c] = 0;
 		CHECKRC2("read(perr)");
-		if (err[0]) dbg(2, "sexec(): stderr: %s", err);
+		if (err[0]) dbg(2, "asn_cmd(): stderr: %s", err);
 	}
 	close(perr);
 
 	rc = asn_wait(child);
-	dbg((rc) ? 2 : 5, "sexec(): error code: %d\n", rc);
+	dbg((rc) ? 2 : 5, "asn_cmd(): error code: %d\n", rc);
 
 end:
 	return (e) ? -1 : rc;

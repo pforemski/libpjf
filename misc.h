@@ -20,7 +20,10 @@
 #ifndef _MISC_H_
 #define _MISC_H_
 
+#include <stdint.h>
+#include <stdbool.h>
 #include <stdlib.h>
+
 #include <libasn/tlist.h>
 #include <libasn/mmatic.h>
 
@@ -50,7 +53,7 @@ void dbg(int level, char *dbg, ...);
  * @param msg  optional (!= NULL) message format + args to show on stderr
  */
 void _die(const char *file, unsigned int line, char *msg, ...);
-#define die(msg, ...) (_die(__FILE__, __LINE__, msg, __VA_ARGS__))
+#define die(...) (_die(__FILE__, __LINE__, __VA_ARGS__))
 
 /** chdir() or die()
  *
@@ -113,7 +116,10 @@ int asn_mkdir(const char *path, mmatic *mm, int (*filter)(const char *part));
  */
 int asn_rmdir(const char *path, const char *skip);
 
-/** Returns 1 if str is a number, 0 otherwise */
+/** Checks if all str characters are digits
+ * @retval 1 str is a number
+ * @retval 0 str is not a number
+ */
 int isnumber(const char *str);
 
 /** Fast double slash trimmer
