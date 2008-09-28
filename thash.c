@@ -42,7 +42,7 @@ static inline int _thash_compare(const void *key1, const void *key2)
 
 thash *thash_create(unsigned int (*hash_func)(const void *key),
                     int (*cmp_func)(const void *key1, const void *key2),
-                    void (*free_func)(void *val), int strings, mmatic *mm)
+                    void (*free_func)(void *val), bool strings, mmatic *mm)
 {
 	thash *hash;
 
@@ -60,30 +60,18 @@ thash *thash_create(unsigned int (*hash_func)(const void *key),
 
 	if (hash_func)
 		hash->hash_func = hash_func;
-	else {
-		if (strings == 1)
-			hash->hash_func = &thash_str_hash;
-		else
-			hash->hash_func = &thash_ptr_hash;
-	}
+	else
+		hash->hash_func = strings ? thash_str_hash : thash_ptr_hash;
 
 	if (cmp_func)
 		hash->cmp_func = cmp_func;
-	else {
-		if (strings == 1)
-			hash->cmp_func = _thash_strcmp_wrapper;
-		else
-			hash->cmp_func = _thash_compare;
-	}
+	else
+		hash->cmp_func = strings ? _thash_strcmp_wrapper : _thash_compare;
 
 	hash->free_func = free_func;
+	hash->strings_mode = strings ? 1 : 0;
+
 	thash_reset(hash);
-
-	if (strings == 1)
-		hash->strings_mode = 1;
-	else
-		hash->strings_mode = 0;
-
 	return hash;
 }
 
@@ -179,7 +167,6 @@ void *_thash_iter(thash *hash, void **key)
 void thash_reset(thash *hash) { hash->counter_x = hash->counter_y = 0; }
 
 /** Resizes a hash table.
- *
  * It doesn't use realloc() because table indices will change as they depend on hash->size.
  */
 static void thash_resize(thash *hash)

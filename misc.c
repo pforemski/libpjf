@@ -97,6 +97,15 @@ int asn_isfile(const char *path)
 	return -2;
 }
 
+int asn_isfifo(const char *path)
+{
+	struct stat stats;
+
+	if (stat(path, &stats)) return -1;
+	if (S_ISFIFO(stats.st_mode)) return 1;
+	return -2;
+}
+
 void asn_cd(const char *path)
 {
 	dbg(11, "changedir(%s)\n", path);
@@ -181,12 +190,22 @@ int asn_isdir(const char *path)
 	return 1;
 }
 
+char *asn_abspath(const char *path, mmatic *mm)
+{
+	char cwd[PATH_MAX];
+
+	if (path[0] == '/')
+		return mmstrdup(path);
+	else
+		return mmprintf("%s/%s", getcwd(cwd, sizeof(cwd)), path);
+}
+
 int asn_mkdir(const char *path, mmatic *mm, int (*filter)(const char *part))
 {
-	tlist *list;
+	tlist *list = MMTLIST_CREATE(NULL);
 	char *curdir, *part;
 
-	list = MMTLIST_CREATE(NULL);
+	path = asn_abspath(path, mm);
 	asn_parsepath(path, list, mm);
 
 	curdir = mmalloc(strlen(path) + 2);
@@ -198,7 +217,7 @@ int asn_mkdir(const char *path, mmatic *mm, int (*filter)(const char *part))
 		strcat(curdir, part);
 
 		switch (asn_isdir(curdir)) {
-			case 1:  continue;  /* exists, is a directory */
+			case  1: continue;  /* exists, is a directory */
 			case -2: return 0;  /* exists, is NOT a directory */
 		}
 

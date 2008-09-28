@@ -114,11 +114,17 @@ void *tlist_iter_dec(tlist *list, int i);
 #define tlist_iter(list)      (tlist_iter_inc((list), 1))
 #define tlist_iterback(list)  (tlist_iter_dec((list), 1))
 
-/** Pushes a value at the end */
+/** Pushes a value at the end of the list */
 void tlist_push(tlist *list, const void *val);
 
-/** Pops a value off end */
+/** Pushes a value at the beginning of the list */
+void tlist_push(tlist *list, const void *val);
+
+/** Pops a value off the end */
 void *tlist_pop(tlist *list);
+
+/** Shift whole list left - ie. removes element and the beginning */
+void *tlist_shift(tlist *list);
 
 /** Insert value before the element pointed by the iterator
  *  If current iterator is NULL, push the value at the beginning

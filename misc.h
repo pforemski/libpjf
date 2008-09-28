@@ -33,11 +33,13 @@ extern int debug;
 /** Function to call instead of fprintf() for logging a message */
 extern void (*debugcb)(const char *msg);
 
-/** I could never understand why there is no such macro by default */
+/** Shortcut for programs using libasn */
+#define __USE_LIBASN int debug = 0; void (*debugcb)() = NULL;
+
+/** I could never understand why there is no such macro by default --pjf */
 #define streq(a, b) (strcmp((a), (b)) == 0)
 
 /** Prints debugging message if debug <= level
- *
  * @param level message debug level
  * @param dbg message to show, in printf-style format
  */
@@ -56,13 +58,11 @@ void _die(const char *file, unsigned int line, char *msg, ...);
 #define die(...) (_die(__FILE__, __LINE__, __VA_ARGS__))
 
 /** chdir() or die()
- *
  * @param path directory path
  */
 void asn_cd(const char *path);
 
 /** Checks if file exists
- *
  * @param  path path to file/dir
  * @retval  1   exists, is a file
  * @retval  2   exists, is a link
@@ -71,8 +71,15 @@ void asn_cd(const char *path);
  */
 int asn_isfile(const char *path);
 
+/** Checks if file is a FIFO
+ * @param  path path to file/dir
+ * @retval  1   exists and is a FIFO
+ * @retval -1   does not exist
+ * @retval -2   exists, but is not a fifo
+ */
+int asn_isfifo(const char *path);
+
 /** Parse path into a tlist
- *
  * @param path   path to parse
  * @param lpath  a tlist to save in (already initialized)
  */
@@ -80,7 +87,6 @@ void asn_parsepath(const char *path, tlist *lpath, mmatic *mm);
 
 /** Parse "../" in paths, trim double slashes ("//"), ie. a realpath() on
  * virtual paths
- *
  * @param vcwd   absolute virtual current working directory
  * @param vpath  virtual path to translate, may be relative
  */
@@ -91,24 +97,30 @@ char *asn_parsedoubleslashes(const char *vcwd, const char *vpath, mmatic *mm);
  */
 char *asn_makepath(tlist *pathparts, mmatic *mm);
 
+/** Convert relative path to absolute one
+ * @param  path  path to convert
+ * @param  mm    memory for new path
+ * @note always returns the value in given mm */
+char *asn_abspath(const char *path, mmatic *mm);
+
 /** Check if path is a directory
- *
- * @param path   path to check
- * @retval 1     is a dir
- * @retval -1    does not exist
- * @retval -2    exists, but not a dir
+ * @param   path   path to check
+ * @retval  1      is a dir
+ * @retval -1      does not exist
+ * @retval -2      exists, but not a dir
  */
 int asn_isdir(const char *path);
 
 /** mkdir(1) -p
- * @param path   path to create
- * @param filter if !NULL, a function which will stop asn_mkdir() if it returns 1
- * @retval 0 error
- * @retval 1 success
+ * @param  path    path to create
+ * @param  filter  if !NULL, a function to call on each iteration and exit from asn_mkdir() with retval 1 if this
+ *                 callback function returns 1, "part" in cb args is the path part were just about to create
+ * @retval 0       error
+ * @retval 1       success
  */
 int asn_mkdir(const char *path, mmatic *mm, int (*filter)(const char *part));
 
-/** rmdir(1) -r
+/** rm -fr
  * @param path  path to remove
  * @param skip  names to skip (optional)
  * @retval 0 error

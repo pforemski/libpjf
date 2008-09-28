@@ -126,6 +126,26 @@ void tlist_push(tlist *list, const void *val)
 	list->size++;
 }
 
+void tlist_prepend(tlist *list, const void *val)
+{
+	tlist_el *el = tmmalloc(sizeof(tlist_el));
+
+	el->val = (void *) val;
+	el->list = list;
+	el->next = el->prev = NULL;
+
+	if (!list->head) {
+		list->head = list->tail = el;
+	}
+	else {
+		el->next = list->head;
+		list->head->prev = el;
+		list->head = el;
+	}
+
+	list->size++;
+}
+
 void *tlist_pop(tlist *list)
 {
 	tlist_el *el;
@@ -136,9 +156,33 @@ void *tlist_pop(tlist *list)
 	el = list->tail;
 	val = el->val;
 
-	if (list->tail->prev) {
-		list->tail->prev->next = NULL;
-		list->tail = list->tail->prev;
+	if (el->prev) {
+		el->prev->next = NULL;
+		list->tail = el->prev;
+	}
+	else {
+		list->head = list->tail = list->current = NULL;
+	}
+
+	mmfreeptr(el);
+	list->size--;
+
+	return val;
+}
+
+void *tlist_shift(tlist *list)
+{
+	tlist_el *el;
+	void *val;
+
+	if (!list->head) return NULL;
+
+	el = list->head;
+	val = el->val;
+
+	if (el->next) {
+		el->next->prev = NULL;
+		list->head = el->next;
 	}
 	else {
 		list->head = list->tail = list->current = NULL;

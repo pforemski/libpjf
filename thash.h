@@ -71,7 +71,7 @@ typedef struct thash_t {
 	void (*free_func)(void *val);
 
 	/** If 1, we operate on string keys only */
-	int strings_mode;
+	bool strings_mode;
 
 	/** mmatic */
 	mmatic *mm;
@@ -85,18 +85,23 @@ typedef struct thash_t {
 
 /** Creates a hashing table.
  *
- * @param  hash_func hashing function to use; if NULL, a generic hashing function will be used
- * @param  cmp_func  key comparison function to use; if NULL:
+ * @param  hash_func key hashing function to use; if NULL:
+ *                     * if strings=1, a generic string hashing function will be used
+ *                     * otherwise, we simply use the key directly
+ * @param  cmp_func  key comparison function to use (in case of same indices); if NULL:
  *                     * if strings=1, strcmp() will be used
  *                     * otherwise, (a - b) will be used
- * @param  free_func function to use to free an element; if NULL, then memory won't be freed
- * @param  strings   if 1, keys will be copied and freed() in the default free_func()
+ * @param  free_func function to use to free the value; if NULL, won't be freed
+ * @param  strings   if true, *keys* will be copied and freed
  * @param  mm        mmatic; if NULL, use tmalloc
  * @retval NULL      an error occured
  */
 thash *thash_create(unsigned int (*hash_func)(const void *key),
                     int (*cmp_func)(const void *key1, const void *key2),
-                    void (*free_func)(void *val), int strings, mmatic *mm);
+                    void (*free_func)(void *val), bool strings, mmatic *mm);
+
+#define MMTHASH_CREATE_STR(ffn) (thash_create(NULL, NULL, (ffn), 1, mm))
+#define MMTHASH_CREATE_PTR(ffn) (thash_create(NULL, NULL, (ffn), 0, mm))
 
 /** Frees a hash table.
  * @param hash the hash table
@@ -148,12 +153,6 @@ void thash_set(thash *hash, const void *key, const void *val);
  * @param hash the hash table
  */
 unsigned int thash_count(thash *hash);
-
-/*
- * Handy shortcuts
- */
-#define MMTHASH_CREATE_STR(ffn) (thash_create(NULL, NULL, (ffn), 1, mm))
-#define MMTHASH_CREATE_PTR(ffn) (thash_create(thash_ptr_hash, NULL, (ffn), 0, mm))
 
 /*
  * Hashing functions
