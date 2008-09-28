@@ -20,13 +20,13 @@
 
 #define _GNU_SOURCE 1
 
-#include <pcre.h>
 #include <ctype.h>
 #include <string.h>
 
 #include "misc.h"
 #include "xstr.h"
 #include "mmatic.h"
+#include "pcre/pcre.h"
 
 #define CVS 90
 

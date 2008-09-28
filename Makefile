@@ -9,5 +9,5 @@ include rules.mk
 pcre/.libs/libpcre.a:
 	./pcre-build.sh
 
-libasn.so: $(C_OBJECTS) pcre/.libs/libpcre.a
+libasn.so: pcre/.libs/libpcre.a $(C_OBJECTS)
 	$(CC) $(LDFLAGS) $(C_OBJECTS) -shared -o libasn.so pcre/.libs/libpcre.a
