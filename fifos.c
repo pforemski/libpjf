@@ -101,27 +101,31 @@ int fifos_update(struct fifos *f, thash *state)
 	/* handle new */
 	thash_reset(state);
 	while ((v = thash_iter(state, &n))) {
-		if (thash_get(f->data, n)) continue; /* yeap, already there */
+		if ((data = thash_get(f->data, n))) { /* just update the value */
+			mmatic_freeptr(data->value);
+			data->value = mmatic_strdup(v, f->mm);
+		}
+		else {
+			p = mmprintf("%s/%s", f->dir, n);
+			if (mkfifo(p, 0666) < 0) { dbg(1, "mkfifo(%s): %m\n", p); continue; }
 
-		p = mmprintf("%s/%s", f->dir, n);
-		if (mkfifo(p, 0666) < 0) { dbg(1, "mkfifo(%s): %m\n", p); continue; }
+			fd = open(p, O_RDWR); /* XXX: r/w so open(O_RDONLY) wont block */
+			if (fd < 0) { dbg(1, "open(%s): %m\n", p); continue; }
 
-		fd = open(p, O_RDWR); /* XXX: r/w so open(O_RDONLY) wont block */
-		if (fd < 0) { dbg(1, "open(%s): %m\n", p); continue; }
+			wd = inotify_add_watch(f->fd, p, IN_OPEN | IN_CLOSE);
+			if (wd < 0) { dbg(1, "inotify_add_watch(%s): %m\n", p); continue; }
 
-		wd = inotify_add_watch(f->fd, p, IN_OPEN | IN_CLOSE);
-		if (wd < 0) { dbg(1, "inotify_add_watch(%s): %m\n", p); continue; }
+			data         = mmatic_alloc(sizeof(*data), f->mm);
+			data->value  = mmatic_strdup(v, f->mm);  /* XXX: copy the value */
+			data->wd     = wd;
+			data->fd     = fd;
+			data->state  = 1;
 
-		data         = mmatic_alloc(sizeof(*data), f->mm);
-		data->value  = mmatic_strdup(v, f->mm);  /* XXX: copy the value */
-		data->wd     = wd;
-		data->fd     = fd;
-		data->state  = 1;
+			thash_set(f->data, n, data);
+			thash_set(f->wd2n, (void *) wd, mmatic_strdup(n, f->mm));
 
-		thash_set(f->data, n, data);
-		thash_set(f->wd2n, (void *) wd, mmatic_strdup(n, f->mm));
-
-		dbg(8, "fifos_update(): added watch on %s\n", p);
+			dbg(8, "fifos_update(): added watch on %s\n", p);
+		}
 	}
 
 	/* handle old */
@@ -139,6 +143,8 @@ int fifos_update(struct fifos *f, thash *state)
 
 		dbg(8, "fifos_update(): deleting watch on %s\n", p);
 		thash_set(f->wd2n, (void *) data->wd, NULL);
+
+		mmfreeptr(data->value);
 		thash_set(f->data, n,  NULL);
 	}
 
@@ -160,7 +166,7 @@ void fifos_read(struct fifos *f)
 	dbg(5, "fifos_read(): e.mask=%d\n", e.mask);
 
 	n = thash_get(f->wd2n, (void *) e.wd);
-	if (!n) { dbg(0, "fifos_read(): unknown wd %d\n", e.wd); return; }
+	if (!n) { dbg(e.mask == IN_IGNORED ? 9 : 0, "fifos_read(): unknown wd %d\n", e.wd); return; }
 
 	data = thash_get(f->data, n);
 	if (!data) die("fifos_read(): no data for '%s' (wd %d)\n", n, e.wd);
@@ -172,8 +178,8 @@ void fifos_read(struct fifos *f)
 			if (data->state == 4) { data->state = 1; goto fr_end; }
 			else if (data->state != 1) goto fr_end;
 
-			v = tmprintf("%s\n", data->value);
-			i = write(data->fd, v, strlen(v) + 1);
+			v = tmprintf("%s", data->value);
+			i = write(data->fd, v, strlen(v));
 			if (i < 0) dbg(0, "fifos_read(): write(): %m\n");
 
 			data->state = 2;

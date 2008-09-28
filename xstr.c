@@ -25,7 +25,6 @@
 #include <stdio.h>
 #include <string.h>
 #include <ctype.h>
-#include <assert.h>
 
 #include "misc.h"
 #include "xstr.h"

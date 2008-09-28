@@ -19,12 +19,15 @@
  * this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+#ifndef _FIFOS_H_
+#define _FIFOS_H_
+
 #include "misc.h"
 #include "mmatic.h"
 #include "thash.h"
 
 struct fifos_el {
-	const char *value; /**> value to show */
+	char *value;       /**> value to show */
 	uint32_t wd;       /**> ID under inotify */
 	int fd;            /**> fifo opened for r/w */
 	int state;         /**> what were currently waiting for */
@@ -59,3 +62,5 @@ int fifos_update(struct fifos *f, thash *state);
 /** Handle a read(2) request
  * @param f  fifos instance data */
 void fifos_read(struct fifos *f);
+
+#endif /* _FIFOS_H_ */

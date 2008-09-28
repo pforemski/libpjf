@@ -256,6 +256,7 @@ void thash_set(thash *hash, const void *key, const void *val)
 	}
 	else if (val) { /* update */
 		dbg(12, "thash_set(): updating %p\n", key);
+		/* XXX: old value not freed */
 		el->val = (void *) val;
 	}
 	else { /* val = null, delete */

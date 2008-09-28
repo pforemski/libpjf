@@ -56,6 +56,7 @@ void dbg(int level, char *dbg, ...);
  */
 void _die(const char *file, unsigned int line, char *msg, ...);
 #define die(...) (_die(__FILE__, __LINE__, __VA_ARGS__))
+#define asnsert(a) do { if(!(a)) die("Assertion failed"); } while(0);
 
 /** chdir() or die()
  * @param path directory path
