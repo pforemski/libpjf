@@ -30,10 +30,11 @@
 
 #include <stdio.h>
 #include <string.h>
-#include <libasn/misc.h>
-#include <libasn/thash.h>
-#include <libasn/tlist.h>
-#include <libasn/mmatic.h>
+
+#include "misc.h"
+#include "thash.h"
+#include "tlist.h"
+#include "mmatic.h"
 
 #include "tsort.h"
 

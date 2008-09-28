@@ -25,7 +25,8 @@
 #define __XSTR_H__
 
 #include <ctype.h>
-#include <libasn/mmatic.h>
+
+#include "mmatic.h"
 
 typedef struct xstr {
 	/** Pointer to allocated memory */

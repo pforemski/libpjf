@@ -24,8 +24,8 @@
 #include <stdbool.h>
 #include <stdlib.h>
 
-#include <libasn/tlist.h>
-#include <libasn/mmatic.h>
+#include "tlist.h"
+#include "mmatic.h"
 
 /** Debugging level for dbg() */
 extern int debug;
