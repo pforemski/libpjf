@@ -47,7 +47,7 @@ typedef struct xstr {
  * @return allocated memory
  */
 xstr *xstr_create(const char *str, mmatic *mm);
-#define mmxstr(str) xstr_create((str), mm)
+#define MMXSTR_CREATE(str) xstr_create((str), mm)
 
 /**
  * Init xstr, ie. set it to "" value.
