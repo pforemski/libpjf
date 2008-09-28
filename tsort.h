@@ -22,9 +22,9 @@
  * this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <libasn/thash.h>
-#include <libasn/tlist.h>
-#include <libasn/mmatic.h>
+#include "thash.h"
+#include "tlist.h"
+#include "mmatic.h"
 
 /** A structure representing a dependency relation */
 typedef struct _tsort_pair {

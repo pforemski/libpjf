@@ -23,7 +23,8 @@
 #define _THASH_H_
 
 #include <stdlib.h>
-#include <libasn/mmatic.h>
+
+#include "mmatic.h"
 
 /** Default size of new hash table. */
 #define THASH_DEFAULT_SIZE 100

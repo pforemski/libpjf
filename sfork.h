@@ -21,7 +21,8 @@
 #define _SFORK_H_
 
 #include <sys/types.h>
-#include <libasn/thash.h>
+
+#include "thash.h"
 
 /**
  * @file sfork.h
