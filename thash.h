@@ -23,6 +23,7 @@
 #define _THASH_H_
 
 #include <stdlib.h>
+#include <stdbool.h>
 
 #include "mmatic.h"
 
