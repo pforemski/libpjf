@@ -22,9 +22,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "misc.h"
-#include "thash.h"
-#include "mmatic.h"
+#include "lib.h"
 
 static inline int _thash_strcmp_wrapper(const void *key1, const void *key2)
 {

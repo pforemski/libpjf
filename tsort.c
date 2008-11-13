@@ -31,12 +31,7 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "misc.h"
-#include "thash.h"
-#include "tlist.h"
-#include "mmatic.h"
-
-#include "tsort.h"
+#include "lib.h"
 
 /* Members of the list of successors.  */
 struct successor

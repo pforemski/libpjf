@@ -36,10 +36,7 @@
 #include <time.h>
 #include <syslog.h>
 
-#include "misc.h"
-#include "tlist.h"
-#include "mmatic.h"
-#include "xstr.h"
+#include "lib.h"
 
 #ifndef NODEBUG
 void dbg(int level, char *dbg, ...)

@@ -28,10 +28,7 @@
 #include <unistd.h>
 #include <dirent.h>
 
-#include "fifos.h"
-#include "misc.h"
-#include "thash.h"
-#include "mmatic.h"
+#include "lib.h"
 
 struct fifos *fifos_init(const char *dir)
 {

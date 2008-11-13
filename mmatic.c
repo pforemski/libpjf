@@ -26,8 +26,7 @@
 #include <stdarg.h>
 #include <sys/mman.h>
 
-#include "misc.h"
-#include "mmatic.h"
+#include "lib.h"
 
 #define PTR(ptr) ((uint8_t *) ptr)
 

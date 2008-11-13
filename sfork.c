@@ -27,10 +27,7 @@
 #include <sys/types.h>
 #include <sys/wait.h>
 
-#include "misc.h"
-#include "thash.h"
-#include "mmatic.h"
-#include "sfork.h"
+#include "lib.h"
 
 pid_t asn_fork(const char *cmd, const char *args, thash *env,
 		int *fd_stdin, int *fd_stdout, int *fd_stderr)

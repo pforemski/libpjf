@@ -26,9 +26,7 @@
 #include <string.h>
 #include <ctype.h>
 
-#include "misc.h"
-#include "xstr.h"
-#include "mmatic.h"
+#include "lib.h"
 
 #define xmmalloc(size) (mmatic_alloc((size), xs->mm))
 
