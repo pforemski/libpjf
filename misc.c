@@ -312,7 +312,7 @@ char *asn_readfile(const char *path, mmatic *mm)
 {
 	FILE *fp;
 	char *buf, *rbuf;
-	unsigned int bigbufsiz, bufsiz;
+	uint32_t bigbufsiz, bufsiz;
 
 	if ((fp = fopen(path, "r")) == NULL)
 		return NULL;

@@ -44,6 +44,7 @@ static void _asn_fcdir(thash *hash, const char *path, mmatic *mm)
 		}
 		else {
 			v = asn_readfile(np, mm);
+			if (!v) die("%s: could not read config file (%m)\n", np); /* fopen() failed */
 
 			/* trim endlines at the end */
 			len = strlen(v);
