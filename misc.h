@@ -52,50 +52,46 @@ void dbg(int level, char *dbg, ...);
 /** Abnormally terminates the program with abort()
  * @param file __FILE__
  * @param line __LINE__
- * @param msg  optional (!= NULL) message format + args to show on stderr
- */
+ * @param msg  optional (!= NULL) message format + args to show on stderr */
 void _die(const char *file, unsigned int line, char *msg, ...);
 #define die(...) (_die(__FILE__, __LINE__, __VA_ARGS__))
-#define asnsert(a) do { if(!(a)) die("Assertion failed"); } while(0);
+#define asnsert(a) do { if(!(a)) die("Assertion failed\n"); } while(0);
 
 /** chdir() or die()
- * @param path directory path
- */
+ * @param path directory path */
 void asn_cd(const char *path);
+
+/** Returns current working directory */
+char *asn_pwd(mmatic *mm);
 
 /** Checks if file exists
  * @param  path path to file/dir
  * @retval  1   exists, is a file
  * @retval  2   exists, is a link
  * @retval -1   does not exist
- * @retval -2   exists, but is not a file nor a link
- */
+ * @retval -2   exists, but is not a file nor a link */
 int asn_isfile(const char *path);
 
 /** Checks if file is a FIFO
  * @param  path path to file/dir
  * @retval  1   exists and is a FIFO
  * @retval -1   does not exist
- * @retval -2   exists, but is not a fifo
- */
+ * @retval -2   exists, but is not a fifo */
 int asn_isfifo(const char *path);
 
 /** Parse path into a tlist
  * @param path   path to parse
- * @param lpath  a tlist to save in (already initialized)
- */
+ * @param lpath  a tlist to save in (already initialized) */
 void asn_parsepath(const char *path, tlist *lpath, mmatic *mm);
 
 /** Parse "../" in paths, trim double slashes ("//"), ie. a realpath() on
  * virtual paths
  * @param vcwd   absolute virtual current working directory
- * @param vpath  virtual path to translate, may be relative
- */
+ * @param vpath  virtual path to translate, may be relative */
 char *asn_parsedoubleslashes(const char *vcwd, const char *vpath, mmatic *mm);
 
 /** Creates a path from a asn_parsepath() list
- * @param pathparts list from asn_parsepath()
- */
+ * @param pathparts list from asn_parsepath() */
 char *asn_makepath(tlist *pathparts, mmatic *mm);
 
 /** Convert relative path to absolute one
@@ -108,8 +104,7 @@ char *asn_abspath(const char *path, mmatic *mm);
  * @param   path   path to check
  * @retval  1      is a dir
  * @retval -1      does not exist
- * @retval -2      exists, but not a dir
- */
+ * @retval -2      exists, but not a dir */
 int asn_isdir(const char *path);
 
 /** mkdir(1) -p
@@ -117,41 +112,35 @@ int asn_isdir(const char *path);
  * @param  filter  if !NULL, a function to call on each iteration and exit from asn_mkdir() with retval 1 if this
  *                 callback function returns 1, "part" in cb args is the path part were just about to create
  * @retval 0       error
- * @retval 1       success
- */
+ * @retval 1       success */
 int asn_mkdir(const char *path, mmatic *mm, int (*filter)(const char *part));
 
 /** rm -fr
  * @param path  path to remove
  * @param skip  names to skip (optional)
  * @retval 0 error
- * @retval 1 success
- */
+ * @retval 1 success */
 int asn_rmdir(const char *path, const char *skip);
 
 /** Checks if all str characters are digits
  * @retval 1 str is a number
- * @retval 0 str is not a number
- */
+ * @retval 0 str is not a number */
 int isnumber(const char *str);
 
 /** Fast double slash trimmer
- * @param path   path to remove "//"s in
- */
+ * @param path   path to remove "//"s in */
 char *asn_sanepath(const char *path, mmatic *mm);
 
 /** Read whole file
- * @param path   path to file
- * @retval null  fopen() failed
- */
+ * @param  path  path to file
+ * @retval null  fopen() failed */
 char *asn_readfile(const char *path, mmatic *mm);
 
 /** Write file at once - simple wrapper around fputs()
- * @param path   path to file
- * @param s      what to write
+ * @param  path  path to file
+ * @param  s     what to write
  * @retval -1    fopen() failed
- * @return       fopen()s return value (number of bytes written or EOF)
- */
+ * @return       fopen()s return value (number of bytes written or EOF) */
 int asn_writefile(const char *path, const char *s);
 
 /** Return current UNIX timestamp in miliseconds */

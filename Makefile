@@ -1,7 +1,7 @@
 CFLAGS =
 LDFLAGS =
 
-C_OBJECTS=misc.o sfork.o regex.o thash.o tlist.o xstr.o wstr.o mmatic.o tsort.o fifos.o
+C_OBJECTS=misc.o sfork.o regex.o thash.o tlist.o xstr.o wstr.o mmatic.o tsort.o fifos.o fc.o
 TARGETS=libasn.so libasn.a
 
 include rules.mk

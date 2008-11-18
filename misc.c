@@ -116,6 +116,13 @@ void asn_cd(const char *path)
 	}
 }
 
+char *asn_pwd(mmatic *mm)
+{
+	char *ret = mmalloc(PATH_MAX);
+	asnsert(getcwd(ret, PATH_MAX));
+	return ret;
+}
+
 void asn_parsepath(const char *path, tlist *lpath, mmatic *mm)
 {
 	char *part, *ptr;
