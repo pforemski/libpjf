@@ -29,7 +29,8 @@ static void _asn_fcdir(thash *hash, const char *path, mmatic *mm)
 {
 	struct dirent *dirp;
 	DIR *subd;
-	char *np;
+	char *np, *v;
+	uint32_t len;
 
 	if (!(subd = opendir(path)))
 		die("opendir(%s) failed: %m\n", path);
@@ -38,10 +39,18 @@ static void _asn_fcdir(thash *hash, const char *path, mmatic *mm)
 		if (dirp->d_name[0] == '.') continue;
 
 		np = (streq(path, ".")) ? dirp->d_name : mmprintf("%s/%s", path, dirp->d_name);
-		if (asn_isdir(np) == 1)
+		if (asn_isdir(np) == 1) {
 			_asn_fcdir(hash, np, mm);
-		else
-			thash_set(hash, np, asn_readfile(np, mm));
+		}
+		else {
+			v = asn_readfile(np, mm);
+
+			/* trim endlines at the end */
+			len = strlen(v);
+			if (len && v[len-1] == '\n') v[len-1] = '\0';
+
+			thash_set(hash, np, v);
+		}
 	}
 
 	closedir(subd);
