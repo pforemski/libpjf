@@ -361,3 +361,36 @@ unsigned int asn_utimestamp()
 	else
 		return 0;
 }
+
+void asn_daemonize(const char *progname, const char *pidfile)
+{
+	int fd;
+	char pwd[PATH_MAX], pid[16];
+
+	for (fd = getdtablesize(); fd >= 0; fd--) close(fd);
+
+	if (fork() != 0) _exit(0);
+	setsid();
+	if (fork() != 0) _exit(0);
+	getcwd(pwd, sizeof(pwd));
+	chdir("/");
+
+	fd = open("/dev/null", O_RDWR);
+	if (fd < 0) _exit(127);
+
+	while ((unsigned) fd < 3) fd = dup(fd);
+	dup2(fd, 0);
+	dup2(fd, 1);
+	dup2(fd, 2);
+	close(fd);
+
+	openlog((progname) ? progname : "", LOG_PID, LOG_DAEMON);
+	debugcb = (void (*)()) syslog;
+
+	asn_cd(pwd); /* XXX: will die() if fails */
+
+	if (pidfile) {
+		snprintf(pid, sizeof(pid), "%u\n", getpid());
+		asn_writefile(pidfile, pid);
+	}
+}

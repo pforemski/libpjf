@@ -74,3 +74,14 @@ thash *asn_fcdir(const char *path, mmatic *mm)
 	asn_cd(pwd);
 	return ret;
 }
+
+const char *asn_fcget(thash *hash, const char *path)
+{
+	char *value;
+
+	value = (char *) thash_get(hash, path);
+	if (value == NULL)
+		die("asn_fcget(): could not get the value of '%s'\n", path);
+
+	return value;
+}

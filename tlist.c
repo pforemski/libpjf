@@ -253,6 +253,32 @@ void tlist_insertafter(tlist *list, const void *val)
 	INSERT_EL(list->current->next, list->current, list->tail);
 }
 
+char *tlist_stringify(tlist *list, const char *sep, mmatic *mm)
+{
+	int l = 0, sl = strlen(sep);
+	char *s, *ret, *p;
+
+	tlist_reset(list);
+	while ((s = tlist_iter(list)))
+		l += strlen(s) + sl;
+
+	if (l <= 0) return mmstrdup("");
+	p = ret = mmalloc(l);
+
+	tlist_reset(list);
+	while ((s = tlist_iter(list))) {
+		l = strlen(s);
+		memcpy(p,   s,   l);
+		memcpy(p+l, sep, sl);
+		p += l + sl;
+	}
+
+	p -= sl;
+	*p = '\0'; /* we dont want the last separator */
+
+	return ret;
+}
+
 /*
  * vim: textwidth=100
  */

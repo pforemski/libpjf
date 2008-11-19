@@ -149,4 +149,9 @@ unsigned int asn_utimestamp();
 /** Return current UNIX timestamp */
 #define asn_timestamp() (asn_utimestamp() / 1000)
 
+/** Daemonize a program
+ * @param progname    program name to show in syslog messages
+ * @param pidfile     path to file where to store the PID in (may be null) */
+void asn_daemonize(const char *progname, const char *pidfile);
+
 #endif /* _MISC_H_ */

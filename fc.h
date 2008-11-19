@@ -31,4 +31,9 @@
  * @param  path   directory path */
 thash *asn_fcdir(const char *path, mmatic *mm);
 
+/** A safe wrapper around thash_get to fetch config values
+ * @param hash   configuration hash
+ * @param path   variable path */
+const char *asn_fcget(thash *hash, const char *path);
+
 #endif /* _FC_H_ */

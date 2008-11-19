@@ -153,6 +153,11 @@ void *tlist_remove(tlist *list);
 int tlist_size(tlist *list);
 #define tlist_count tlist_size
 
+/** Stringify a tlist using given separator
+ * @param  list    list to stringify
+ * @param  sep     separator (cant be null!)
+ * @return char *  (always, even just an mm-ed "") */
+char *tlist_stringify(tlist *list, const char *sep, mmatic *mm);
 /***/
 #define MMTLIST_CREATE(fn) (tlist_create((fn), mm))
 
