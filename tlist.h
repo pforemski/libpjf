@@ -117,9 +117,6 @@ void *tlist_iter_dec(tlist *list, int i);
 /** Pushes a value at the end of the list */
 void tlist_push(tlist *list, const void *val);
 
-/** Pushes a value at the beginning of the list */
-void tlist_push(tlist *list, const void *val);
-
 /** Pops a value off the end */
 void *tlist_pop(tlist *list);
 
