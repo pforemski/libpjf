@@ -27,9 +27,8 @@
  * @param str   string
  *
  * @retval  1 matched
- * @retval  0 didn't math
- * @retval -1 pattern error
- */
+ * @retval  0 didn't match
+ * @retval -1 pattern error */
 int asn_match(char *regex, char *str);
 
 /** Simple regex replace
@@ -37,8 +36,7 @@ int asn_match(char *regex, char *str);
  * @param regex pattern
  * @param str   subject
  * @param rep   replacement
- * @return      new char *, always succeeds
- */
+ * @return      new char *, always succeeds */
 char *asn_replace(char *regex, char *str, char *rep, mmatic *mm);
 
 #endif /* _REGEX_H_ */
