@@ -22,9 +22,7 @@
 #ifndef _FC_H_
 #define _FC_H_
 
-#include "misc.h"
-#include "mmatic.h"
-#include "thash.h"
+#include "lib.h"
 
 /** Read recursively a Flatconf datatree
  * @return thash - keys are relative paths (e.g. "foo", "foo/bar/woo")

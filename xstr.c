@@ -26,9 +26,7 @@
 #include <string.h>
 #include <ctype.h>
 
-#include "misc.h"
-#include "xstr.h"
-#include "mmatic.h"
+#include "lib.h"
 
 #define xmmalloc(size) (mmatic_alloc((size), xs->mm))
 
@@ -196,4 +194,40 @@ char *xstr_stripch(char *string, mmatic *mm)
 	xstr_free(&xs);
 
 	return s;
+}
+
+/* XXX: The following might not work on other standards than C99, due to some
+ *      snprintf inconsistency between standards */
+
+int xstr_set_format(xstr *xs, const char *format, ...)
+{
+	int len;
+	va_list args;
+
+	va_start(args, format);
+	len = vsnprintf(NULL, 0, format, args);
+	xstr_reserve(xs, len);
+	if (vsnprintf(xs->s, xs->a + 1, format, args) != len) len = -1;
+	va_end(args);
+
+	if (len > 0) xs->len = len;
+
+	return len;
+}
+
+int xstr_append_format(xstr *xs, const char *format, ...)
+{
+	char *ptr = xs->s + xs->len;
+	int len;
+	va_list args;
+
+	va_start(args, format);
+	len = vsnprintf(NULL, 0, format, args);
+	xstr_reserve(xs, xs->len + len);
+	if (vsnprintf(ptr, xs->a - xs->len + 1, format, args) != len) len = -1;
+	va_end(args);
+
+	if (len > 0) xs->len += len;
+
+	return len;
 }

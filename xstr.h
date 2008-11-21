@@ -25,6 +25,7 @@
 #define __XSTR_H__
 
 #include <ctype.h>
+#include <stdarg.h>
 
 #include "mmatic.h"
 
@@ -111,5 +112,23 @@ char *xstr_strip(xstr *xs);
  * Like xstr_strip() but on char*.
  */
 char *xstr_stripch(char *s, mmatic *mm);
+
+/**
+ * sprintf to xstr, allocating memory if necessary
+ *
+ * @param xs     xstr to be printed to (formatted)
+ * @param format the printf-style format string
+ * @return number of characters written
+ */
+int xstr_set_format(xstr *xs, const char *format, ...);
+
+/**
+ * Append a sprintf-string to xstr, allocating memory if necessary
+ *
+ * @param xs     xstr to be printed to (formatted)
+ * @param format the printf-style format string
+ * @return number of characters appended
+ */
+int xstr_append_format(xstr *xs, const char *format, ...);
 
 #endif

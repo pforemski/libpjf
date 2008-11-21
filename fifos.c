@@ -22,16 +22,13 @@
 #include <stdio.h>
 #include <sys/types.h>
 #include <sys/stat.h>
-#include <linux/inotify.h>
+#include <sys/inotify.h>
 #include <fcntl.h>
 #include <errno.h>
 #include <unistd.h>
 #include <dirent.h>
 
-#include "fifos.h"
-#include "misc.h"
-#include "thash.h"
-#include "mmatic.h"
+#include "lib.h"
 
 struct fifos *fifos_init(const char *dir)
 {

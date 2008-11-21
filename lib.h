@@ -17,15 +17,25 @@
  * this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef _MISC_H_
-#define _MISC_H_
+#ifndef _LIBASN_H_
+#define _LIBASN_H_
 
 #include <stdint.h>
 #include <stdbool.h>
 #include <stdlib.h>
 
-#include "tlist.h"
+/* All libasn components included */
 #include "mmatic.h"
+#include "tlist.h"
+#include "thash.h"
+#include "tsort.h"
+#include "fifos.h"
+#include "math.h"
+#include "sfork.h"
+#include "regex.h"
+#include "xstr.h"
+#include "wstr.h"
+#include "fc.h"
 
 /** Debugging level for dbg() */
 extern int debug;

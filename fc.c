@@ -21,9 +21,7 @@
 
 #include <dirent.h>
 
-#include "misc.h"
-#include "thash.h"
-#include "mmatic.h"
+#include "lib.h"
 
 static void _asn_fcdir(thash *hash, const char *path, mmatic *mm)
 {

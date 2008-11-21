@@ -22,9 +22,7 @@
 #ifndef _FIFOS_H_
 #define _FIFOS_H_
 
-#include "misc.h"
-#include "mmatic.h"
-#include "thash.h"
+#include "lib.h"
 
 struct fifos_el {
 	char *value;       /**> value to show */

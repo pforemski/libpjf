@@ -22,9 +22,7 @@
 
 #include <stdarg.h>
 
-#include "misc.h"
-#include "tlist.h"
-#include "mmatic.h"
+#include "lib.h"
 
 #define tmmalloc(size) (mmatic_alloc((size), list->mm))
 
