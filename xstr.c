@@ -217,13 +217,14 @@ int xstr_set_format(xstr *xs, const char *format, ...)
 
 int xstr_append_format(xstr *xs, const char *format, ...)
 {
-	char *ptr = xs->s + xs->len;
+	char *ptr;
 	int len;
 	va_list args;
 
 	va_start(args, format);
 	len = vsnprintf(NULL, 0, format, args);
 	xstr_reserve(xs, xs->len + len);
+	ptr = xs->s + xs->len;
 	if (vsnprintf(ptr, xs->a - xs->len + 1, format, args) != len) len = -1;
 	va_end(args);
 
