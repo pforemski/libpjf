@@ -1,5 +1,5 @@
 /*
- * example - an exemplary application
+ * libasn_example - an exemplary application
  *
  * This file is part of libasn
  * Copyright (C) 2005-2008 by ASN <http://www.asn.pl/>
@@ -37,8 +37,10 @@ static void usage(void)
 
 int main(int argc, char **argv)
 {
+	/* This exemplary program does not have much sense, but please remember that
+	 * its goal is to demonstrate how to use some of libasn library features */
 	int i;
-	char *pair, *ptr, *key, *value;
+	char *pair, *ptr, *key, *value, *input;
 	xstr *str;
 	thash *hash;
 	tlist *list;
@@ -49,6 +51,10 @@ int main(int argc, char **argv)
 		return 0;
 	}
 
+	/* We fetch the debug level from the program arguments. The debug variable
+	 * tells asn what dbg() messages should be viewed when encountered. Only
+	 * those dbg() messages with equal or lower debug level then the one given in
+	 * debug are handled */
 	debug = strtol(argv[1], NULL, 10);
 	if (errno == ERANGE || errno == EINVAL) {
 		fprintf(stdout, "Invalid debug level given.\n\n");
@@ -110,7 +116,42 @@ int main(int argc, char **argv)
 		i++;
 	}
 
-	/* TODO: Rest of examples */
+	/* We allocate a dynamic buffer using the mm memory manager to use for input
+	 * gathering */
+	input = mmalloc(BUFSIZ);
+	fprintf(stdout, "Please enter key of the element you wish to view or "
+	                "^A D (EOF character) to continue:\n");
+	while (fgets(input, BUFSIZ, stdin)) {
+		input[strlen(input) - 1] = '\0';
+		dbg(2, "main(): Inputted \"%s\"\n", input);
+		/* We are fetching the value under the given user-typed key if existent */
+		ptr = thash_get(hash, input);
+		if (ptr) fprintf(stdout, "Value: %s\n", ptr);
+		else     fprintf(stdout, "Key not found\n");
+	}
+
+	/* If, for some reason, we do not want to wait with freeing memory, we can
+	 * free mmallocated memory using the mmfreeptr() function */
+	mmfreeptr(input);
+
+	xstr_set(str, "");
+	thash_reset(hash);
+	while ((ptr = (char *)thash_iter(hash, &key))) {
+		xstr_append(str, ptr);
+		xstr_append_char(str, '\n');
+	}
+
+	/* We want to pass our data to some external program. Here, we want to obtain
+	 * the list of keys once more sorted according to the indexes. Since thash
+	 * elements are now probably scatered differently than in the list, we would
+	 * like to use the sort command. For this, we'll use asn_cmd(). */
+
+	/* The used xstr_string() and xstr_length() macros have been defined for use
+	 * to make the code more readable if required */
+	asn_cmd("sort", NULL, NULL, xstr_string(str), xstr_length(str),
+	        xstr_string(str), xstr_length(str), NULL, 0);
+
+	fprintf(stdout, "Once again sorted values:\n%s\n", xstr_string(str));
 
 	/* We're finished using memory from 'mm', so we can now deallocate all
 	 * previously allocated memory using this manager */

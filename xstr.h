@@ -101,6 +101,16 @@ void xstr_set_size(xstr *xs, const char *s, int size);
 void xstr_free(xstr *xs);
 
 /**
+ * Return the xstr as a standard char string
+ */
+#define xstr_string(xs) xs->s
+
+/**
+ * Return the length of the string
+ */
+#define xstr_length(xs) xs->len
+
+/**
  * Return (duplicated) stripped version of xs
  *
  * Caller must free allocated memory.
