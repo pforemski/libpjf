@@ -3,7 +3,7 @@ LDFLAGS =
 
 ME=libasn
 C_OBJECTS=lib.o sfork.o regex.o thash.o tlist.o xstr.o wstr.o mmatic.o tsort.o fifos.o fc.o
-TARGETS=libasn.so libasn.a
+TARGETS=libasn.so libasn.a libasn_example
 
 include rules.mk
 
@@ -16,7 +16,7 @@ libasn.so: pcre/.libs/libpcre.a $(C_OBJECTS)
 libasn.a: $(C_OBJECTS) pcre/.libs/libpcre.a
 	$(AR) rc libasn.a $(C_OBJECTS) pcre/.libs/libpcre.a
 
-example: example.o libasn.a pcre/.libs/libpcre.a
-	$(CC) $(CFLAGS) example.c -o example libasn.a pcre/.libs/libpcre.a
+libasn_example: libasn_example.o libasn.a pcre/.libs/libpcre.a
+	$(CC) $(CFLAGS) libasn_example.c -o libasn_example libasn.a pcre/.libs/libpcre.a
 
 install: install-std
