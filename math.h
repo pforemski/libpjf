@@ -24,6 +24,7 @@
 
 #define MAX(a, b) (((a) > (b)) ? (a) : (b))
 #define MIN(a, b) (((a) < (b)) ? (a) : (b))
+#define CLAMP(a, min, max) (MIN(MAX((a), (min)), (max)))
 
 /* moving averages */
 #define MA(avg, new, i) (avg += ((new) - (avg)) / (i))
