@@ -40,4 +40,4 @@ pcre/pcreposix.lo
 pcre/pcretest
 pcre/stamp-h1
 pcre/autom4te.cache
-example
+libasn_example
