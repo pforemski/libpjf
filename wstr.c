@@ -35,10 +35,11 @@ void wstr_init(wstr *ws, mmatic *mm)
 	wstr_set(ws, L"");
 }
 
-wstr * wstr_create(mmatic *mm)
+wstr * wstr_create(const wchar_t *s, mmatic *mm)
 {
 	wstr *new = mmalloc(sizeof(wstr));
 	wstr_init(new, mm);
+	wstr_set(new, s);
 	return new;
 }
 

@@ -48,7 +48,8 @@ typedef struct wstr_t {
  */
 
 void wstr_init(wstr *ws, mmatic *mm);
-wstr * wstr_create(mmatic *mm);
+wstr * wstr_create(const wchar_t *s, mmatic *mm);
+#define MMWSTR_CREATE(str) wstr_create((str), mm)
 void wstr_reserve(wstr *ws, size_t l);
 void wstr_append(wstr *ws, const wchar_t *s);
 void wstr_append_size(wstr *ws, const wchar_t *s, size_t size);
