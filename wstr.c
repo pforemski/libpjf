@@ -35,10 +35,11 @@ void wstr_init(wstr *ws, mmatic *mm)
 	wstr_set(ws, L"");
 }
 
-wstr * wstr_create(mmatic *mm)
+wstr * wstr_create(const wchar_t *s, mmatic *mm)
 {
 	wstr *new = mmalloc(sizeof(wstr));
 	wstr_init(new, mm);
+	wstr_set(new, s);
 	return new;
 }
 
@@ -153,12 +154,19 @@ void wstr_free(wstr *ws)
 	}
 }
 
+#define DUP_STRING(str, len) \
+	wchar_t *ret = mmalloc((len + 1) * sizeof(wchar_t)); \
+	wcscpy(ret, str); \
+	return ret;
+
 wchar_t * wstr_dup(wstr *ws, mmatic *mm)
 {
-	wchar_t *ret;
-
-	ret = mmalloc((ws->len + 1) * sizeof(wchar_t));
-	wcscpy(ret, ws->s);
-
-	return ret;
+	DUP_STRING(ws->s, ws->len);
 }
+
+wchar_t * wstr_dup_ch(const wchar_t *s, mmatic *mm)
+{
+	DUP_STRING(s, wcslen(s));
+}
+
+#undef DUP_STRING
