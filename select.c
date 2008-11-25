@@ -24,34 +24,29 @@
 
 #include "lib.h"
 
-struct asn_fd *asn_newfd(int fd, void *prv, mmatic *mm)
+thash *asn_rselect(thash *fdlist, uint32_t *timeout_ms, mmatic *mm)
 {
-	struct asn_fd *afd = mmalloc(sizeof(struct asn_fd));
-	afd->fd = fd;
-	afd->prv = prv;
-	return afd;
-}
-
-tlist *asn_rselect(tlist *fdlist, uint32_t *timeout_ms, mmatic *mm)
-{
-	int r, nfds = -1;
+	unsigned int fd, nfds = 0;
 	struct timeval tv;
-	struct asn_fd *afd;
-	tlist *ret;
+	thash *ret;
 	fd_set fds;
+	void *prv;
 
 	FD_ZERO(&fds);
 
-	tlist_reset(fdlist);
-	while ((afd = tlist_iter(fdlist))) {
-		if (afd->fd < 0) continue;
+	thash_reset(fdlist);
+	while ((prv = THASH_ITER_UINT(fdlist, &fd))) {
+		if (fd >= FD_SETSIZE) {
+			dbg(3, "asn_rselect(): invalid fd %d\n", fd);
+			continue;
+		}
 
-		FD_SET(afd->fd, &fds);
-		nfds = MAX(nfds, afd->fd);
+		FD_SET(fd, &fds);
+		nfds = MAX(nfds, fd);
 	}
 
 	/* no proper input, no output */
-	if (nfds < 0) return MMTLIST_CREATE(NULL);
+	if (!nfds) return MMTHASH_CREATE_INT(NULL);
 
 	if (timeout_ms) {
 		tv.tv_sec = *timeout_ms / 1000;
@@ -59,7 +54,7 @@ tlist *asn_rselect(tlist *fdlist, uint32_t *timeout_ms, mmatic *mm)
 	}
 
 	dbg(8, "asn_rselect(): calling select() nfds=%d, timeout=%d\n", nfds, *timeout_ms);
-	if ((r = select(nfds + 1, &fds, NULL, NULL, (timeout_ms) ? &tv: NULL) < 0)) {
+	if (select(nfds + 1, &fds, NULL, NULL, (timeout_ms) ? &tv: NULL) < 0) {
 		switch (errno) {
 			case EBADF:  dbg(0, "asn_rselect(): unexpected EBADF received\n"); break;
 			case EINTR:  break; /* signal handled, reload fds as they may have changed */
@@ -71,15 +66,13 @@ tlist *asn_rselect(tlist *fdlist, uint32_t *timeout_ms, mmatic *mm)
 		return NULL;
 	}
 
-	ret = MMTLIST_CREATE(NULL);
+	ret = MMTHASH_CREATE_INT(NULL);
 
-	tlist_reset(fdlist);
-	while ((afd = tlist_iter(fdlist))) {
-		if (afd->fd < 0) continue;
-
-		if (FD_ISSET(afd->fd, &fds)) {
-			dbg(8, "asn_rselect(): fd %d ready\n", afd->fd);
-			tlist_push(ret, afd); /* magic! */
+	thash_reset(fdlist);
+	while ((prv = THASH_ITER_UINT(fdlist, &fd))) {
+		if (FD_ISSET(fd, &fds)) {
+			dbg(8, "asn_rselect(): fd %d ready\n", fd);
+			THASH_SET_UINT(ret, fd, prv); /* magic! */
 		}
 	}
 

@@ -32,21 +32,16 @@
 
 #include "lib.h"
 
-struct asn_fd {
-	int   fd;    /**> file descriptor */
-	void *prv;   /**> user data */
-};
-
-/** Quick struct asn_fd creator */
-struct asn_fd *asn_newfd(int fd, void *prv, mmatic *mm);
-
 /** Waits until a file descriptor is ready for reading
- * @param fdlist      list of FDs to monitor - a tlist of (struct asn_fd *)
+ * @param fdlist      list of FDs to monitor - a thash of (struct asn_fd *)s indexed by (unsigned int) FDs
+ *                    XXX: a thash because its easier to check/delete elements
+ *                    XXX: use THASH_*_UINT() macros
  * @param timeout_ms  timeout, in miliseconds, after which we should exit, even if no FDs are ready
  *                    0 means exit immediately after polling, NULL means we can block
  *                    under Linux, value of timeout_ms is updated to reflect the amount of time left
  * @retval NULL       no result, repeat (e.g. select() interrupted)
- * @return            a NEW tlist with elements REFERENCING elements of fdlist, for which FDs are ready for reading */
-tlist *asn_rselect(tlist *fdlist, uint32_t *timeout_ms, mmatic *mm);
+ * @return            a NEW thash with elements REFERENCING elements of fdlist, for which FDs are ready for reading
+ * @note              all monitored FDs must be > 0 */
+thash *asn_rselect(thash *fdlist, uint32_t *timeout_ms, mmatic *mm);
 
 #endif /* _SELECT_H */
