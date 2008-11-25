@@ -36,6 +36,7 @@
 #include "xstr.h"
 #include "wstr.h"
 #include "fc.h"
+#include "select.h"
 
 /** Debugging level for dbg() */
 extern int debug;

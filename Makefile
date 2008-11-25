@@ -2,7 +2,7 @@ CFLAGS =
 LDFLAGS =
 
 ME=libasn
-C_OBJECTS=lib.o sfork.o regex.o thash.o tlist.o xstr.o wstr.o mmatic.o tsort.o fifos.o fc.o
+C_OBJECTS=lib.o sfork.o regex.o thash.o tlist.o xstr.o wstr.o mmatic.o tsort.o fifos.o fc.o select.o
 TARGETS=libasn.so libasn.a libasn_example
 
 include rules.mk

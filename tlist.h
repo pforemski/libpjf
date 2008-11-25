@@ -83,6 +83,7 @@ void tlist_flush(tlist *list);
 
 /** Frees a list
  * @param list the list
+ * @note not only all elements, but also the list itself (see also tlist_flush)
  */
 void tlist_free(tlist *list);
 
