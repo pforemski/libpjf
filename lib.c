@@ -386,7 +386,7 @@ void asn_daemonize(const char *progname, const char *pidfile)
 
 	asn_cd(pwd); /* XXX: will die() if fails */
 
-	if (pidfile) {
+	if (pidfile && !streq(pidfile, "")) {
 		snprintf(pid, sizeof(pid), "%u\n", getpid());
 		asn_writefile(pidfile, pid);
 	}
