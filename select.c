@@ -21,6 +21,7 @@
 
 #include <time.h>
 #include <errno.h>
+#include <fcntl.h>
 
 #include "lib.h"
 
@@ -36,7 +37,9 @@ thash *asn_rselect(thash *fdlist, uint32_t *timeout_ms, mmatic *mm)
 
 	thash_reset(fdlist);
 	while ((prv = THASH_ITER_UINT(fdlist, &fd))) {
-		if (fd >= FD_SETSIZE) {
+		/* XXX: fcntl() is a bit hacky, since we just want to check if fd is valid (so we dont get e.g. a EBADF
+		 * immediately after call to select(); if someone knows better method - please fix */
+		if (fd >= FD_SETSIZE || fcntl(fd, F_GETFD) < 0) {
 			dbg(3, "asn_rselect(): invalid fd %d\n", fd);
 			continue;
 		}
