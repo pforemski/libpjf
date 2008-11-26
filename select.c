@@ -46,14 +46,14 @@ thash *asn_rselect(thash *fdlist, uint32_t *timeout_ms, mmatic *mm)
 	}
 
 	/* no proper input, no output */
-	if (!nfds) return MMTHASH_CREATE_INT(NULL);
+	if (!nfds) return MMTHASH_CREATE_UINT(NULL);
 
 	if (timeout_ms) {
 		tv.tv_sec = *timeout_ms / 1000;
 		tv.tv_usec = (*timeout_ms % 1000) * 1000;
 	}
 
-	dbg(8, "asn_rselect(): calling select() nfds=%d, timeout=%d\n", nfds, *timeout_ms);
+	dbg(11, "asn_rselect(): calling select() nfds=%d, timeout=%d\n", nfds, *timeout_ms);
 	if (select(nfds + 1, &fds, NULL, NULL, (timeout_ms) ? &tv: NULL) < 0) {
 		switch (errno) {
 			case EBADF:  dbg(0, "asn_rselect(): unexpected EBADF received\n"); break;
@@ -66,12 +66,12 @@ thash *asn_rselect(thash *fdlist, uint32_t *timeout_ms, mmatic *mm)
 		return NULL;
 	}
 
-	ret = MMTHASH_CREATE_INT(NULL);
+	ret = MMTHASH_CREATE_UINT(NULL);
 
 	thash_reset(fdlist);
 	while ((prv = THASH_ITER_UINT(fdlist, &fd))) {
 		if (FD_ISSET(fd, &fds)) {
-			dbg(8, "asn_rselect(): fd %d ready\n", fd);
+			dbg(10, "asn_rselect(): fd %d ready\n", fd);
 			THASH_SET_UINT(ret, fd, prv); /* magic! */
 		}
 	}

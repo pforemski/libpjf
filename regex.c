@@ -28,7 +28,7 @@
 
 #define CVS 90
 
-static int _regex_match(char *regex, char *str, int cv[CVS], int *cvn)
+static int _regex_match(char *regex, const char *str, int cv[CVS], int *cvn)
 {
 	pcre *re;
 	int rc, mods = 0;
@@ -98,7 +98,7 @@ static int _regex_match(char *regex, char *str, int cv[CVS], int *cvn)
 
 int asn_match(char *regex, char *str) { int cv[CVS]; return _regex_match(regex, str, cv, NULL); }
 
-char *asn_replace(char *regex, char *str, char *rep, mmatic *mm)
+char *asn_replace(char *regex, const char *str, char *rep, mmatic *mm)
 {
 	int cv[CVS], cvn, rc, done = 0;
 	xstr *xs = MMXSTR_CREATE("");

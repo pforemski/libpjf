@@ -102,14 +102,14 @@ thash *thash_create(unsigned int (*hash_func)(const void *key),
                     int (*cmp_func)(const void *key1, const void *key2),
                     void (*free_func)(void *val), bool strings, mmatic *mm);
 
-/** Create a thash indexed by string, holding pointers to strings */
+/** Create a thash indexed by string, holding pointers to arbitrary data */
 #define MMTHASH_CREATE_STR(ffn) (thash_create(NULL, NULL, (ffn), 1, mm))
 
 /** Create a thash indexed by pointers, holding pointers to arbitrary data */
 #define MMTHASH_CREATE_PTR(ffn) (thash_create(NULL, NULL, (ffn), 0, mm))
 
-/** Create a thash indexed by integers, holding pointers to arbitrary data */
-#define MMTHASH_CREATE_INT MMTHASH_CREATE_PTR
+/** Create a thash indexed by unsigned integers, holding pointers to arbitrary data */
+#define MMTHASH_CREATE_UINT MMTHASH_CREATE_PTR
 
 /** Frees a hash table.
  * @param hash the hash table
@@ -145,6 +145,7 @@ void thash_reset(thash *hash);
 void *_thash_iter(thash *hash, void **key);
 #define thash_iter(a, b) (_thash_iter((a), ((void **) (b))))
 
+/** Safe iterator in case indices are of unsingned int type */
 #define THASH_ITER_UINT(a, b) (_thash_iter((a), ((void **) (unsigned long *) b)))
 
 /** Sets value of an element to given value.
@@ -158,6 +159,7 @@ void *_thash_iter(thash *hash, void **key);
  */
 void thash_set(thash *hash, const void *key, const void *val);
 
+/** A safe thash_set in case indices are of unsigned int type */
 #define THASH_SET_UINT(a, b, c) (thash_set((a), ((const void *) (unsigned long) b), (c)))
 
 /** Returns number of entries in a hash table.

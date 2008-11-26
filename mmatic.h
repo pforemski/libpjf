@@ -71,10 +71,10 @@ typedef struct _mmatic {
 mmatic *mmatic_create(void);
 
 /** Hacky shortcut to initialize a new mmatic under the default symbol name */
-#define MMNEW() (mmatic *mm = mmatic_create())
+#define MMNEW() mmatic *mm = mmatic_create()
 
 /** A shortcut for freeing the default mm */
-#define MMEND() (mmatic_free(mm))
+#define MMEND() mmatic_free(mm)
 
 /** mmatic memory allocator
  * @remark it sits in *.h because its inline

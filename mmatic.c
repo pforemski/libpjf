@@ -69,7 +69,7 @@ void mmatic_freeptr(void *mem)
 	chunk->prev->next = chunk->next;
 	if (chunk->next)
 		chunk->next->prev = chunk->prev;
-	else /* (mgr->last == chunk) */
+	else /* XXX: implicit: (mgr->last == chunk) */
 		chunk->mgr->last = chunk->prev;
 
 	chunk->mgr->totalloc -= chunk->alloc;
