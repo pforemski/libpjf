@@ -35,7 +35,7 @@ int asn_match(char *regex, char *str);
  *
  * @param regex pattern
  * @param str   subject
- * @param rep   replacement
+ * @param rep   replacement (supports back-references)
  * @return      new char *, always succeeds */
 char *asn_replace(char *regex, char *rep, const char *str, mmatic *mm);
 

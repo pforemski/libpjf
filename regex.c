@@ -100,17 +100,43 @@ int asn_match(char *regex, char *str) { int cv[CVS]; return _regex_match(regex, 
 
 char *asn_replace(char *regex, char *rep, const char *str, mmatic *mm)
 {
-	int cv[CVS], cvn, rc, done = 0;
+	int cv[CVS], cvn, rc, done = 0, br;
 	xstr *xs = MMXSTR_CREATE("");
+	char *mem = malloc(strlen(rep) + 1), *p, *bs;
 
 	while ((rc = _regex_match(regex, str, cv, &cvn)) == 1 && cv[0] >= 0 && cv[1] >= cv[0]) {
 		xstr_append_size(xs, str, cv[0]);  /* up to first match */
-		xstr_append(xs, rep);              /* replace */
+
+		/* replace, handling backreferences */
+		strcpy(mem, rep);
+		for (bs = p = mem; (bs = strchr(bs, '\\'));) {
+			if (!bs[1] || !isdigit(bs[1])) continue;
+
+			/* append everything up to \, position bs on the number */
+			*bs++ = '\0';
+			xstr_append(xs, p);
+
+			/* find end of the number + 1 (goes -> p) and read it */
+			for (p = bs; *p && isdigit(*p); p++);
+			br = atoi(bs);
+
+			if (br++ > 0 && br <= cvn) {
+#				define IB (2*br - 2)
+#				define IT (2*br - 1)
+				xstr_append_size(xs, str + cv[IB], cv[IT] - cv[IB]);
+			}
+
+			bs = p;
+		}
+		xstr_append(xs, p);
+
 		str += cv[1];                      /* start next match after */
 		done++;
 	}
 	xstr_append(xs, str);                  /* end of string, with no matches (may be just "") */
 
 	if (rc == 1) dbg(0, "regex_replace(): this should not happen\n");
+
+	free(mem);
 	return xs->s;
 }
