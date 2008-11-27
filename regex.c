@@ -110,7 +110,9 @@ char *asn_replace(const char *regex, const char *rep, const char *str, mmatic *m
 	char *mem = malloc(strlen(rep) + 1), *p, *bs;
 
 	while ((rc = _regex_match(regex, str, len, offset, cv, &cvn)) == 1 && cv[0] >= 0 && cv[1] >= cv[0]) {
-		dbg(8, "asn_replace(): matched at %d (rc=%d, offset=%d)\n", cv[0], rc, offset);
+		if (cv[0] >= len) break;
+
+		dbg(8, "asn_replace(): matched at %d-%d (rc=%d, offset=%d)\n", cv[0], cv[1], rc, offset);
 
 		/* copy text up to the first match */
 		xstr_append_size(xs, str+offset, cv[0]-offset);
@@ -145,13 +147,16 @@ char *asn_replace(const char *regex, const char *rep, const char *str, mmatic *m
 		/* in no backreferences case, this appends the whole "rep" string */
 		xstr_append(xs, p);
 
-		offset = cv[1];             /* start next match after */
+		/* start next match after
+		 * XXX: pcreapi(3) manual page says "The first element of a pair is set to the offset of the first character in
+		 * a substring, and the second is set to the offset of the first character *after* the end of a substring.", but
+		 * does not mention that e.g. a pattern of just /$/m will return cv[1] == cv[0]! */
+		offset = cv[1] + (cv[1] == cv[0]);
+		if (offset >= len) break;
 	}
 
-	asnsert(offset <= len);
-	xstr_append(xs, str + offset);  /* may be just "" */
-
-	if (rc == 1) dbg(0, "regex_replace(): this should not happen\n");
+	if (offset <= len);
+		xstr_append(xs, str + offset);  /* may be just "" */
 
 	free(mem);
 	return xs->s;
