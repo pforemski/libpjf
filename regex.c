@@ -103,7 +103,7 @@ char *asn_replace(char *regex, char *rep, const char *str, mmatic *mm)
 	int cv[CVS], cvn, rc, done = 0;
 	xstr *xs = MMXSTR_CREATE("");
 
-	while ((rc = _regex_match(regex, str, cv, &cvn)) == 1 && cv[0] > 0 && cv[1] > cv[0]) {
+	while ((rc = _regex_match(regex, str, cv, &cvn)) == 1 && cv[0] >= 0 && cv[1] >= cv[0]) {
 		xstr_append_size(xs, str, cv[0]);  /* up to first match */
 		xstr_append(xs, rep);              /* replace */
 		str += cv[1];                      /* start next match after */
