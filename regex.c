@@ -28,12 +28,12 @@
 
 #define CVS 90
 
-static int _regex_match(char *regex, const char *str, int cv[CVS], int *cvn)
+static int _regex_match(const char *regex, const char *str, int len, int offset, int cv[CVS], int *cvn)
 {
 	pcre *re;
 	int rc, mods = 0;
 	char *pattern;
-	char *pp = regex;
+	const char *pp = regex;
 	char delim = regex[0];
 	const char *err;
 
@@ -77,7 +77,7 @@ static int _regex_match(char *regex, const char *str, int cv[CVS], int *cvn)
 
 	/* run it */
 	dbg(10, "regex_match(): matching '%s'\n", str);
-	rc = pcre_exec(re, 0, str, strlen(str), 0, 0, cv, CVS);
+	rc = pcre_exec(re, 0, str, len, offset, 0, cv, CVS);
 	if (cvn) *cvn = rc;
 
 	/* translate the return code */
@@ -96,16 +96,24 @@ static int _regex_match(char *regex, const char *str, int cv[CVS], int *cvn)
 	return rc;
 }
 
-int asn_match(char *regex, char *str) { int cv[CVS]; return _regex_match(regex, str, cv, NULL); }
-
-char *asn_replace(char *regex, char *rep, const char *str, mmatic *mm)
+int asn_match(const char *regex, const char *str)
 {
-	int cv[CVS], cvn, rc, done = 0, br;
+	int cv[CVS];
+
+	return _regex_match(regex, str, strlen(str), 0, cv, NULL);
+}
+
+char *asn_replace(const char *regex, const char *rep, const char *str, mmatic *mm)
+{
+	int cv[CVS], cvn, rc, br, offset = 0, len = strlen(str);
 	xstr *xs = MMXSTR_CREATE("");
 	char *mem = malloc(strlen(rep) + 1), *p, *bs;
 
-	while ((rc = _regex_match(regex, str, cv, &cvn)) == 1 && cv[0] >= 0 && cv[1] >= cv[0]) {
-		xstr_append_size(xs, str, cv[0]);  /* up to first match */
+	while ((rc = _regex_match(regex, str, len, offset, cv, &cvn)) == 1 && cv[0] >= 0 && cv[1] >= cv[0]) {
+		dbg(8, "asn_replace(): matched at %d (rc=%d, offset=%d)\n", cv[0], rc, offset);
+
+		/* copy text up to the first match */
+		xstr_append_size(xs, str+offset, cv[0]-offset);
 
 		/* replace, handling backreferences */
 		strcpy(mem, rep);
@@ -116,24 +124,32 @@ char *asn_replace(char *regex, char *rep, const char *str, mmatic *mm)
 			*bs++ = '\0';
 			xstr_append(xs, p);
 
-			/* find end of the number + 1 (goes -> p) and read it */
+			/* position p on the end of the number + 1 */
 			for (p = bs; *p && isdigit(*p); p++);
-			br = atoi(bs);
 
+			/* substitute */
+			br = atoi(bs);
 			if (br++ > 0 && br <= cvn) {
 #				define IB (2*br - 2)
 #				define IT (2*br - 1)
+				dbg(9, "asn_replace(): appending backreference %d between %d and %d\n", br-1, cv[IB], cv[IT]-1);
 				xstr_append_size(xs, str + cv[IB], cv[IT] - cv[IB]);
+			}
+			else {
+				dbg(1, "asn_replace(): invalid backreference: %d\n", br-1);
 			}
 
 			bs = p;
 		}
+
+		/* in no backreferences case, this appends the whole "rep" string */
 		xstr_append(xs, p);
 
-		str += cv[1];                      /* start next match after */
-		done++;
+		offset = cv[1];             /* start next match after */
 	}
-	xstr_append(xs, str);                  /* end of string, with no matches (may be just "") */
+
+	asnsert(offset <= len);
+	xstr_append(xs, str + offset);  /* may be just "" */
 
 	if (rc == 1) dbg(0, "regex_replace(): this should not happen\n");
 

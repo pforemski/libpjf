@@ -29,7 +29,7 @@
  * @retval  1 matched
  * @retval  0 didn't match
  * @retval -1 pattern error */
-int asn_match(char *regex, char *str);
+int asn_match(const char *regex, const char *str);
 
 /** Simple regex replace
  *
@@ -37,6 +37,6 @@ int asn_match(char *regex, char *str);
  * @param str   subject
  * @param rep   replacement (supports back-references)
  * @return      new char *, always succeeds */
-char *asn_replace(char *regex, char *rep, const char *str, mmatic *mm);
+char *asn_replace(const char *regex, const char *rep, const char *str, mmatic *mm);
 
 #endif /* _REGEX_H_ */
