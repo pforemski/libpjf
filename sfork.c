@@ -142,8 +142,10 @@ int asn_wait(pid_t child)
 
 pid_t asn_waitany(int *code)
 {
-	int pid, status;
+	pid_t pid;
+	int status;
 
+	/* pid == 0 means wait for any child process whose process group ID is equal to that of the calling process */
 	pid = waitpid(0, &status, WNOHANG);
 	if (pid < 1) { if (code) *code = 130; return 0; }
 
