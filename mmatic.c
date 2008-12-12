@@ -112,7 +112,7 @@ void *mmatic_realloc(void *mem, size_t size, mmatic *mgr)
 	mmchunk *chunk = (mmchunk *) (PTR(mem) - sizeof(mmchunk)); /* XXX */
 	void *newmem;
 
-	newmem = mmatic_allocate(chunk->shared, size, mgr, chunk->cfile, chunk->cline);
+	newmem = mmatic_allocate(chunk->shared, size, mgr, NULL, 0, chunk->cfile, chunk->cline);
 	memcpy(newmem, mem, chunk->alloc);
 	mmatic_freeptr(mem);
 
