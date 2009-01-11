@@ -61,5 +61,9 @@ void wstr_remove_char(wstr *ws, int32_t pos);
 void wstr_free(wstr *ws);
 wchar_t * wstr_dup(wstr *ws, mmatic *mm);
 wchar_t * wstr_dup_ch(const wchar_t *s, mmatic *mm);
+#define wstr_string(ws) ws->s
+#define wstr_length(ws) ws->len
+
+
 
 #endif

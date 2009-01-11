@@ -17,6 +17,6 @@ libasn.a: $(C_OBJECTS) pcre/.libs/libpcre.a
 	$(AR) rc libasn.a $(C_OBJECTS) pcre/.libs/libpcre.a
 
 libasn_example: libasn_example.o libasn.a pcre/.libs/libpcre.a
-	$(CC) $(CFLAGS) libasn_example.c -o libasn_example libasn.a pcre/.libs/libpcre.a
+	$(CC) $(CFLAGS) libasn_example.o -o libasn_example libasn.a pcre/.libs/libpcre.a
 
 install: install-std
