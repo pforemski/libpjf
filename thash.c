@@ -106,29 +106,6 @@ void thash_free(thash *hash)
 	_thash_free(hash, hash);
 }
 
-inline void *thash_get(const thash *hash, const void *key)
-{
-	thash_el *el;
-	void *val = NULL;
-	int index;
-
-	index = (hash->hash_func)(key) % hash->size;
-	dbg(15, "thash_get(%p, %p): index %d\n", hash, key, index);
-
-	el = hash->tbl[index];
-	while (el) {
-		dbg(14, "thash_get(%p, %p): checking %p\n", hash, key, el->key);
-		if ((hash->cmp_func)(el->key, key) == 0) {
-			val = el->val;
-			break;
-		}
-		el = el->next;
-	}
-
-	dbg(12, "thash_get(%p, %p) = %p\n", hash, key, val);
-	return val;
-}
-
 void *_thash_iter(thash *hash, void **key)
 {
 	unsigned int i;
@@ -279,29 +256,32 @@ void thash_set(thash *hash, const void *key, const void *val)
 	return;
 }
 
+void *thash_get(const thash *hash, const void *key)
+{
+	thash_el *el;
+	void *val = NULL;
+	int index;
+
+	index = (hash->hash_func)(key) % hash->size;
+	dbg(15, "thash_get(%p, %p): index %d\n", hash, key, index);
+
+	el = hash->tbl[index];
+	while (el) {
+		dbg(14, "thash_get(%p, %p): checking %p\n", hash, key, el->key);
+		if ((hash->cmp_func)(el->key, key) == 0) {
+			val = el->val;
+			break;
+		}
+		el = el->next;
+	}
+
+	dbg(12, "thash_get(%p, %p) = %p\n", hash, key, val);
+	return val;
+}
+
 unsigned int thash_count(thash *hash)
 {
 	return hash->used;
-}
-
-/*
- * Hashing functions
- */
-unsigned inline int thash_str_hash(const void *vkey)
-{
-	unsigned int hash = 5381;
-	unsigned int i;
-	const char *key = (char *) vkey;
-
-	for (i = 0; key[i]; i++)
-		hash = ((hash << 5) + hash) + key[i]; /* hash * 33 + char */
-
-	return hash;
-}
-
-unsigned inline int thash_ptr_hash(const void *key)
-{
-	return ((unsigned int) key);
 }
 
 /*

@@ -125,9 +125,8 @@ void thash_flush(thash *hash);
  *
  * @param hash the hash table
  * @param key  the element key
- * @retval NULL entry does not exist
- */
-inline void *thash_get(const thash *hash, const void *key);
+ * @retval NULL entry does not exist */
+void *thash_get(const thash *hash, const void *key);
 
 /** Resets internal iteration counters.
  *
@@ -176,12 +175,26 @@ unsigned int thash_count(thash *hash);
  * @remark note that key will be dereferenced and treated like a string
  * @note by Daniel J. Bernstein
  */
-inline unsigned int thash_str_hash(const void *key);
+static inline unsigned int thash_str_hash(const void *vkey)
+{
+	unsigned int hash = 5381;
+	unsigned int i;
+	const char *key = (char *) vkey;
+
+	for (i = 0; key[i]; i++)
+		hash = ((hash << 5) + hash) + key[i]; /* hash * 33 + char */
+
+	return hash;
+}
 
 /** Simplest possible pointer "hashing" function
  * @note just casts the pointer
  */
-inline unsigned int thash_ptr_hash(const void *key);
+static inline unsigned int thash_ptr_hash(const void *key)
+{
+	return ((unsigned int) key);
+}
+
 
 #endif
 

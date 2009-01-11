@@ -24,36 +24,15 @@
 #include <stdbool.h>
 #include <stdlib.h>
 
-/* All libasn components included */
-#include "mmatic.h"
-#include "tlist.h"
-#include "thash.h"
-#include "tsort.h"
-#include "fifos.h"
-#include "math.h"
-#include "sfork.h"
-#include "regex.h"
-#include "xstr.h"
-#include "wstr.h"
-#include "fc.h"
-#include "select.h"
-
 /** Debugging level for dbg() */
 extern int debug;
 
 /** Function to call instead of fprintf() for logging a message */
 extern void (*debugcb)(const char *msg);
 
-/** Shortcut for programs using libasn */
-#define __USE_LIBASN int debug = 0; void (*debugcb)() = NULL;
-
-/** I could never understand why there is no such macro by default --pjf */
-#define streq(a, b) (strcmp((a), (b)) == 0)
-
 /** Prints debugging message if debug <= level
  * @param level message debug level
- * @param dbg message to show, in printf-style format
- */
+ * @param dbg message to show, in printf-style format */
 #ifndef NODEBUG
 void dbg(int level, char *dbg, ...);
 #else
@@ -67,6 +46,26 @@ void dbg(int level, char *dbg, ...);
 void _die(const char *file, unsigned int line, char *msg, ...);
 #define die(...) (_die(__FILE__, __LINE__, __VA_ARGS__))
 #define asnsert(a) do { if(!(a)) die("Assertion failed\n"); } while(0);
+
+/* All libasn components included */
+#include "thash.h"
+#include "mmatic.h"
+#include "tlist.h"
+#include "tsort.h"
+#include "fifos.h"
+#include "math.h"
+#include "sfork.h"
+#include "regex.h"
+#include "xstr.h"
+#include "wstr.h"
+#include "fc.h"
+#include "select.h"
+
+/** Shortcut for programs using libasn */
+#define __USE_LIBASN int debug = 0; void (*debugcb)() = NULL;
+
+/** I could never understand why there is no such macro by default --pjf */
+#define streq(a, b) (strcmp((a), (b)) == 0)
 
 /** chdir() or die()
  * @param path directory path */
