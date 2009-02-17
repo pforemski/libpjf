@@ -9,4 +9,4 @@ cd pcre
 	--enable-utf8 \
 	--disable-shared \
 	--enable-static \
-	CFLAGS="-O3" && make
+	CFLAGS="-O3 -fPIC" && make
