@@ -2,7 +2,7 @@
  * tlist - trivial list
  *
  * This file is part of libasn
- * Copyright (C) 2005-2008 by ASN <http://www.asn.pl/>
+ * Copyright (C) 2005-2009 ASN Sp. z o.o.
  * Authors: Pawel Foremski <pjf@asn.pl>
  *          Łukasz Zemczak <sil2100@asn.pl>
  *

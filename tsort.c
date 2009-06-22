@@ -3,7 +3,7 @@
  *
  * This file is part of libasn
  * Copyright (C) 1998-2007 Free Software Foundation, Inc.
- * Copyright (C) 2005-2008 by ASN <http://www.asn.pl/>
+ * Copyright (C) 2005-2009 ASN Sp. z o.o.
  *
  * Originally written by Mark Kettenis <kettenis@phys.uva.nl>.
  * Libified for libasn by Pawel Foremski <pjf@asn.pl>

@@ -1,6 +1,6 @@
 /*
  * This file is part of libasn
- * Copyright (C) 2005-2008 by ASN <http://www.asn.pl/>
+ * Copyright (C) 2005-2009 ASN Sp. z o.o.
  * Authors: Dawid Ciężarkiewicz <dawid.ciezarkiewicz@gmail.com> (original asn_match)
  *          Pawel Foremski <pjf@asn.pl>
  *

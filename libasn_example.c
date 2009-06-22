@@ -2,7 +2,7 @@
  * libasn_example - an exemplary application
  *
  * This file is part of libasn
- * Copyright (C) 2005-2008 by ASN <http://www.asn.pl/>
+ * Copyright (C) 2005-2009 ASN Sp. z o.o.
  * Authors: Łukasz Zemczak <sil2100@asn.pl>
  *
  * libasn is free software; you can redistribute it and/or modify it under

@@ -1,6 +1,6 @@
 /*
  * This file is part of libasn
- * Copyright (C) 2005-2008 by ASN <http://www.asn.pl/>
+ * Copyright (C) 2005-2009 ASN Sp. z o.o.
  * Author: Pawel Foremski <pjf@asn.pl>
  *
  * libasn is free software; you can redistribute it and/or modify it under
@@ -60,6 +60,7 @@ void _die(const char *file, unsigned int line, char *msg, ...);
 #include "wstr.h"
 #include "fc.h"
 #include "select.h"
+#include "fcml.h"
 
 /** Shortcut for programs using libasn */
 #define __USE_LIBASN int debug = 0; void (*debugcb)() = NULL;

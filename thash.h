@@ -2,7 +2,7 @@
  * thash - trivial hash table
  *
  * This file is part of libasn
- * Copyright (C) 2005-2008 by ASN <http://www.asn.pl/>
+ * Copyright (C) 2005-2009 ASN Sp. z o.o.
  * Author: Pawel Foremski <pjf@asn.pl>
  *
  * libasn is free software; you can redistribute it and/or modify it under
