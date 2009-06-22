@@ -22,6 +22,8 @@
 #ifndef _MMATIC_H_
 #define _MMATIC_H_
 
+#define __USE_MISC 1 /* for MAP_ANONYMOUS */
+
 #include <stdlib.h>
 #include <stdint.h>
 #include <sys/mman.h>
