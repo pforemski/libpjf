@@ -84,6 +84,11 @@ pid_t asn_fork(const char *cmd, const char *args, thash *env,
 		if (dup2(fd_in[0],  0) == -1) _exit(123);
 		if (dup2(fd_out[1], 1) == -1) _exit(124);
 		if (dup2(fd_err[1], 2) == -1) _exit(125);
+
+		close(fd_in[0]);
+		close(fd_out[1]);
+		close(fd_err[1]);
+
 		if (script)
 			if (dup2(fd_in2[0], 3) == -1) _exit(126);
 
