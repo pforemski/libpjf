@@ -133,6 +133,11 @@ int asn_mkdir(const char *path, mmatic *mm, int (*filter)(const char *part));
  * @retval 1 success */
 int asn_rmdir(const char *path, const char *skip);
 
+/** ls dir
+ * @param path  directory to scan
+ * @note        automatically skips . and .. */
+tlist *asn_ls(const char *path, mmatic *mm);
+
 /** Checks if all str characters are digits
  * @retval 1 str is a number
  * @retval 0 str is not a number */
