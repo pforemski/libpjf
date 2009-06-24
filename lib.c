@@ -274,10 +274,8 @@ int asn_rmdir(const char *path, const char *skip)
 	return 1;
 }
 
-static int filterdots(const struct dirent *d)
-{
-	return (!streq(d->d_name, ".") && !streq(d->d_name, ".."));
-}
+static int vsort(const void *a, const void *b) { return strverscmp((*(const struct dirent **) a)->d_name, (*(const struct dirent **) b)->d_name); }
+static int filterdots(const struct dirent *d)  { return (!streq(d->d_name, ".") && !streq(d->d_name, "..")); }
 
 tlist *asn_ls(const char *path, mmatic *mm)
 {
@@ -285,7 +283,7 @@ tlist *asn_ls(const char *path, mmatic *mm)
 	struct dirent **entries;
 	tlist *ret = MMTLIST_CREATE(NULL);
 
-	n = scandir(path, &entries, filterdots, versionsort);
+	n = scandir(path, &entries, filterdots, vsort);
 	for (i = 0; i < n; i++) {
 		tlist_push(ret, mmstrdup(entries[i]->d_name));
 		free(entries[i]);
