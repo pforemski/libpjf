@@ -59,7 +59,6 @@ void mmatic_free(mmatic *mgr)
 	}
 
 	free(mgr);
-	mgr = 0;
 }
 
 void mmatic_freeptr(void *mem)
@@ -78,8 +77,6 @@ void mmatic_freeptr(void *mem)
 		munmap(chunk, chunk->alloc + sizeof(mmchunk));
 	else
 		free(chunk);
-
-	mem = 0;
 }
 
 int mmatic_isof(void *mem, mmatic *mm)
