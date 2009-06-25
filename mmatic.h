@@ -119,15 +119,20 @@ static inline void *mmatic_allocate(int shared, size_t size, mmatic *mgr, void *
 
 /** Frees all memory and destroys given manager
  * @param mgr       memory manager
- */
-void mmatic_free(mmatic *mgr);
+ * @note sets *mgr = 0 */
+void mmatic_free_(mmatic **mgr);
+#define mmatic_free(a) (mmatic_free_(&(a)))
 #define mmfree() (mmatic_free(mm))
 
 /** Frees one specific pointer
  * @param mem       memory from mmatic_alloc()
- */
-void mmatic_freeptr(void *mem);
-#define mmfreeptr mmatic_freeptr
+ * @note set *mem = 0 */
+void mmatic_freeptr_(void **mem);
+#define mmatic_freeptr(a) (mmatic_freeptr_((void **) &(a)))
+
+/** A counterpart to mmatic_freeptr which doesnt do mem=0 */
+static inline void mmatic_freeptrs(void *ptr) { mmatic_freeptr_((void **) &ptr); }
+#define mmfreeptr mmatic_freeptrs
 
 /** Print memory usage summary */
 void mmatic_summary(mmatic *mgr, int dbglevel);

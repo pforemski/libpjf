@@ -42,8 +42,9 @@ mmatic *mmatic_create(void)
 	return mgr;
 }
 
-void mmatic_free(mmatic *mgr)
+void mmatic_free_(mmatic **mgrptr)
 {
+	mmatic *mgr = *mgrptr;
 	mmchunk *chunk, *nchunk;
 
 	dbg(10, "mmatic_free(%p): freeing\n", mgr);
@@ -59,12 +60,12 @@ void mmatic_free(mmatic *mgr)
 	}
 
 	free(mgr);
-	mgr = 0;
+	*mgrptr = 0;
 }
 
-void mmatic_freeptr(void *mem)
+void mmatic_freeptr_(void **memptr)
 {
-	mmchunk *chunk = (mmchunk *) (PTR(mem) - sizeof(mmchunk)); /* XXX */
+	mmchunk *chunk = (mmchunk *) (PTR(*memptr) - sizeof(mmchunk)); /* XXX */
 
 	chunk->prev->next = chunk->next;
 	if (chunk->next)
@@ -79,7 +80,7 @@ void mmatic_freeptr(void *mem)
 	else
 		free(chunk);
 
-	mem = 0;
+	*memptr = 0;
 }
 
 int mmatic_isof(void *mem, mmatic *mm)
