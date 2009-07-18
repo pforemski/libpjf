@@ -167,14 +167,18 @@ void thash_set(thash *hash, const void *key, const void *val);
  */
 unsigned int thash_count(thash *hash);
 
+/** Print thash contents
+ * @note both key and value must be strings
+ * @param lvl   level to dbg() */
+void thash_dump(int lvl, thash *hash);
+
 /*
  * Hashing functions
  */
 
 /** Generic string hashing function
  * @remark note that key will be dereferenced and treated like a string
- * @note by Daniel J. Bernstein
- */
+ * @note by Daniel J. Bernstein */
 static inline unsigned int thash_str_hash(const void *vkey)
 {
 	unsigned int hash = 5381;
@@ -188,13 +192,11 @@ static inline unsigned int thash_str_hash(const void *vkey)
 }
 
 /** Simplest possible pointer "hashing" function
- * @note just casts the pointer
- */
+ * @note just casts the pointer */
 static inline unsigned int thash_ptr_hash(const void *key)
 {
 	return ((unsigned int) key);
 }
-
 
 #endif
 

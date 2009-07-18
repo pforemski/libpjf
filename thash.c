@@ -284,6 +284,15 @@ unsigned int thash_count(thash *hash)
 	return hash->used;
 }
 
+void thash_dump(int lvl, thash *hash)
+{
+	char *v, *k;
+
+	thash_reset(hash);
+	while ((v = thash_iter(hash, &k)))
+		dbg(lvl, "%s = %s\n", k, v);
+}
+
 /*
  * vim: textwidth=100
  */
