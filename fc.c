@@ -83,3 +83,42 @@ const char *asn_fcget(thash *hash, const char *path)
 
 	return value;
 }
+
+tlist *asn_fcparselist(const char *listorder, mmatic *mm)
+{
+	char *buf;
+	int i, j, l;
+	tlist *ret;
+	struct fcel *el;
+
+	ret = MMTLIST_CREATE(NULL);
+	buf = mmstrdup(listorder);
+	l = strlen(buf);
+
+	for (i = 0; i < l; i = j + 1) {
+		/* skip rubbish */
+		while (buf[i] && !(buf[i] == '#' || (buf[i] >= '0' && buf[i] <= '9'))) i++;
+		if (!buf[i]) break;
+
+		el = mmalloc(sizeof(*el));
+
+		/* skip comment */
+		if (buf[i] == '#')
+			el->enabled = false, i++;
+		else
+			el->enabled = true;
+
+		/* read elid */
+		for (j = i; buf[j] >= '0' && buf[j] <= '9'; j++);
+		buf[j] = '\0';
+		el->elid = strtoul(buf + i, NULL, 10);
+
+		for (i = ++j; buf[j] && buf[j] != '\n'; j++);
+		buf[j] = '\0';
+		el->elname = buf + i; /* XXX: @mm */
+
+		tlist_push(ret, el);
+	}
+
+	return ret;
+}

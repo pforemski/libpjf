@@ -30,8 +30,19 @@
 thash *asn_fcdir(const char *path, mmatic *mm);
 
 /** A safe wrapper around thash_get to fetch config values
- * @param hash   configuration hash
+ * @param hash   configuration hash returned from asn_fcdir()
  * @param path   variable path */
 const char *asn_fcget(thash *hash, const char *path);
+
+/** Structure representing a list element */
+struct fcel {
+	bool enabled;
+	unsigned int elid;
+	char *elname;
+};
+
+/** Return a list of struct fcel representing contents of given list
+ * @param  listorder  contents of *.order file */
+tlist *asn_fcparselist(const char *listorder, mmatic *mm);
 
 #endif /* _FC_H_ */
