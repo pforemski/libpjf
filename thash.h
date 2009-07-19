@@ -147,6 +147,8 @@ void *_thash_iter(thash *hash, void **key);
 /** Safe iterator in case indices are of unsingned int type */
 #define THASH_ITER_UINT(a, b) (_thash_iter((a), ((void **) (unsigned long *) b)))
 
+#define THASH_ITER_LOOP(hash, v, k) thash_reset(hash); while (((v) = thash_iter((hash), &(k))))
+
 /** Sets value of an element to given value.
  *
  * Resizes hash table if necessary.

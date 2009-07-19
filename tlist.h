@@ -115,6 +115,8 @@ void *tlist_iter_dec(tlist *list, int i);
 #define tlist_iter(list)      (tlist_iter_inc((list), 1))
 #define tlist_iterback(list)  (tlist_iter_dec((list), 1))
 
+#define TLIST_ITER_LOOP(list, v) tlist_reset(list); while (((v) = tlist_iter(list)))
+
 /** Pushes a value at the end of the list */
 void tlist_push(tlist *list, const void *val);
 
