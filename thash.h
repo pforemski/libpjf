@@ -147,7 +147,7 @@ void *_thash_iter(thash *hash, void **key);
 /** Safe iterator in case indices are of unsingned int type */
 #define THASH_ITER_UINT(a, b) (_thash_iter((a), ((void **) (unsigned long *) b)))
 
-#define THASH_ITER_LOOP(hash, v, k) thash_reset(hash); while (((v) = thash_iter((hash), &(k))))
+#define THASH_ITER_LOOP(hash, k, v) thash_reset(hash); while (((v) = thash_iter((hash), &(k))))
 
 /** Sets value of an element to given value.
  *
@@ -174,6 +174,9 @@ unsigned int thash_count(thash *hash);
  * @param lvl   level to dbg() */
 void thash_dump(int lvl, thash *hash);
 
+/** Clone a thash using given mmatic
+ * @note hash table needs to be a pure "string -> string" one */
+thash *thash_clone(thash *hash, mmatic *mm);
 /*
  * Hashing functions
  */

@@ -293,6 +293,21 @@ void thash_dump(int lvl, thash *hash)
 		dbg(lvl, "%s = %s\n", k, v);
 }
 
+thash *thash_clone(thash *hash, mmatic *mm)
+{
+	thash *ret;
+	const char *k, *v;
+
+	ret = thash_create(
+		hash->hash_func, hash->cmp_func, hash->free_func,
+		hash->strings_mode, mm);
+
+	THASH_ITER_LOOP(hash, k, v)
+		thash_set(ret, k, mmstrdup(v));
+
+	return ret;
+}
+
 /*
  * vim: textwidth=100
  */
