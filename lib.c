@@ -94,6 +94,18 @@ int asn_isfile(const char *path)
 	return -2;
 }
 
+bool asn_isexecutable(const char *path)
+{
+	struct stat stats;
+
+	if (stat(path, &stats)) return false;
+
+	/* XXX: simplified check, ie. we dont know if users or groups rights apply */
+	return (
+		(S_ISREG(stats.st_mode) || S_ISLNK(stats.st_mode)) &&
+		(stats.st_mode & (S_IXUSR | S_IXGRP | S_IXOTH)));
+}
+
 int asn_isfifo(const char *path)
 {
 	struct stat stats;

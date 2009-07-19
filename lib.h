@@ -83,6 +83,9 @@ char *asn_pwd(mmatic *mm);
  * @retval -2   exists, but is not a file nor a link */
 int asn_isfile(const char *path);
 
+/** Checks if file has any of executable bits set */
+bool asn_isexecutable(const char *path);
+
 /** Checks if file is a FIFO
  * @param  path path to file/dir
  * @retval  1   exists and is a FIFO
