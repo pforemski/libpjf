@@ -92,6 +92,9 @@ tlist *asn_fcparselist(const char *listorder, mmatic *mm)
 	struct fcel *el;
 
 	ret = MMTLIST_CREATE(NULL);
+
+	if (!listorder) return ret;
+
 	buf = mmstrdup(listorder);
 	l = strlen(buf);
 
