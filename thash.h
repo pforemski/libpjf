@@ -177,6 +177,13 @@ void thash_dump(int lvl, thash *hash);
 /** Clone a thash using given mmatic
  * @note hash table needs to be a pure "string -> string" one */
 thash *thash_clone(thash *hash, mmatic *mm);
+
+/** Parse RFC822 into hash table
+ * @note hash to be a pure "string -> string" one
+ * @note txt will be modified and referenced by hash values
+ * @retval false parse error */
+bool thash_parse_rfc822(thash *hash, char *txt);
+
 /*
  * Hashing functions
  */

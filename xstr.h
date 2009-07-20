@@ -45,100 +45,67 @@ typedef struct xstr {
 
 /** Create an xstr object
  * @param str    initial value; if NULL, "" is assumed
- * @return allocated memory
- */
+ * @return allocated memory */
 xstr *xstr_create(const char *str, mmatic *mm);
 #define MMXSTR_CREATE(str) xstr_create((str), mm)
 
-/**
- * Init xstr, ie. set it to "" value.
- */
+/** Init xstr, ie. set it to "" value */
 void xstr_init(xstr *sx, mmatic *mm);
 
-/**
- * Init xstr with value.
- */
+/** Init xstr with value */
 void xstr_init_val(xstr *sx, const char *ch, mmatic *mm);
 
-/**
- * Duplicate string.
- */
+/** Duplicate string */
 char *xstr_dup(xstr *sx, mmatic *mm);
 
-/**
- * Allocate more space in buffer.
- */
+/** Allocate more space in buffer */
 void xstr_reserve(xstr *sx, size_t l);
 
-/**
- * Append string to xstr.
- */
+/** Append string to xstr */
 void xstr_append(xstr *sx, const char *s);
 
-/**
- * Append string of length size to xstr.
- */
+/** Append string of length size to xstr */
 void xstr_append_size(xstr *sx, const char *s, int size);
 
-/**
- * Append one char to xstr.
- */
+/** Append one char to xstr */
 void xstr_append_char(xstr *sx, char s);
 
-/**
- * Set xstr value.
- */
+/** Set xstr value */
 void xstr_set(xstr *xs, const char *s);
 
-/**
- * Set xstr value to string s of size size.
- */
+/** Set xstr value to string s of size size */
 void xstr_set_size(xstr *xs, const char *s, int size);
 
-/**
- * Dellocate memory.
- */
+/** Dellocate memory */
 void xstr_free(xstr *xs);
 
-/**
- * Return the xstr as a standard char string
- */
+/** Return the xstr as a standard char string */
 #define xstr_string(xs) xs->s
 
-/**
- * Return the length of the string
- */
+/** Return the length of the string */
 #define xstr_length(xs) xs->len
 
-/**
- * Return (duplicated) stripped version of xs
+/** Return (duplicated) stripped version of xs
  *
  * Caller must free allocated memory.
- * @return NULL on failure
- */
+ * @return NULL on failure */
 char *xstr_strip(xstr *xs);
 
-/**
- * Like xstr_strip() but on char*.
- */
+/** Like xstr_strip() but on char* */
 char *xstr_stripch(char *s, mmatic *mm);
 
-/**
- * sprintf to xstr, allocating memory if necessary
+/** sprintf to xstr, allocating memory if necessary
  *
  * @param xs     xstr to be printed to (formatted)
  * @param format the printf-style format string
- * @return number of characters written
- */
+ * @return number of characters written */
 int xstr_set_format(xstr *xs, const char *format, ...);
 
-/**
- * Append a sprintf-string to xstr, allocating memory if necessary
+/** Append a sprintf-string to xstr, allocating memory if necessary
  *
  * @param xs     xstr to be printed to (formatted)
  * @param format the printf-style format string
- * @return number of characters appended
- */
+ * @return number of characters appended */
 int xstr_append_format(xstr *xs, const char *format, ...);
 
 #endif

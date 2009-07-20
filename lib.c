@@ -422,3 +422,18 @@ void asn_daemonize(const char *progname, const char *pidfile)
 		asn_writefile(pidfile, pid);
 	}
 }
+
+char *asn_trim(char *txt)
+{
+	int i;
+	char c;
+
+	if (!txt[0]) return txt;
+
+	while ((c = *txt) && (c == ' ' || c == '\n' || c == '\t')) txt++;
+	for (i = 0; txt[i]; i++);
+	for (i -= 1; i > 0 && (c = txt[i]) && (c == ' ' || c == '\n' || c == '\t'); i--);
+	txt[i + 1] = '\0';
+
+	return txt;
+}

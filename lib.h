@@ -173,4 +173,9 @@ unsigned int asn_utimestamp();
  * @param pidfile     path to file where to store the PID in (may be null) */
 void asn_daemonize(const char *progname, const char *pidfile);
 
+/** Trim string from both sides
+ * @note removes ' ', '\t' and '\n'
+ * @note modifies txt and returns memory location within it */
+char *asn_trim(char *txt);
+
 #endif /* _MISC_H_ */

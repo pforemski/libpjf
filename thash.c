@@ -308,6 +308,36 @@ thash *thash_clone(thash *hash, mmatic *mm)
 	return ret;
 }
 
+bool thash_parse_rfc822(thash *hash, char *txt)
+{
+	char *k, *v;
+	int i, l;
+
+	txt = asn_trim(txt);
+	l = strlen(txt);
+
+	for (i = 0; i < l; i++) {
+		k = txt + i;
+
+		while (txt[i] && txt[i] != ':') i++;
+		if (txt[i] != ':') return false;
+		txt[i++] = '\0';
+
+		while (txt[i] && txt[i] == ' ') i++;
+		if (!txt[i]) return false;
+		v = txt + i;
+
+nextline:
+		while (txt[i] && txt[i] != '\n') i++;
+		if (txt[i] == '\n' && txt[i+1] == ' ') { i += 2; goto nextline; }
+		txt[i] = '\0';
+
+		thash_set(hash, k, v);
+	}
+
+	return true;
+}
+
 /*
  * vim: textwidth=100
  */
