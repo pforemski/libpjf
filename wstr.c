@@ -19,9 +19,8 @@
  * this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "wstr.h"
-
 #include <string.h>
+#include "lib.h"
 
 #define wmmalloc(size) (mmatic_alloc((size), ws->mm))
 

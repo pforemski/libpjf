@@ -29,7 +29,7 @@
 #endif
 
 /** Main FCML structure */
-typedef struct fcmlparser_ {
+typedef struct fcmlparser {
 	/** Caches parser output (of fcmlfile type) */
 	thash *files;
 
@@ -41,7 +41,7 @@ typedef struct fcmlparser_ {
 } fcmlparser;
 
 /** Source to use instead of file->fp */
-typedef struct _fcmlsrc_ {
+typedef struct fcmlsrc {
 	/** Description to help the user identify the source of error
 	 * @param if empty, thats the final source (usually the FCML file contents) */
 	char *descr;
@@ -59,11 +59,11 @@ typedef struct _fcmlsrc_ {
 	int i;
 
 	/** Next source to use if this ends */
-	struct _fcmlsrc_ *next;
-} _fcmlsrc;
+	struct fcmlsrc *next;
+} fcmlsrc;
 
 /** Represents a single FCML file along with parser parameters */
-typedef struct fcmlfile_ {
+typedef struct fcmlfile {
 	/** Way back */
 	fcmlparser *parser;
 
@@ -74,11 +74,11 @@ typedef struct fcmlfile_ {
 	thash *vars;
 
 	/* File content sources */
-	_fcmlsrc *addsrc;
+	fcmlsrc *addsrc;
 } fcmlfile;
 
 /** Represents a filespace definition */
-typedef struct fcmlfspace_ {
+typedef struct fcmlfspace {
 	/** Root dir */
 	char rootdir[PATH_MAX];
 } fcmlfspace;
@@ -91,9 +91,9 @@ enum fcmltype {
 };
 
 /** An FCML variable */
-typedef struct fcmlvar_ {
+typedef struct fcmlvar {
 	enum fcmltype type;
-	union in_t {
+	union in {
 		char *string;
 		thash *array;
 		int num;

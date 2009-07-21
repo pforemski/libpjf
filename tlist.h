@@ -25,10 +25,10 @@
 
 #include "mmatic.h"
 
-typedef struct _tlist_el tlist_el;
+typedef struct tlist_el tlist_el;
 
 /** A list */
-typedef struct _tlist {
+typedef struct tlist {
 	/** Head */
 	tlist_el *head;
 
@@ -49,15 +49,15 @@ typedef struct _tlist {
 } tlist;
 
 /** Element of list */
-struct _tlist_el {
+struct tlist_el {
 	/** Element value. */
 	void *val;
 
 	/** Next element */
-	struct _tlist_el *next;
+	tlist_el *next;
 
 	/** Previous element */
-	struct _tlist_el *prev;
+	tlist_el *prev;
 
 	/** List root */
 	tlist *list;

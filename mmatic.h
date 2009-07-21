@@ -30,11 +30,11 @@
 #include <unistd.h>
 #include <string.h>
 
-struct _mmatic;
+struct mmatic;
 
-typedef struct _mmchunk {
+typedef struct mmchunk {
 	/** Allocation type */
-	int shared;
+	bool shared;
 
 	/** Number of bytes allocated for this chunk */
 	unsigned int alloc;
@@ -46,16 +46,16 @@ typedef struct _mmchunk {
 	unsigned int cline;
 
 	/** Next chunk */
-	struct _mmchunk *next;
+	struct mmchunk *next;
 
 	/** Previus chunk */
-	struct _mmchunk *prev;
+	struct mmchunk *prev;
 
 	/** Manager */
-	struct _mmatic *mgr;
+	struct mmatic *mgr;
 } mmchunk;
 
-typedef struct _mmatic {
+typedef struct mmatic {
 	/** First chunk */
 	mmchunk *first;
 
@@ -89,7 +89,7 @@ mmatic *mmatic_create(void);
  * @param cline     C source code line
  * @note the start and flags arguments are ignored when shared is 0
  */
-static inline void *mmatic_allocate(int shared, size_t size, mmatic *mgr, void *start, int flags, const char *cfile, unsigned int cline)
+static inline void *mmatic_allocate(bool shared, size_t size, mmatic *mgr, void *start, int flags, const char *cfile, unsigned int cline)
 {
 	mmchunk *chunk;
 

@@ -34,7 +34,7 @@
 #define THASH_MAX_USAGE 0.60
 
 /** Element of hash table */
-typedef struct thash_el_t {
+typedef struct thash_el {
 	/** Hash key used to access this field. */
 	void *key;
 
@@ -43,12 +43,12 @@ typedef struct thash_el_t {
 
 	/** Pointer at next element under this key.
 	 * Used in case of key duplicates. */
-	struct thash_el_t *next;
+	struct thash_el *next;
 } thash_el;
 
 
 /** A hash table */
-typedef struct thash_t {
+typedef struct thash {
 	/** Current size of hash table. */
 	unsigned int size;
 

@@ -80,7 +80,7 @@ static char *curvar;
 /*****/
 static void fcml_push_src(fcmlfile *file, char *descr, char *data)
 {
-	_fcmlsrc *src = fmmalloc(sizeof(_fcmlsrc)),
+	fcmlsrc *src = fmmalloc(sizeof(fcmlsrc)),
 	         *first = file->addsrc;
 
 	src->descr = descr;
@@ -94,7 +94,7 @@ static void fcml_push_src(fcmlfile *file, char *descr, char *data)
 
 static void fcml_pop_src(fcmlfile *file)
 {
-	_fcmlsrc *src = file->addsrc;
+	fcmlsrc *src = file->addsrc;
 
 	if (!src) return;
 
@@ -213,7 +213,7 @@ void fcml_free_parser(void *arg)
 void fcml_free_file(void *arg)
 {
 	fcmlfile *file = (fcmlfile *) arg;
-	_fcmlsrc *src = file->addsrc, *src2;
+	fcmlsrc *src = file->addsrc, *src2;
 
 	if (file->vars) thash_free(file->vars);
 
