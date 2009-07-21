@@ -47,6 +47,9 @@ void _die(const char *file, unsigned int line, char *msg, ...);
 #define die(...) (_die(__FILE__, __LINE__, __VA_ARGS__))
 #define asnsert(a) do { if(!(a)) die("Assertion failed\n"); } while(0);
 
+/** From linux/stddef.h */
+#define offsetof(TYPE, MEMBER) ((size_t) &((TYPE *)0)->MEMBER)
+
 /* All libasn components included */
 #include "thash.h"
 #include "mmatic.h"
@@ -61,6 +64,7 @@ void _die(const char *file, unsigned int line, char *msg, ...);
 #include "fc.h"
 #include "select.h"
 #include "fcml.h"
+#include "unitype.h"
 
 /** Shortcut for programs using libasn */
 #define __USE_LIBASN int debug = 0; void (*debugcb)() = NULL;
