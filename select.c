@@ -36,7 +36,7 @@ thash *asn_rselect(thash *fdlist, uint32_t *timeout_ms, mmatic *mm)
 	FD_ZERO(&fds);
 
 	thash_reset(fdlist);
-	while ((prv = THASH_ITER_UINT(fdlist, &fd))) {
+	while (THASH_ITER_UINT(fdlist, &fd)) {
 		/* XXX: fcntl() is a bit hacky, since we just want to check if fd is valid (so we dont get e.g. a EBADF
 		 * immediately after call to select(); if someone knows better method - please fix */
 		if (fd >= FD_SETSIZE || fcntl(fd, F_GETFD) < 0) {

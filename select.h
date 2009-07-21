@@ -33,7 +33,7 @@
 #include "lib.h"
 
 /** Waits until a file descriptor is ready for reading
- * @param fdlist      list of FDs to monitor - a thash of (struct asn_fd *)s indexed by (unsigned int) FDs
+ * @param fdlist      list of FDs to monitor - a thash indexed by (unsigned int) FDs holding arbitrary (void *)
  *                    XXX: a thash because its easier to check/delete elements
  *                    XXX: use THASH_*_UINT() macros
  * @param timeout_ms  timeout, in miliseconds, after which we should exit, even if no FDs are ready
