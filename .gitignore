@@ -47,3 +47,4 @@ libasn_example
 version.h
 fcmldump
 test/unitype
+test/json
