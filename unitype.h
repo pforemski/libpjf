@@ -22,20 +22,22 @@
 
 #include "lib.h"
 
-enum ut_type {
-	T_NULL,
-	T_PTR,       /* void*  */
-	T_BOOL,      /* bool   */
-	T_INT,       /* int    */
-	T_DOUBLE,    /* double */
-	T_STRING,    /* xstr   */
-	T_LIST,      /* tlist  */
-	T_HASH,      /* thash string->ut */
-};
-
 typedef struct ut {
 	mmatic *mm;
-	enum ut_type type;
+
+	enum ut_type {
+		T_PTR,       /* void*  */
+		T_BOOL,      /* bool   */
+		T_INT,       /* int    */
+		T_DOUBLE,    /* double */
+		T_STRING,    /* xstr   */
+		T_LIST,      /* tlist  */
+		T_HASH,      /* thash string->ut */
+
+		/* special types */
+		T_NULL,
+		T_ERR,
+	} type;
 
 	union ut_as {
 		bool        as_bool;
@@ -45,6 +47,12 @@ typedef struct ut {
 		tlist      *as_tlist;
 		thash      *as_thash;
 		void       *as_ptr;
+
+		struct ut_err {
+			int  code;
+			const char *msg;  /** XXX: never null */
+			const char *data; /** XXX: may be null */
+		} *as_err;
 	} d;
 } ut;
 
@@ -52,7 +60,14 @@ typedef struct ut {
  * @note root is always of thash type */
 ut *ut_root(mmatic *mm);
 
+/** Return type of variable */
 enum ut_type ut_type(ut *ut);
+
+/** Checks if ut is not of err type */
+#define ut_ok(ut) (ut->type != T_ERR)
+
+/** Returns human-readable error description */
+const char *ut_err(ut *ut);
 
 /* big fat warning: if conversion needs to be done, a completely new memory is
  * allocated @ut->mm and it wont be referenced at our side - its your task if required */
@@ -65,14 +80,16 @@ tlist      *ut_tlist(ut *ut);
 thash      *ut_thash(ut *ut);
 void       *ut_ptr(ut *ut);
 
-ut *ut_new_bool(ut *ut, bool val);
-ut *ut_new_int(ut *ut, int val);
-ut *ut_new_double(ut *ut, double val);
-ut *ut_new_char(ut *ut, const char *val);
-ut *ut_new_xstr(ut *ut, xstr *val);
-ut *ut_new_tlist(ut *ut, tlist *val);
-ut *ut_new_thash(ut *ut, thash *val);
-ut *ut_new_ptr(ut *ut, void *ptr);
+ut *ut_new_bool(bool val, mmatic *mm);
+ut *ut_new_int(int val, mmatic *mm);
+ut *ut_new_double(double val, mmatic *mm);
+ut *ut_new_char(const char *val, mmatic *mm);
+ut *ut_new_xstr(xstr *val, mmatic *mm);
+ut *ut_new_tlist(tlist *val, mmatic *mm);
+ut *ut_new_thash(thash *val, mmatic *mm);
+ut *ut_new_ptr(void *val, mmatic *mm);
+ut *ut_new_null(mmatic *mm);
+ut *ut_new_err(int code, const char *msg, const char *data, mmatic *mm);
 
 /* applicable for ut->type == T_HASH */
 ut *uth_add_bool(ut *ut, const char *key, bool val);
