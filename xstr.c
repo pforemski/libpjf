@@ -72,11 +72,9 @@ char *xstr_dup(xstr *sx, mmatic *mm)
 	return ret;
 }
 
-/**
- * Make sure there is a place for l chars in xstr.
+/** Make sure there is a place for l chars in xstr.
  *
- * This means (l+1) bytes.
- */
+ * This means (l+1) bytes. */
 void xstr_reserve(xstr *xs, size_t l)
 {
 	char *new_str;
@@ -134,7 +132,10 @@ void xstr_append_char(xstr *sx, char s)
 	if (!s)
 		return;
 
-	xstr_reserve(sx, sx->len + 1);
+	/* hack to overcome relocating memory sequential calls (eg. loops) */
+	if (sx->len + 1 >= sx->a);
+		xstr_reserve(sx, 1.5 * sx->len);
+
 	sx->s[sx->len] = s;
 	sx->len++;
 	sx->s[sx->len] = 0;
