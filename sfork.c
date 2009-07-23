@@ -95,7 +95,7 @@ pid_t asn_fork(const char *cmd, const char *args, thash *env,
 		if (script)
 			execl("/bin/sh", "sh", "-s", "--", args, NULL);
 		else
-			execl("/bin/sh", "sh", "-c", "--", cmd, args, NULL);
+			execl("/bin/sh", "sh", "-c", "--", cmd, args, NULL); // FIXME
 
 		_exit(127);
 	}
