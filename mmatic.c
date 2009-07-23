@@ -139,7 +139,7 @@ void *asn_malloc(size_t size)
 char *mmatic_printf(mmatic *mm, const char *fmt, ...)
 {
 	va_list args; char *buf;
-	va_start(args, fmt); buf = mmalloc(1024); vsnprintf(buf, 1024, fmt, args); va_end(args);
+	va_start(args, fmt); buf = mmalloc(BUFSIZ); vsnprintf(buf, BUFSIZ, fmt, args); va_end(args);
 	return buf;
 }
 
@@ -147,6 +147,6 @@ char *mmatic_printf(mmatic *mm, const char *fmt, ...)
 char *asn_malloc_printf(const char *fmt, ...)
 {
 	va_list args; char *buf;
-	va_start(args, fmt); buf = asn_malloc(1024); vsnprintf(buf, 1024, fmt, args); va_end(args);
+	va_start(args, fmt); buf = asn_malloc(BUFSIZ); vsnprintf(buf, BUFSIZ, fmt, args); va_end(args);
 	return buf;
 }

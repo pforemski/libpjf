@@ -3,7 +3,7 @@ LDFLAGS = -lm
 
 ME=libasn
 C_OBJECTS=lib.o sfork.o regex.o thash.o tlist.o xstr.o wstr.o mmatic.o tsort.o \
-	fc.o select.o fcml.o unitype.o json.o
+	fc.o select.o fcml.o unitype.o json.o rfc822.o
 
 ifeq (,$(NOFIFOS))
 C_OBJECTS+=fifos.o

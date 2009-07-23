@@ -66,6 +66,7 @@ void _die(const char *file, unsigned int line, char *msg, ...);
 #include "fcml.h"
 #include "unitype.h"
 #include "json.h"
+#include "rfc822.h"
 
 /** Shortcut for programs using libasn */
 #define __USE_LIBASN int debug = 0; void (*debugcb)() = NULL;
