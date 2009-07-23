@@ -12,6 +12,8 @@
 
 typedef struct json {
 	mmatic *mm;
+	int depth;          /** recurrency depth */
+
 	const char *txt;    /** text to parse */
 	int i;              /** position in txt */
 } json;

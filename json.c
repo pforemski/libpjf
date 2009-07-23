@@ -17,6 +17,18 @@
 #define UNGETC()        (json->i--)
 #define SKIPWS()        skipws(json)
 
+#define INC_DEPTH() do {  \
+	json->depth++;        \
+	if (json->depth > 50) \
+		return err(json, 20, "document too deep"); \
+} while (0);
+
+#define DEC_DEPTH() do {  \
+	json->depth--;        \
+	if (json->depth < 0)  \
+		return err(json, 21, "internal error"); \
+} while (0);
+
 static ut *parse_array(json *json);
 static ut *parse_object(json *json);
 
@@ -219,6 +231,8 @@ static ut *parse_array(json *json)
 	if (c != '[')
 		return err(json, 3, "array: expected '['");
 
+	INC_DEPTH();
+
 	c = SKIPWS();
 	while (c > 0 && c != ']') {
 		UNGETC();
@@ -240,6 +254,7 @@ static ut *parse_array(json *json)
 	if (c != ']')
 		return err(json, 5, "array: expected ']'");
 
+	DEC_DEPTH();
 	return ut_new_tlist(list, json->mm);
 }
 
@@ -252,6 +267,8 @@ static ut *parse_object(json *json)
 	c = SKIPWS();
 	if (c != '{')
 		return err(json, 2, "object: expected '{'");
+
+	INC_DEPTH();
 
 	c = SKIPWS();
 	while (c > 0 && c != '}') {
@@ -280,6 +297,7 @@ static ut *parse_object(json *json)
 	if (c != '}')
 		return err(json, 19, "object: expected '}'");
 
+	DEC_DEPTH();
 	return ut_new_thash(hash, json->mm);
 }
 
@@ -296,6 +314,7 @@ json *json_create(mmatic *mm)
 	json *j = mmalloc(sizeof(json));
 
 	j->mm = mm;
+	j->depth = 0;
 	j->txt = NULL;
 	j->i = 0;
 
