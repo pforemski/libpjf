@@ -14,7 +14,7 @@ typedef struct json {
 	mmatic *mm;
 	int depth;          /** recurrency depth */
 
-	const char *txt;    /** text to parse */
+	const char *txt;    /** text representation */
 	int i;              /** position in txt */
 } json;
 
@@ -23,5 +23,11 @@ json *json_create(mmatic *mm);
 
 /** Parse given string into unitype node */
 ut *json_parse(json *j, const char *txt);
+
+/** Print ut as text */
+const char *json_print(json *json, ut *var);
+
+/** Helper function: escape string so it can be used in string representation */
+const char *json_escape(json *json, const char *str);
 
 #endif

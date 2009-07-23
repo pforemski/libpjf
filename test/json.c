@@ -14,7 +14,7 @@ int main(int argc, char *argv[])
 
 	ut *parsed = json_parse(js, xstr_string(xs));
 	if (ut_ok(parsed))
-		printf("%s", ut_char(parsed));
+		printf("%s", json_print(js, parsed));
 	else
 		printf("%s\n", ut_err(parsed));
 

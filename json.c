@@ -305,7 +305,6 @@ ut *json_parse(json *json, const char *txt)
 {
 	json->txt = txt;
 	json->i = 0;
-
 	return parse_value(json);
 }
 
@@ -314,9 +313,117 @@ json *json_create(mmatic *mm)
 	json *j = mmalloc(sizeof(json));
 
 	j->mm = mm;
-	j->depth = 0;
 	j->txt = NULL;
 	j->i = 0;
+	j->depth = 0;
 
 	return j;
+}
+
+const char *json_escape(json *json, const char *str)
+{
+	bool bs;
+	char c;
+	xstr *xs = xstr_create("", json->mm);
+
+	xstr_reserve(xs, 1.1 * strlen(str));
+
+	while ((c = *str++)) {
+		bs = true;
+		switch (c) {
+			case '\\':
+				if (*str == 'u') bs = false;  /* copy \uHHHH verbatim */
+				break;
+			case '"':               break;
+			case '\b':  c = 'b';    break;
+			case '\f':  c = 'f';    break;
+			case '\n':  c = 'n';    break;
+			case '\r':  c = 'r';    break;
+			case '\t':  c = 't';    break;
+			default:    bs = false; break;
+		}
+
+		if (bs) xstr_append_char(xs, '\\');
+		xstr_append_char(xs, c);
+	}
+
+	return xstr_string(xs);
+}
+
+const char *json_print(json *json, ut *var)
+{
+	mmatic *mm = json->mm;
+	char *k, *str;
+	ut *el;
+	xstr *xs;
+
+	switch (var->type) {
+		case T_STRING:
+			str = mmprintf("\"%s\"",
+				json_escape(json, xstr_string(var->d.as_xstr)));
+			break;
+
+		case T_INT:
+			str = mmprintf("%d", var->d.as_int);
+			break;
+
+		case T_DOUBLE:
+			str = mmprintf("%g", var->d.as_double);
+			break;
+
+		case T_LIST:
+			xs = MMXSTR_CREATE("[ ");
+
+			TLIST_ITER_LOOP(var->d.as_tlist, el) {
+				xstr_append(xs, json_print(json, el));
+				xstr_append(xs, ", ");
+			}
+			if (xstr_length(xs) > 2) xstr_cut(xs, 2);
+			xstr_append(xs, " ]");
+
+			str = xstr_string(xs);
+			break;
+
+		case T_HASH:
+			xs = MMXSTR_CREATE("{ ");
+
+			THASH_ITER_LOOP(var->d.as_thash, k, el) {
+				xstr_append_char(xs, '"');
+				xstr_append(xs, k);
+				xstr_append(xs, "\": ");
+
+				xstr_append(xs, json_print(json, el));
+				xstr_append(xs, ", ");
+			}
+			if (xstr_length(xs) > 2) xstr_cut(xs, 2);
+			xstr_append(xs, " }");
+
+			str = xstr_string(xs);
+			break;
+
+		case T_BOOL:
+			str = var->d.as_bool ? "true" : "false";
+			break;
+
+		case T_NULL:
+			str = "null";
+			break;
+
+		case T_ERR:
+			if (var->d.as_err->data)
+				str = mmprintf("{ \"code\": %d, \"message\": \"%s\", \"data\": \"%s\" }",
+					var->d.as_err->code,
+					json_escape(json, var->d.as_err->msg),
+					json_escape(json, var->d.as_err->data));
+			else
+				str = mmprintf("{ \"code\": %d, \"message\": \"%s\" }",
+					var->d.as_err->code,
+					json_escape(json, var->d.as_err->msg));
+
+		default:
+			str = "";
+			break;
+	}
+
+	return str;
 }
