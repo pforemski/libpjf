@@ -36,8 +36,10 @@ mmatic *mmatic_create(void)
 
 	mgr = asn_malloc(sizeof(mmatic));
 	mgr->totalloc = 0;
+
 	mgr->first = mgr->last = asn_malloc(sizeof(mmchunk));
 	bzero(mgr->first, sizeof(mmchunk));
+	mgr->first->mgr = mgr;
 
 	return mgr;
 }

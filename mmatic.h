@@ -102,7 +102,7 @@ static inline void *mmatic_allocate(bool shared, size_t size, mmatic *mgr, void 
 	chunk->alloc    = size;
 	chunk->cfile    = cfile;
 	chunk->cline    = cline;
-	chunk->next     = 0;
+	chunk->next     = NULL;
 	chunk->prev     = mgr->last;
 	chunk->mgr      = mgr;
 	mgr->last->next = chunk;
