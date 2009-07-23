@@ -82,7 +82,7 @@ void xstr_reserve(xstr *xs, size_t l)
 	if (xs->a > l)
 		return;
 
-	new_str = xmmalloc(sizeof(char) * (l + 1));
+	new_str = xmmalloc(l + 1);
 
 	if (xs->s) {
 		strcpy(new_str, xs->s);
@@ -133,11 +133,10 @@ void xstr_append_char(xstr *sx, char s)
 		return;
 
 	/* hack to overcome relocating memory sequential calls (eg. loops) */
-	if (sx->len + 1 >= sx->a);
-		xstr_reserve(sx, 1.5 * sx->len);
+	if (sx->len + 2 >= sx->a);
+		xstr_reserve(sx, MAX(sx->len + 2, 1.5 * sx->len));
 
-	sx->s[sx->len] = s;
-	sx->len++;
+	sx->s[sx->len++] = s;
 	sx->s[sx->len] = 0;
 }
 
