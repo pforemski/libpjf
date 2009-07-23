@@ -1,4 +1,4 @@
-CFLAGS = -I../ -lasn
+CFLAGS = -g -I../ -lasn
 
 all: unitype json
 
