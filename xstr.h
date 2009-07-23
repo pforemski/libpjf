@@ -108,4 +108,7 @@ int xstr_set_format(xstr *xs, const char *format, ...);
  * @return number of characters appended */
 int xstr_append_format(xstr *xs, const char *format, ...);
 
+/** Cut the string @l byte starting from the end */
+void xstr_cut(xstr *xs, unsigned int l);
+
 #endif

@@ -134,7 +134,7 @@ void xstr_append_char(xstr *sx, char s)
 
 	/* hack to overcome relocating memory sequential calls (eg. loops) */
 	if (sx->len + 2 >= sx->a);
-		xstr_reserve(sx, MAX(sx->len + 2, 1.5 * sx->len));
+		xstr_reserve(sx, MAX(8, 2 * sx->len));
 
 	sx->s[sx->len++] = s;
 	sx->s[sx->len] = 0;
@@ -231,4 +231,11 @@ int xstr_append_format(xstr *xs, const char *format, ...)
 	if (len > 0) xs->len += len;
 
 	return len;
+}
+
+void xstr_cut(xstr *xs, unsigned int l)
+{
+	if (l > xs->len) return;
+	xs->len -= l;
+	xs->s[xs->len] = '\0';
 }
