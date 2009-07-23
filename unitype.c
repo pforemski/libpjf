@@ -19,11 +19,6 @@
 
 #include "lib.h"
 
-ut *ut_root(mmatic *mm)
-{
-	return ut_new_thash(NULL, mm);
-}
-
 enum ut_type ut_type(ut *var)
 {
 	return var->type;
@@ -286,83 +281,73 @@ ut *ut_new_err(int code, const char *msg, const char *data, mmatic *mm)
 
 /****************************************************************/
 
+ut *uth_add_ut(ut *var, const char *key, ut *val)
+{
+	thash_set(var->d.as_thash, key, val);
+	return val;
+}
+
 ut *uth_add_bool(ut *var, const char *key, bool val)
 {
-	ut *ret = ut_new_bool(val, var->mm);
-	thash_set(var->d.as_thash, key, ret);
-	return ret;
+	return uth_add_ut(var, key, ut_new_bool(val, var->mm));
 }
 
 ut *uth_add_int(ut *var, const char *key, int val)
 {
-	ut *ret = ut_new_int(val, var->mm);
-	thash_set(var->d.as_thash, key, ret);
-	return ret;
+	return uth_add_ut(var, key, ut_new_int(val, var->mm));
 }
 
 ut *uth_add_double(ut *var, const char *key, double val)
 {
-	ut *ret = ut_new_double(val, var->mm);
-	thash_set(var->d.as_thash, key, ret);
-	return ret;
+	return uth_add_ut(var, key, ut_new_double(val, var->mm));
 }
 
 ut *uth_add_char(ut *var, const char *key, const char *val)
 {
-	ut *ret = ut_new_char(val, var->mm);
-	thash_set(var->d.as_thash, key, ret);
-	return ret;
+	return uth_add_ut(var, key, ut_new_char(val, var->mm));
 }
 
 ut *uth_add_xstr(ut *var, const char *key, xstr *val)
 {
-	ut *ret = ut_new_xstr(val, var->mm);
-	thash_set(var->d.as_thash, key, ret);
-	return ret;
+	return uth_add_ut(var, key, ut_new_xstr(val, var->mm));
 }
 
 ut *uth_add_tlist(ut *var, const char *key, tlist *val)
 {
-	ut *ret = ut_new_tlist(val, var->mm);
-	thash_set(var->d.as_thash, key, ret);
-	return ret;
+	return uth_add_ut(var, key, ut_new_tlist(val, var->mm));
 }
 
 ut *uth_add_thash(ut *var, const char *key, thash *val)
 {
-	ut *ret = ut_new_thash(val, var->mm);
-	thash_set(var->d.as_thash, key, ret);
-	return ret;
+	return uth_add_ut(var, key, ut_new_thash(val, var->mm));
 }
 
 ut *uth_add_ptr(ut *var, const char *key, void *ptr)
 {
-	ut *ret = ut_new_ptr(ptr, var->mm);
-	thash_set(var->d.as_thash, key, ret);
-	return ret;
+	return uth_add_ut(var, key, ut_new_ptr(ptr, var->mm));
 }
 
 /****************************************************************/
 
+ut *utl_add_ut(ut *var, ut *val)
+{
+	tlist_push(var->d.as_tlist, val);
+	return val;
+}
+
 ut *utl_add_bool(ut *var, bool val)
 {
-	ut *ret = ut_new_bool(val, var->mm);
-	tlist_push(var->d.as_tlist, ret);
-	return ret;
+	return utl_add_ut(var, ut_new_bool(val, var->mm));
 }
 
 ut *utl_add_int(ut *var, int val)
 {
-	ut *ret = ut_new_int(val, var->mm);
-	tlist_push(var->d.as_tlist, ret);
-	return ret;
+	return utl_add_ut(var, ut_new_int(val, var->mm));
 }
 
 ut *utl_add_double(ut *var, double val)
 {
-	ut *ret = ut_new_double(val, var->mm);
-	tlist_push(var->d.as_tlist, ret);
-	return ret;
+	return utl_add_ut(var, ut_new_double(val, var->mm));
 }
 
 ut *utl_add_char(ut *var, const char *val)
@@ -372,28 +357,20 @@ ut *utl_add_char(ut *var, const char *val)
 
 ut *utl_add_xstr(ut *var, xstr *val)
 {
-	ut *ret = ut_new_xstr(val, var->mm);
-	tlist_push(var->d.as_tlist, ret);
-	return ret;
+	return utl_add_ut(var, ut_new_xstr(val, var->mm));
 }
 
 ut *utl_add_tlist(ut *var, tlist *val)
 {
-	ut *ret = ut_new_tlist(val, var->mm);
-	tlist_push(var->d.as_tlist, ret);
-	return ret;
+	return utl_add_ut(var, ut_new_tlist(val, var->mm));
 }
 
 ut *utl_add_thash(ut *var, thash *val)
 {
-	ut *ret = ut_new_thash(val, var->mm);
-	tlist_push(var->d.as_tlist, ret);
-	return ret;
+	return utl_add_ut(var, ut_new_thash(val, var->mm));
 }
 
 ut *utl_add_ptr(ut *var, void *ptr)
 {
-	ut *ret = ut_new_ptr(ptr, var->mm);
-	tlist_push(var->d.as_tlist, ret);
-	return ret;
+	return utl_add_ut(var, ut_new_ptr(ptr, var->mm));
 }

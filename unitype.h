@@ -56,10 +56,6 @@ typedef struct ut {
 	} d;
 } ut;
 
-/** Create unitype root
- * @note root is always of thash type */
-ut *ut_root(mmatic *mm);
-
 /** Return type of variable */
 enum ut_type ut_type(ut *ut);
 
@@ -92,6 +88,7 @@ ut *ut_new_null(mmatic *mm);
 ut *ut_new_err(int code, const char *msg, const char *data, mmatic *mm);
 
 /* applicable for ut->type == T_HASH */
+ut *uth_add_ut(ut *var, const char *key, ut *val);
 ut *uth_add_bool(ut *ut, const char *key, bool val);
 ut *uth_add_int(ut *ut, const char *key, int val);
 ut *uth_add_double(ut *ut, const char *key, double val);
@@ -102,6 +99,7 @@ ut *uth_add_thash(ut *ut, const char *key, thash *val);
 ut *uth_add_ptr(ut *ut, const char *key, void *ptr);
 
 /* applicable for ut->type == T_LIST */
+ut *utl_add_ut(ut *var, ut *val);
 ut *utl_add_bool(ut *ut, bool val);
 ut *utl_add_int(ut *ut, int val);
 ut *utl_add_double(ut *ut, double val);
