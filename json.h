@@ -25,9 +25,9 @@ json *json_create(mmatic *mm);
 ut *json_parse(json *j, const char *txt);
 
 /** Print ut as text */
-const char *json_print(json *json, ut *var);
+char *json_print(json *json, ut *var);
 
 /** Helper function: escape string so it can be used in string representation */
-const char *json_escape(json *json, const char *str);
+char *json_escape(json *json, const char *str);
 
 #endif

@@ -62,9 +62,6 @@ enum ut_type ut_type(ut *ut);
 /** Checks if ut is not of err type */
 #define ut_ok(ut) (ut->type != T_ERR)
 
-/** Returns human-readable error description */
-const char *ut_err(ut *ut);
-
 /* big fat warning: if conversion needs to be done, a completely new memory is
  * allocated @ut->mm and it wont be referenced at our side - its your task if required */
 bool        ut_bool(ut *ut);
@@ -76,16 +73,36 @@ tlist      *ut_tlist(ut *ut);
 thash      *ut_thash(ut *ut);
 void       *ut_ptr(ut *ut);
 
+/** Returns human-readable error description */
+const char *ut_err(ut *ut);
+
+/** Returns error code */
+int ut_errcode(ut *ut);
+
 ut *ut_new_bool(bool val, mmatic *mm);
 ut *ut_new_int(int val, mmatic *mm);
 ut *ut_new_double(double val, mmatic *mm);
 ut *ut_new_char(const char *val, mmatic *mm);
 ut *ut_new_xstr(xstr *val, mmatic *mm);
-ut *ut_new_tlist(tlist *val, mmatic *mm);
-ut *ut_new_thash(thash *val, mmatic *mm);
 ut *ut_new_ptr(void *val, mmatic *mm);
 ut *ut_new_null(mmatic *mm);
 ut *ut_new_err(int code, const char *msg, const char *data, mmatic *mm);
+
+/** Create a ut containing given list of strings
+ * @param val may be NULL to create a new list */
+ut *ut_new_tlist(tlist *val, mmatic *mm);
+
+/** Create a ut containing given hash of string->string
+ * @param val may be NULL to create a new hash */
+ut *ut_new_thash(thash *val, mmatic *mm);
+
+/** Create a ut containing given list of ut objects
+ * @param val may be NULL to create a new list */
+ut *ut_new_uttlist(tlist *val, mmatic *mm);
+
+/** Create a ut containing given hash of string->ut objects
+ * @param val may be NULL to create a new hash */
+ut *ut_new_utthash(thash *val, mmatic *mm);
 
 /* applicable for ut->type == T_HASH */
 ut *uth_add_ut(ut *var, const char *key, ut *val);
@@ -94,9 +111,9 @@ ut *uth_add_int(ut *ut, const char *key, int val);
 ut *uth_add_double(ut *ut, const char *key, double val);
 ut *uth_add_char(ut *ut, const char *key, const char *val);
 ut *uth_add_xstr(ut *ut, const char *key, xstr *val);
-ut *uth_add_tlist(ut *ut, const char *key, tlist *val);
-ut *uth_add_thash(ut *ut, const char *key, thash *val);
 ut *uth_add_ptr(ut *ut, const char *key, void *ptr);
+ut *uth_add_tlist(ut *ut, const char *key, tlist *val); /** @note see ut_new_tlist */
+ut *uth_add_thash(ut *ut, const char *key, thash *val); /** @note see ut_new_thash */
 
 /* applicable for ut->type == T_LIST */
 ut *utl_add_ut(ut *var, ut *val);
@@ -105,8 +122,8 @@ ut *utl_add_int(ut *ut, int val);
 ut *utl_add_double(ut *ut, double val);
 ut *utl_add_char(ut *ut, const char *val);
 ut *utl_add_xstr(ut *ut, xstr *val);
-ut *utl_add_tlist(ut *ut, tlist *val);
-ut *utl_add_thash(ut *ut, thash *val);
 ut *utl_add_ptr(ut *ut, void *ptr);
+ut *utl_add_tlist(ut *ut, tlist *val);  /** @note see ut_new_tlist */
+ut *utl_add_thash(ut *ut, thash *val);  /** @note see ut_new_thash */
 
 #endif

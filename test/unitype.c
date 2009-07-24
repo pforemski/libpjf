@@ -6,7 +6,7 @@ int main(int argc, char *argv[])
 {
 	mmatic *mm = mmatic_create();
 
-	ut *root = ut_root(mm);
+	ut *root = ut_new_thash(NULL, mm);
 
 	ut *list123 = uth_add_tlist(root, "list123", NULL);
 	utl_add_int(list123, 123);

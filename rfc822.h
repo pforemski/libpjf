@@ -22,7 +22,7 @@
 
 #include "lib.h"
 
-/** Parse RFC822 into unitype hash table */
-ut *rfc822_parse(const char *str, mmatic *mm);
+/** Parse RFC822 into thash */
+thash *rfc822_parse(const char *str, mmatic *mm);
 
 #endif

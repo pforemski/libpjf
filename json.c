@@ -255,7 +255,7 @@ static ut *parse_array(json *json)
 		return err(json, 5, "array: expected ']'");
 
 	DEC_DEPTH();
-	return ut_new_tlist(list, json->mm);
+	return ut_new_uttlist(list, json->mm);
 }
 
 static ut *parse_object(json *json)
@@ -298,7 +298,7 @@ static ut *parse_object(json *json)
 		return err(json, 19, "object: expected '}'");
 
 	DEC_DEPTH();
-	return ut_new_thash(hash, json->mm);
+	return ut_new_utthash(hash, json->mm);
 }
 
 ut *json_parse(json *json, const char *txt)
@@ -320,7 +320,7 @@ json *json_create(mmatic *mm)
 	return j;
 }
 
-const char *json_escape(json *json, const char *str)
+char *json_escape(json *json, const char *str)
 {
 	bool bs;
 	char c;
@@ -350,7 +350,7 @@ const char *json_escape(json *json, const char *str)
 	return xstr_string(xs);
 }
 
-const char *json_print(json *json, ut *var)
+char *json_print(json *json, ut *var)
 {
 	mmatic *mm = json->mm;
 	char *k, *str;
@@ -419,6 +419,7 @@ const char *json_print(json *json, ut *var)
 				str = mmprintf("{ \"code\": %d, \"message\": \"%s\" }",
 					var->d.as_err->code,
 					json_escape(json, var->d.as_err->msg));
+			break;
 
 		default:
 			str = "";

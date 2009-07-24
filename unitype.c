@@ -77,7 +77,7 @@ xstr  *ut_xstr(ut *var)
 			xs = MMXSTR_CREATE("");
 			TLIST_ITER_LOOP(var->d.as_tlist, el) {
 				xstr_append(xs, ut_char(el));
-				xstr_append_char(xs, '\n');
+				xstr_append_char(xs, ' ');
 			}
 			return xs;
 		case T_HASH:
@@ -86,7 +86,7 @@ xstr  *ut_xstr(ut *var)
 				xstr_append(xs, key);
 				xstr_append(xs, ": ");
 				xstr_append(xs, ut_char(el));
-				xstr_append_char(xs, '\n');
+				xstr_append_char(xs, ' ');
 			}
 			return xs;
 		case T_BOOL:
@@ -170,6 +170,14 @@ const char *ut_err(ut *var)
 	}
 }
 
+int ut_errcode(ut *var)
+{
+	if (var->type == T_ERR)
+		return var->d.as_err->code;
+	else
+		return 0;
+}
+
 /****************************************************************/
 
 ut *ut_new_bool(bool val, mmatic *mm)
@@ -221,7 +229,7 @@ ut *ut_new_xstr(xstr *val, mmatic *mm)
 	return ret;
 }
 
-ut *ut_new_tlist(tlist *val, mmatic *mm)
+ut *ut_new_uttlist(tlist *val, mmatic *mm)
 {
 	ut *ret = mmatic_alloc(sizeof(struct ut), mm);
 
@@ -232,7 +240,16 @@ ut *ut_new_tlist(tlist *val, mmatic *mm)
 	return ret;
 }
 
-ut *ut_new_thash(thash *val, mmatic *mm)
+ut *ut_new_tlist(tlist *val, mmatic *mm)
+{
+	char *v;
+	ut *ret = ut_new_uttlist(NULL, mm);
+
+	if (val) { TLIST_ITER_LOOP(val, v) utl_add_char(ret, v); }
+	return ret;
+}
+
+ut *ut_new_utthash(thash *val, mmatic *mm)
 {
 	ut *ret = mmatic_alloc(sizeof(struct ut), mm);
 
@@ -240,6 +257,15 @@ ut *ut_new_thash(thash *val, mmatic *mm)
 	ret->type = T_HASH;
 	ret->d.as_thash = val ? val : MMTHASH_CREATE_STR(NULL);
 
+	return ret;
+}
+
+ut *ut_new_thash(thash *val, mmatic *mm)
+{
+	char *k, *v;
+	ut *ret = ut_new_utthash(NULL, mm);
+
+	if (val) { THASH_ITER_LOOP(val, k, v) uth_add_char(ret, k, v); }
 	return ret;
 }
 

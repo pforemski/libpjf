@@ -19,11 +19,11 @@
 
 #include "lib.h"
 
-ut *rfc822_parse(const char *str, mmatic *mm)
+thash *rfc822_parse(const char *str, mmatic *mm)
 {
 	char *k, *v, *txt = mmstrdup(str);
 	int i, l;
-	ut *ret = ut_new_thash(NULL, mm);
+	thash *ret =  MMTHASH_CREATE_STR(NULL);
 
 	txt = asn_trim(txt);
 	l = strlen(txt);
@@ -49,7 +49,7 @@ nextline:
 			txt[i] = '\0';
 		}
 
-		uth_add_char(ret, k, v);
+		thash_set(ret, k, v);
 	}
 
 	return ret;
