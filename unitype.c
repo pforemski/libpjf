@@ -215,7 +215,7 @@ ut *ut_new_double(double val, mmatic *mm)
 
 ut *ut_new_char(const char *val, mmatic *mm)
 {
-	return ut_new_xstr(xstr_create(val, mm), mm);
+	return ut_new_xstr(xstr_create(val ? val : "", mm), mm);
 }
 
 ut *ut_new_xstr(xstr *val, mmatic *mm)
@@ -378,7 +378,7 @@ ut *utl_add_double(ut *var, double val)
 
 ut *utl_add_char(ut *var, const char *val)
 {
-	return utl_add_xstr(var, xstr_create(val, var->mm));
+	return utl_add_ut(var, ut_new_char(val, var->mm));
 }
 
 ut *utl_add_xstr(ut *var, xstr *val)
