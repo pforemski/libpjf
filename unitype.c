@@ -97,6 +97,8 @@ xstr  *ut_xstr(ut *var)
 		case T_PTR:
 			snprintf(buf, sizeof(buf), "%p", var->d.as_ptr);
 			return MMXSTR_CREATE(buf);
+		case T_ERR:
+			return MMXSTR_CREATE(ut_err(var));
 		default:
 			return MMXSTR_CREATE("");
 	}
