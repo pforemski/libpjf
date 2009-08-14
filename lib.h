@@ -46,6 +46,7 @@ void dbg(int level, char *dbg, ...);
 void _die(const char *file, unsigned int line, char *msg, ...);
 #define die(...) (_die(__FILE__, __LINE__, __VA_ARGS__))
 #define asnsert(a) do { if(!(a)) die("Assertion failed\n"); } while(0);
+#define die_errno(msg) (die("%s: %s\n", (msg), strerror(errno)))
 
 /** From linux/stddef.h */
 #define offsetof(TYPE, MEMBER) ((size_t) &((TYPE *)0)->MEMBER)
@@ -168,11 +169,14 @@ char *asn_readfile(const char *path, mmatic *mm);
  * @return       fopen()s return value (number of bytes written or EOF) */
 int asn_writefile(const char *path, const char *s);
 
-/** Return current UNIX timestamp in miliseconds */
-unsigned int asn_utimestamp();
+/** Wrapper around gettimeofday() */
+void asn_timenow(struct timeval *tv);
+
+/** Returns time difference vs. given tv in microseconds */
+uint32_t asn_timediff(struct timeval *tv);
 
 /** Return current UNIX timestamp */
-#define asn_timestamp() (asn_utimestamp() / 1000)
+#define asn_timestamp() ((uint32_t) time(NULL))
 
 /** Daemonize a program
  * @param progname    program name to show in syslog messages

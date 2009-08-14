@@ -380,14 +380,28 @@ int asn_writefile(const char *path, const char *s)
 	return r;
 }
 
-unsigned int asn_utimestamp()
+void asn_timenow(struct timeval *tv)
 {
-	struct timeval tv;
+	if (gettimeofday(tv, NULL) == 0)
+		return;
 
-	if (gettimeofday(&tv, NULL) == 0)
-		return ((tv.tv_sec * 1000) + (tv.tv_usec / 1000));
-	else
-		return 0;
+	tv->tv_sec = 0;
+	tv->tv_usec = 0;
+}
+
+uint32_t asn_timediff(struct timeval *tv)
+{
+	static struct timeval tvnow;
+
+	asnsert(tv);
+
+	asn_timenow(&tvnow);
+	return (
+		(tvnow.tv_sec > tv->tv_sec) ?
+			(tvnow.tv_sec  - tv->tv_sec) * 1000000 - (1000000 - tv->tv_usec) + tvnow.tv_usec
+			:
+			(tvnow.tv_usec - tv->tv_usec)
+		);
 }
 
 void asn_daemonize(const char *progname, const char *pidfile)
