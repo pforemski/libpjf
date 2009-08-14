@@ -44,8 +44,9 @@ thash *rfc822_parse(const char *str, mmatic *mm)
 			v = txt + i;
 
 nextline:
-			while (txt[i] && txt[i] != '\n') i++;
-			if (txt[i] == '\n' && txt[i+1] == ' ') { i += 2; goto nextline; }
+			while (txt[i] && txt[i] != '\n' && txt[i] != '\r') i++;
+			if (strncmp(txt+i, "\n ", 2) == 0) { i += 2; goto nextline; }
+			else if (strncmp(txt+i, "\r\n ", 3) == 0) { i += 3; goto nextline; }
 			txt[i] = '\0';
 		}
 
