@@ -145,7 +145,6 @@ int main(int argc, char *argv[])
 	mmsummary(9);
 	fcml_free_parser(&fp);
 	mmatic_free(mm);
-	mmsummary(7);
 
 	return 0;
 }
