@@ -32,7 +32,7 @@
 
 #include "lib.h"
 
-/** Waits until a file descriptor is ready for reading
+/** Waits until one or more of file descriptors are ready for reading
  * @param fdlist      list of FDs to monitor - a thash indexed by (unsigned int) FDs holding arbitrary (void *)
  *                    XXX: a thash because its easier to check/delete elements
  *                    XXX: use THASH_*_UINT() macros

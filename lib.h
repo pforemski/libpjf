@@ -188,4 +188,9 @@ void asn_daemonize(const char *progname, const char *pidfile);
  * @note modifies txt and returns memory location within it */
 char *asn_trim(char *txt);
 
+/** Frequency -> period conversions */
+#define Hz_to_msec(f) (1.0/f * 1000.0)
+
+#define msec_to_Hz Hz_to_msec
+
 #endif /* _MISC_H_ */

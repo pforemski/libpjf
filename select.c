@@ -57,7 +57,7 @@ thash *asn_rselect(thash *fdlist, uint32_t *timeout_ms, mmatic *mm)
 	}
 
 	dbg(11, "asn_rselect(): calling select() nfds=%d, timeout=%d\n", nfds, *timeout_ms);
-	if (select(nfds + 1, &fds, NULL, NULL, (timeout_ms) ? &tv: NULL) < 0) {
+	if (select(nfds + 1, &fds, NULL, NULL, (timeout_ms) ? &tv : NULL) < 0) {
 		switch (errno) {
 			case EBADF:  dbg(0, "asn_rselect(): unexpected EBADF received\n"); break;
 			case EINTR:  break; /* signal handled, reload fds as they may have changed */
