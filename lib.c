@@ -398,7 +398,7 @@ uint32_t asn_timediff(struct timeval *tv)
 	asn_timenow(&tvnow);
 	return (
 		(tvnow.tv_sec > tv->tv_sec) ?
-			(tvnow.tv_sec  - tv->tv_sec) * 1000000 - (1000000 - tv->tv_usec) + tvnow.tv_usec
+			(tvnow.tv_sec  - tv->tv_sec) * 1000000 - tv->tv_usec + tvnow.tv_usec
 			:
 			(tvnow.tv_usec - tv->tv_usec)
 		);
