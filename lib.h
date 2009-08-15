@@ -189,7 +189,7 @@ void asn_daemonize(const char *progname, const char *pidfile);
 char *asn_trim(char *txt);
 
 /** Frequency -> period conversions */
-#define Hz_to_msec(f) (1.0/f * 1000.0)
+#define Hz_to_msec(f) (f ? (1.0/f * 1000.0) : 0)
 
 #define msec_to_Hz Hz_to_msec
 
