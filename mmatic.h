@@ -192,6 +192,6 @@ char *asn_malloc_printf(const char *fmt, ...);
 #define mmatic_make(mmatic, type, ...) memcpy(mmatic_alloc(sizeof(type), (mmatic)), &(type){ __VA_ARGS__ }, sizeof(type))
 
 /** A wrapper around mmatic_make() which uses global "mm" object */
-#define mmake(type, ...) mmatic_make(mm, (type))
+#define mmake(type, ...) mmatic_make(mm, type, __VA_ARGS__)
 
 #endif /* _MMATIC_H_ */
