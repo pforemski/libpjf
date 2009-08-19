@@ -44,4 +44,19 @@
  * @note              all monitored FDs must be > 0 */
 thash *asn_rselect(thash *fdlist, uint32_t *timeout_ms, mmatic *mm);
 
+/** Initialize generic main event loop */
+void asn_loop_init(mmatic *mm);
+
+/** Deinitialize main event loop, freeing the memory */
+void asn_loop_deinit(void);
+
+/** Start the main event loop */
+void asn_loop(uint32_t timer);
+
+/** Connect using TCP/IP
+ * @param ipaddr   IPv4 address to connect to
+ * @param port     TCP/IP port to use
+ * @param cb       callback function to call each time new line is read */
+FILE *asn_loop_connect_tcp(const char *ipaddr, const char *port, void (*cb)(const char *line));
+
 #endif /* _SELECT_H */

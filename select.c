@@ -23,7 +23,24 @@
 #include <errno.h>
 #include <fcntl.h>
 
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
+#include <errno.h>
+
 #include "lib.h"
+
+/* used by asn_loop_ */
+static thash *fds;
+static mmatic *mm;
+
+struct reader {
+	char buf[8192];
+	int  pos;
+	FILE *io;
+	void (*cb)(const char *line);
+};
 
 thash *asn_rselect(thash *fdlist, uint32_t *timeout_ms, mmatic *mm)
 {
@@ -83,4 +100,128 @@ thash *asn_rselect(thash *fdlist, uint32_t *timeout_ms, mmatic *mm)
 		*timeout_ms = tv.tv_sec * 1000 + tv.tv_usec / 1000;
 
 	return ret;
+}
+
+void asn_loop_init(mmatic *mymm)
+{
+	mm = mymm; /* TODO: can be replaced by purely local one? */
+	fds = MMTHASH_CREATE_UINT(NULL);
+}
+
+void asn_loop_deinit(void)
+{
+	mmatic_free(mm);
+}
+
+void asn_loop(uint32_t timer)
+{
+	thash *ready;
+	uint32_t left;
+	struct reader *rd;
+	int fd;
+
+	do {
+		left = timer;
+		ready = asn_rselect(fds, &left, mm);
+
+		if (ready) {
+			thash_reset(ready);
+			while ((rd = (struct reader *) THASH_ITER_UINT(ready, &fd))) {
+read:
+				if (fgets(rd->buf + rd->pos, sizeof(rd->buf) - rd->pos, rd->io) == NULL)
+					continue;
+
+				/* update pos */
+				rd->pos = strlen(rd->buf + rd->pos) + rd->pos; /* XXX: speed-up */
+
+				if (rd->buf[rd->pos - 1] == '\n')
+					rd->pos = 0; /* success, we finished reading whole line */
+				else
+					goto read; /* carry on */
+
+				if (rd->cb)
+					rd->cb(rd->buf);
+			}
+			thash_free(ready);
+		}
+
+		if (left > 0)
+			usleep(left * 1000);
+	} while (true);
+}
+
+FILE *asn_loop_connect_tcp(const char *ipaddr, const char *port, void (*cb)(const char *))
+{
+	int fd;
+	FILE *io;
+	struct sockaddr_in addr;
+
+	dbg(5, "asn_loop_connect_tcp(%s, %s, %x)\n", ipaddr, port, cb);
+
+	fd = socket(AF_INET, SOCK_STREAM, 0);
+	if (fd < 0)
+		die_errno("asn_loop_connect_tcp(): socket");
+
+	addr.sin_family = AF_INET;
+	addr.sin_addr.s_addr = inet_addr(ipaddr);
+	addr.sin_port = htons(atoi(port));
+
+	if (connect(fd, (struct sockaddr *) &addr, sizeof(addr)) != 0)
+		die_errno("asn_loop_connect_tcp(): connect");
+
+	dbg(2, "connected to %s:%s\n", ipaddr, port);
+
+	if (fcntl(fd, F_SETFL, O_NONBLOCK) < 0)
+		die_errno("asn_loop_connect_tcp(): fcntl");
+
+	io = fdopen(fd, "w+");
+	if (io == NULL)
+		die_errno("asn_loop_connect_tcp(): fdopen");
+
+	/* use line-buffered I/O */
+	if (setvbuf(io, 0, _IOLBF, 0) != 0)
+		die_errno("asn_loop_connect_tcp(): setvbuf");
+
+	/* add to monitored fds */
+	THASH_SET_UINT(fds, fd, (void *) mmake(struct reader, "", 0, io, cb));
+
+	return io;
+}
+
+FILE *asn_loop_listen_udp(const char *ipaddr, const char *port, void (*cb)(const char *))
+{
+	int fd;
+	FILE *io;
+	struct sockaddr_in addr;
+
+	dbg(5, "asn_loop_listen_udp(%s, %s, %x)\n", ipaddr, port, cb);
+
+	fd = socket(AF_INET, SOCK_DGRAM, 0);
+	if (fd < 0)
+		die_errno("asn_loop_listen_udp(): socket");
+
+	addr.sin_family = AF_INET;
+	addr.sin_addr.s_addr = inet_addr(ipaddr);
+	addr.sin_port = htons(atoi(port));
+
+	if (bind(fd, (struct sockaddr *) &addr, sizeof(addr)) != 0)
+		die_errno("asn_loop_listen_udp(): connect");
+
+	dbg(2, "bound to %s:%s\n", ipaddr, port);
+
+	if (fcntl(fd, F_SETFL, O_NONBLOCK) < 0)
+		die_errno("asn_loop_listen_udp(): fcntl");
+
+	io = fdopen(fd, "w+");
+	if (io == NULL)
+		die_errno("asn_loop_listen_udp(): fdopen");
+
+	/* use line-buffered I/O */
+	if (setvbuf(io, 0, _IOLBF, 0) != 0)
+		die_errno("asn_loop_listen_udp(): setvbuf");
+
+	/* add to monitored fds */
+	THASH_SET_UINT(fds, fd, (void *) mmake(struct reader, "", 0, io, cb));
+
+	return io;
 }
