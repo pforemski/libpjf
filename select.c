@@ -32,14 +32,20 @@
 #include "lib.h"
 
 /* used by asn_loop_ */
-static thash *fds;
 static mmatic *mm;
+static thash *fds;           /** fds monitored in main loop via asn_rselect() */
 
 struct reader {
 	char buf[8192];
 	int  pos;
 	FILE *io;
 	void (*cb)(const char *line);
+};
+
+struct sender {
+	const char *interface;
+	int fd;
+	struct sockaddr_in addr;
 };
 
 thash *asn_rselect(thash *fdlist, uint32_t *timeout_ms, mmatic *mm)
@@ -156,7 +162,7 @@ FILE *asn_loop_connect_tcp(const char *ipaddr, const char *port, void (*cb)(cons
 	FILE *io;
 	struct sockaddr_in addr;
 
-	dbg(5, "asn_loop_connect_tcp(%s, %s, %x)\n", ipaddr, port, cb);
+	dbg(5, "asn_loop_connect_tcp(%s, %s, 0x%x)\n", ipaddr, port, cb);
 
 	fd = socket(AF_INET, SOCK_STREAM, 0);
 	if (fd < 0)
@@ -188,18 +194,29 @@ FILE *asn_loop_connect_tcp(const char *ipaddr, const char *port, void (*cb)(cons
 	return io;
 }
 
-FILE *asn_loop_listen_udp(const char *ipaddr, const char *port, void (*cb)(const char *))
+FILE *asn_loop_listen_udp(const char *iface, const char *ipaddr, const char *port, void (*cb)(const char *))
 {
 	int fd;
 	FILE *io;
 	struct sockaddr_in addr;
+	int one = 1;
 
-	dbg(5, "asn_loop_listen_udp(%s, %s, %x)\n", ipaddr, port, cb);
+	dbg(5, "asn_loop_listen_udp(%s, %s, 0x%x)\n", ipaddr, port, cb);
 
-	fd = socket(AF_INET, SOCK_DGRAM, 0);
+	fd = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
 	if (fd < 0)
 		die_errno("asn_loop_listen_udp(): socket");
 
+	if (setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, &one, sizeof(int)) < 0)
+		die_errno("asn_loop_listen_udp(): SO_REUSEADDR");
+
+	if (iface && *iface && setsockopt(fd, SOL_SOCKET, SO_BINDTODEVICE, iface, strlen(iface)) < 0)
+		die_errno("asn_loop_listen_udp(): SO_BINDTODEVICE");
+
+	if (fcntl(fd, F_SETFL, O_NONBLOCK) < 0)
+		die_errno("asn_loop_listen_udp(): fcntl");
+
+	memset((char *) &addr, 0, sizeof(addr));
 	addr.sin_family = AF_INET;
 	addr.sin_addr.s_addr = inet_addr(ipaddr);
 	addr.sin_port = htons(atoi(port));
@@ -209,10 +226,7 @@ FILE *asn_loop_listen_udp(const char *ipaddr, const char *port, void (*cb)(const
 
 	dbg(2, "bound to %s:%s\n", ipaddr, port);
 
-	if (fcntl(fd, F_SETFL, O_NONBLOCK) < 0)
-		die_errno("asn_loop_listen_udp(): fcntl");
-
-	io = fdopen(fd, "w+");
+	io = fdopen(fd, "r");
 	if (io == NULL)
 		die_errno("asn_loop_listen_udp(): fdopen");
 
@@ -224,4 +238,42 @@ FILE *asn_loop_listen_udp(const char *ipaddr, const char *port, void (*cb)(const
 	THASH_SET_UINT(fds, fd, (void *) mmake(struct reader, "", 0, io, cb));
 
 	return io;
+}
+
+void *asn_loop_udp_sender(const char *iface, const char *ipaddr, const char *port)
+{
+	int one = 1;
+	struct sender *s = mmake(struct sender, iface, 0, { 0 });
+
+	s->fd = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
+	if (s->fd < 0)
+		die_errno("asn_udp_send_create(): socket");
+
+	if (setsockopt(s->fd, SOL_SOCKET, SO_REUSEADDR, &one, sizeof(int)) < 0)
+		die_errno("asn_udp_send_create(): SO_REUSEADDR");
+
+	if (iface && *iface && setsockopt(s->fd, SOL_SOCKET, SO_BINDTODEVICE, iface, strlen(iface)) < 0)
+		die_errno("asn_udp_send_create(): SO_BINDTODEVICE");
+
+	if (setsockopt(s->fd, SOL_SOCKET, SO_BROADCAST, &one, sizeof(int)) < 0)
+		die_errno("asn_udp_send_create(): SO_BROADCAST");
+
+	if (fcntl(s->fd, F_SETFL, O_NONBLOCK) < 0)
+		die_errno("asn_udp_send_create(): fcntl");
+
+	memset((char *) &(s->addr), 0, sizeof(struct sockaddr_in));
+	s->addr.sin_family = AF_INET;
+	s->addr.sin_addr.s_addr = inet_addr(ipaddr);
+	s->addr.sin_port = htons(atoi(port));
+
+	return s;
+}
+
+void asn_loop_send_udp(void *sender, const char *line)
+{
+	struct sender *s = (struct sender *) sender;
+
+	dbg(5, "asn_loop_send_udp(0x%x, %s)\n", sender, line);
+
+	sendto(s->fd, line, strlen(line), 0, (struct sockaddr *) &(s->addr), sizeof(struct sockaddr_in));
 }

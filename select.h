@@ -58,9 +58,22 @@ void asn_loop(uint32_t timer);
 FILE *asn_loop_connect_tcp(const char *ipaddr, const char *port, void (*cb)(const char *line));
 
 /** Create a UDP server
+ * @param iface    interface to listen on (may be null)
  * @param ipaddr   IPv4 address to listen to (e.g. 0.0.0.0)
  * @param port     UDP port
  * @param cb       callback function to call each time new line is read */
-FILE *asn_loop_listen_udp(const char *ipaddr, const char *port, void (*cb)(const char *));
+FILE *asn_loop_listen_udp(const char *iface, const char *ipaddr, const char *port, void (*cb)(const char *));
+
+/** Create a UDP sender
+ * @param iface    interface to send packets on (may be null)
+ * @param ipaddr   destination IP address
+ * @param port     UDP port
+ * @return address-token to pass to functions needing it */
+void *asn_loop_udp_sender(const char *iface, const char *ipaddr, const char *port);
+
+/** Send a line of text via UDP
+ * @param sender   return value from asn_loop_udp_sender()
+ * @param line     string to send (\0 is the ending character) */
+void asn_loop_send_udp(void *sender, const char *line);
 
 #endif /* _SELECT_H */
