@@ -47,10 +47,8 @@ thash *asn_rselect(thash *fdlist, uint32_t *timeout_ms, mmatic *mm);
 /** Initialize generic main event loop */
 void asn_loop_init(mmatic *mm);
 
-/** Deinitialize main event loop, freeing the memory */
-void asn_loop_deinit(void);
-
-/** Start the main event loop */
+/** Start the main event loop
+ * @param timer   minimum time between two iterations [ms] */
 void asn_loop(uint32_t timer);
 
 /** Connect using TCP/IP
@@ -58,5 +56,11 @@ void asn_loop(uint32_t timer);
  * @param port     TCP/IP port to use
  * @param cb       callback function to call each time new line is read */
 FILE *asn_loop_connect_tcp(const char *ipaddr, const char *port, void (*cb)(const char *line));
+
+/** Create a UDP server
+ * @param ipaddr   IPv4 address to listen to (e.g. 0.0.0.0)
+ * @param port     UDP port
+ * @param cb       callback function to call each time new line is read */
+FILE *asn_loop_listen_udp(const char *ipaddr, const char *port, void (*cb)(const char *));
 
 #endif /* _SELECT_H */

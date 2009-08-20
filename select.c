@@ -108,11 +108,6 @@ void asn_loop_init(mmatic *mymm)
 	fds = MMTHASH_CREATE_UINT(NULL);
 }
 
-void asn_loop_deinit(void)
-{
-	mmatic_free(mm);
-}
-
 void asn_loop(uint32_t timer)
 {
 	thash *ready;
@@ -141,9 +136,14 @@ read:
 
 				if (rd->cb)
 					rd->cb(rd->buf);
+
+				goto read;
 			}
 			thash_free(ready);
 		}
+
+		/* TODO: add support for periodical calls of fn-s */
+		/* TODO: add support for timeout-ed calls of fn-s */
 
 		if (left > 0)
 			usleep(left * 1000);
