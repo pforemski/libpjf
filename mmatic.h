@@ -131,7 +131,7 @@ void mmatic_freeptr_(void **mem);
 #define mmatic_freeptr(a) (mmatic_freeptr_((void **) &(a)))
 
 /** A counterpart to mmatic_freeptr which doesnt do mem=0 */
-static inline void mmatic_freeptrs(void *ptr) { mmatic_freeptr_((void **) &ptr); }
+void mmatic_freeptrs(void *ptr);
 #define mmfreeptr mmatic_freeptrs
 
 /** Print memory usage summary */

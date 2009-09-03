@@ -185,24 +185,11 @@ thash *thash_clone(thash *hash, mmatic *mm);
 /** Generic string hashing function
  * @remark note that key will be dereferenced and treated like a string
  * @note by Daniel J. Bernstein */
-static inline unsigned int thash_str_hash(const void *vkey)
-{
-	unsigned int hash = 5381;
-	unsigned int i;
-	const char *key = (char *) vkey;
-
-	for (i = 0; key[i]; i++)
-		hash = ((hash << 5) + hash) + key[i]; /* hash * 33 + char */
-
-	return hash;
-}
+unsigned int thash_str_hash(const void *vkey);
 
 /** Simplest possible pointer "hashing" function
  * @note just casts the pointer */
-static inline unsigned int thash_ptr_hash(const void *key)
-{
-	return ((unsigned int) key);
-}
+unsigned int thash_ptr_hash(const void *key);
 
 #endif
 

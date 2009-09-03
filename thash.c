@@ -24,13 +24,13 @@
 
 #include "lib.h"
 
-static inline int _thash_strcmp_wrapper(const void *key1, const void *key2)
+static int _thash_strcmp_wrapper(const void *key1, const void *key2)
 {
 	return strcmp((const char *) key1, (const char *) key2);
 }
 
 /* generic comparisiong function */
-static inline int _thash_compare(const void *key1, const void *key2)
+static int _thash_compare(const void *key1, const void *key2)
 {
 	return (((unsigned long) key1) != ((unsigned long) key2));
 }
@@ -306,4 +306,21 @@ thash *thash_clone(thash *hash, mmatic *mm)
 		thash_set(ret, k, mmstrdup(v));
 
 	return ret;
+}
+
+unsigned int thash_str_hash(const void *vkey)
+{
+	unsigned int hash = 5381;
+	unsigned int i;
+	const char *key = (char *) vkey;
+
+	for (i = 0; key[i]; i++)
+		hash = ((hash << 5) + hash) + key[i]; /* hash * 33 + char */
+
+	return hash;
+}
+
+unsigned int thash_ptr_hash(const void *key)
+{
+	return ((unsigned int) key);
 }

@@ -44,6 +44,11 @@ mmatic *mmatic_create(void)
 	return mgr;
 }
 
+void mmatic_freeptrs(void *ptr)
+{
+	mmatic_freeptr_((void **) &ptr);
+}
+
 void mmatic_free_(mmatic **mgrptr)
 {
 	mmatic *mgr = *mgrptr;

@@ -156,7 +156,23 @@ read:
 	} while (true);
 }
 
-FILE *asn_loop_connect_tcp(const char *ipaddr, const char *port, void (*cb)(const char *))
+void asn_loop_add_fd(int fd, loop_cb cb)
+{
+	FILE *io;
+
+	io = fdopen(fd, "r");
+	if (io == NULL)
+		die_errno("asn_loop_add_fd(): fdopen");
+
+	/* use line-buffered I/O */
+	if (setvbuf(io, 0, _IOLBF, 0) != 0)
+		die_errno("asn_loop_add_fd(): setvbuf");
+
+	/* add to monitored fds */
+	THASH_SET_UINT(fds, fd, (void *) mmake(struct reader, "", 0, io, cb));
+}
+
+FILE *asn_loop_connect_tcp(const char *ipaddr, const char *port, loop_cb cb)
 {
 	int fd;
 	FILE *io;
@@ -194,14 +210,14 @@ FILE *asn_loop_connect_tcp(const char *ipaddr, const char *port, void (*cb)(cons
 	return io;
 }
 
-FILE *asn_loop_listen_udp(const char *iface, const char *ipaddr, const char *port, void (*cb)(const char *))
+FILE *asn_loop_listen_udp(const char *iface, const char *ipaddr, const char *port, loop_cb cb)
 {
 	int fd;
 	FILE *io;
 	struct sockaddr_in addr;
 	int one = 1;
 
-	dbg(5, "asn_loop_listen_udp(%s, %s, 0x%x)\n", ipaddr, port, cb);
+	dbg(5, "asn_loop_listen_udp(%s, %s, %s, 0x%x)\n", iface, ipaddr, port, cb);
 
 	fd = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
 	if (fd < 0)
@@ -245,6 +261,8 @@ void *asn_loop_udp_sender(const char *iface, const char *ipaddr, const char *por
 	int one = 1;
 	struct sender *s = mmake(struct sender, iface, 0, { 0 });
 
+	dbg(5, "asn_loop_udp_sender(%s, %s, %s)\n", iface, ipaddr, port);
+
 	s->fd = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
 	if (s->fd < 0)
 		die_errno("asn_udp_send_create(): socket");
@@ -273,7 +291,7 @@ void asn_loop_send_udp(void *sender, const char *line)
 {
 	struct sender *s = (struct sender *) sender;
 
-	dbg(5, "asn_loop_send_udp(0x%x, %s)\n", sender, line);
+	dbg(5, "asn_loop_send_udp: %s", line);
 
 	sendto(s->fd, line, strlen(line), 0, (struct sockaddr *) &(s->addr), sizeof(struct sockaddr_in));
 }
