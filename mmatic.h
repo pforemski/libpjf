@@ -29,6 +29,7 @@
 #include <sys/mman.h>
 #include <unistd.h>
 #include <string.h>
+#include <stdbool.h>
 
 struct mmatic;
 
