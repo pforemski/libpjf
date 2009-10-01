@@ -29,7 +29,7 @@ fcmldump: fcmldump.o libasn.so
 	$(CC) fcmldump.o -o fcmldump -L. -lasn $(LDFLAGS)
 
 fcmldump_static: fcmldump.o libasn.a
-	$(CC) fcmldump.o -o fcmldump libasn.a $(LDFLAGS)
+	$(CC) fcmldump.o -o fcmldump_static libasn.a $(LDFLAGS)
 
 install: install-std
 
