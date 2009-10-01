@@ -32,6 +32,10 @@
 
 #include "lib.h"
 
+/** Callback function type
+ * @param line      line of text that caused the callback call */
+typedef void (*loop_cb)(const char *line);
+
 /** Waits until one or more of file descriptors are ready for reading
  * @param fdlist      list of FDs to monitor - a thash indexed by (unsigned int) FDs holding arbitrary (void *)
  *                    XXX: a thash because its easier to check/delete elements
@@ -51,16 +55,34 @@ void asn_loop_init(mmatic *mm);
  * @param timer   minimum time between two iterations [ms] */
 void asn_loop(uint32_t timer);
 
+/** Monitor given file descriptor
+ * @param fd   file descriptor to monitor
+ * @param cb   callback function to call each time new line is read */
+void asn_loop_add_fd(int fd, loop_cb cb);
+
 /** Connect using TCP/IP
  * @param ipaddr   IPv4 address to connect to
  * @param port     TCP/IP port to use
  * @param cb       callback function to call each time new line is read */
-FILE *asn_loop_connect_tcp(const char *ipaddr, const char *port, void (*cb)(const char *line));
+FILE *asn_loop_connect_tcp(const char *ipaddr, const char *port, loop_cb cb);
 
 /** Create a UDP server
+ * @param iface    interface to listen on (may be null)
  * @param ipaddr   IPv4 address to listen to (e.g. 0.0.0.0)
  * @param port     UDP port
  * @param cb       callback function to call each time new line is read */
-FILE *asn_loop_listen_udp(const char *ipaddr, const char *port, void (*cb)(const char *));
+FILE *asn_loop_listen_udp(const char *iface, const char *ipaddr, const char *port, loop_cb cb);
+
+/** Create a UDP sender
+ * @param iface    interface to send packets on (may be null)
+ * @param ipaddr   destination IP address
+ * @param port     UDP port
+ * @return address-token to pass to functions needing it */
+void *asn_loop_udp_sender(const char *iface, const char *ipaddr, const char *port);
+
+/** Send a line of text via UDP
+ * @param sender   return value from asn_loop_udp_sender()
+ * @param line     string to send (\0 is the ending character) */
+void asn_loop_send_udp(void *sender, const char *line);
 
 #endif /* _SELECT_H */

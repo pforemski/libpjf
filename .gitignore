@@ -46,5 +46,6 @@ pcre/autom4te.cache
 libasn_example
 version.h
 fcmldump
+fcmldump_static
 test/unitype
 test/json
