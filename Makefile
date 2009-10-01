@@ -22,8 +22,8 @@ libasn.so: pcre/.libs/libpcre.a $(C_OBJECTS)
 libasn.a: $(C_OBJECTS) pcre/.libs/libpcre.a
 	$(AR) rc libasn.a $(C_OBJECTS) pcre/.libs/libpcre.a
 
-libasn_example: libasn_example.o libasn.a
-	$(CC) libasn_example.o -o libasn_example libasn.a $(LDFLAGS)
+libasn_example: libasn_example.o libasn.a pcre/.libs/libpcre.a
+	$(CC) libasn_example.o -o libasn_example libasn.a pcre/.libs/libpcre.a $(LDFLAGS)
 
 fcmldump: fcmldump.o libasn.so
 	$(CC) fcmldump.o -o fcmldump -L. -lasn $(LDFLAGS)
@@ -32,3 +32,6 @@ fcmldump_static: fcmldump.o libasn.a
 	$(CC) fcmldump.o -o fcmldump libasn.a $(LDFLAGS)
 
 install: install-std
+
+distclean: clean
+	$(MAKE) -C pcre distclean
