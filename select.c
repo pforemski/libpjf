@@ -238,8 +238,10 @@ int asn_loop_listen_udp(const char *iface, const char *ipaddr, const char *port,
 	if (fd < 0)
 		die_errno("asn_loop_listen_udp(): socket");
 
+#if 0
 	if (setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, &one, sizeof(int)) < 0)
 		die_errno("asn_loop_listen_udp(): SO_REUSEADDR");
+#endif
 
 	if (iface && *iface && setsockopt(fd, SOL_SOCKET, SO_BINDTODEVICE, iface, strlen(iface)) < 0)
 		die_errno("asn_loop_listen_udp(): SO_BINDTODEVICE");
