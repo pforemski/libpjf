@@ -36,8 +36,9 @@ static mmatic *mm;
 static thash *fds;           /** fds monitored in main loop via asn_rselect() */
 
 struct reader {
+	bool isnet;
 	char buf[8192];
-	int  pos;
+	int  pos; /* XXX: pos = recv() - dont unsign it */
 	FILE *io;
 	void (*cb)(const char *line);
 };
@@ -129,16 +130,26 @@ void asn_loop(uint32_t timer)
 			thash_reset(ready);
 			while ((rd = (struct reader *) THASH_ITER_UINT(ready, &fd))) {
 read:
-				if (fgets(rd->buf + rd->pos, sizeof(rd->buf) - rd->pos, rd->io) == NULL)
-					continue;
+				if (rd->isnet) {
+					rd->pos = recv(fd, rd->buf, sizeof(rd->buf), 0);
 
-				/* update pos */
-				rd->pos = strlen(rd->buf + rd->pos) + rd->pos; /* XXX: speed-up */
+					if (rd->pos > 0)
+						rd->buf[rd->pos] = '\0';
+					else
+						continue;
+				}
+				else {
+					if (fgets(rd->buf + rd->pos, sizeof(rd->buf) - rd->pos, rd->io) == NULL)
+						continue;
 
-				if (rd->buf[rd->pos - 1] == '\n')
-					rd->pos = 0; /* success, we finished reading whole line */
-				else
-					goto read; /* carry on */
+					/* update pos */
+					rd->pos = strlen(rd->buf + rd->pos) + rd->pos; /* XXX: speed-up */
+
+					if (rd->buf[rd->pos - 1] == '\n')
+						rd->pos = 0; /* success, we finished reading whole line */
+					else
+						goto read; /* carry on */
+				}
 
 				if (rd->cb)
 					rd->cb(rd->buf);
@@ -159,6 +170,11 @@ read:
 void asn_loop_add_fd(int fd, loop_cb cb)
 {
 	FILE *io;
+	long int fl;
+
+	fl = fcntl(fd, F_GETFL);
+	if (fcntl(fd, F_SETFL, fl | O_NONBLOCK) < 0)
+		die_errno("asn_loop_add_fd(): fcntl");
 
 	io = fdopen(fd, "r");
 	if (io == NULL)
@@ -169,7 +185,7 @@ void asn_loop_add_fd(int fd, loop_cb cb)
 		die_errno("asn_loop_add_fd(): setvbuf");
 
 	/* add to monitored fds */
-	THASH_SET_UINT(fds, fd, (void *) mmake(struct reader, "", 0, io, cb));
+	THASH_SET_UINT(fds, fd, (void *) mmake(struct reader, false, "", 0, io, cb));
 }
 
 FILE *asn_loop_connect_tcp(const char *ipaddr, const char *port, loop_cb cb)
@@ -205,15 +221,14 @@ FILE *asn_loop_connect_tcp(const char *ipaddr, const char *port, loop_cb cb)
 		die_errno("asn_loop_connect_tcp(): setvbuf");
 
 	/* add to monitored fds */
-	THASH_SET_UINT(fds, fd, (void *) mmake(struct reader, "", 0, io, cb));
+	THASH_SET_UINT(fds, fd, (void *) mmake(struct reader, true, "", 0, io, cb));
 
 	return io;
 }
 
-FILE *asn_loop_listen_udp(const char *iface, const char *ipaddr, const char *port, loop_cb cb)
+int asn_loop_listen_udp(const char *iface, const char *ipaddr, const char *port, loop_cb cb)
 {
 	int fd;
-	FILE *io;
 	struct sockaddr_in addr;
 	int one = 1;
 
@@ -242,18 +257,10 @@ FILE *asn_loop_listen_udp(const char *iface, const char *ipaddr, const char *por
 
 	dbg(2, "bound to %s:%s\n", ipaddr, port);
 
-	io = fdopen(fd, "r");
-	if (io == NULL)
-		die_errno("asn_loop_listen_udp(): fdopen");
-
-	/* use line-buffered I/O */
-	if (setvbuf(io, 0, _IOLBF, 0) != 0)
-		die_errno("asn_loop_listen_udp(): setvbuf");
-
 	/* add to monitored fds */
-	THASH_SET_UINT(fds, fd, (void *) mmake(struct reader, "", 0, io, cb));
+	THASH_SET_UINT(fds, fd, (void *) mmake(struct reader, true, "", 0, NULL, cb));
 
-	return io;
+	return fd;
 }
 
 void *asn_loop_udp_sender(const char *iface, const char *ipaddr, const char *port)
