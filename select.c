@@ -139,15 +139,17 @@ read:
 						continue;
 				}
 				else {
-					if (fgets(rd->buf + rd->pos, sizeof(rd->buf) - rd->pos, rd->io) == NULL)
+					int ch;
+					errno = 0;
+					ch = fgetc(rd->io);
+					if (ch == EOF)
 						continue;
+					rd->buf[rd->pos++] = ch;
 
-					/* update pos */
-					rd->pos = strlen(rd->buf + rd->pos) + rd->pos; /* XXX: speed-up */
-
-					if (rd->buf[rd->pos - 1] == '\n')
+					if (ch == '\n') {
+						rd->buf[rd->pos] = '\0';
 						rd->pos = 0; /* success, we finished reading whole line */
-					else
+					} else
 						goto read; /* carry on */
 				}
 
