@@ -115,12 +115,18 @@ void mmatic_summary(mmatic *mgr, int dbglevel)
 	dbg(dbglevel, "--- MMATIC MEMORY SUMMARY END (%p) ---\n", mgr);
 }
 
-void *mmatic_realloc(void *mem, size_t size, mmatic *mgr)
+void *mmatic_realloc_(void *mem, size_t size, mmatic *mgr, const char *cfile, unsigned int cline)
 {
 	mmchunk *chunk = (mmchunk *) (PTR(mem) - sizeof(mmchunk)); /* XXX */
 	void *newmem;
 
-	newmem = mmatic_allocate(chunk->shared, size, mgr, NULL, 0, chunk->cfile, chunk->cline);
+	if (!mgr)
+		mgr = chunk->mgr;
+
+	if (!size)
+		size = chunk->alloc;
+
+	newmem = mmatic_allocate(size, mgr, 0, chunk->shared, NULL, 0, cfile, cline);
 	memcpy(newmem, mem, chunk->alloc);
 	mmatic_freeptr(mem);
 

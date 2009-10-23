@@ -357,7 +357,7 @@ char *asn_readfile(const char *path, mmatic *mm)
 		bufsiz = bigbufsiz;
 		bigbufsiz *= 2;
 
-		rbuf = mmrealloc(bigbufsiz, rbuf);
+		rbuf = mmatic_realloc(rbuf, bigbufsiz);
 		buf = rbuf + bufsiz; /* start from half */
 	}
 
