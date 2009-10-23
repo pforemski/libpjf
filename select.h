@@ -32,9 +32,13 @@
 
 #include "lib.h"
 
-/** Callback function type
- * @param line      line of text that caused the callback call */
-typedef void (*loop_cb)(const char *line);
+/** Callback function that uses line of text
+ * @param line      line of text that caused the callback call
+ * @note do not reference line, its destroyed after callback exits */
+typedef void (*loop_line_cb)(const char *line, void *prv);
+
+/** Callback function that is executed on timeout */
+typedef void (*loop_timeout_cb)(uint32_t delay, void *prv);
 
 /** Waits until one or more of file descriptors are ready for reading
  * @param fdlist      list of FDs to monitor - a thash indexed by (unsigned int) FDs holding arbitrary (void *)
@@ -43,13 +47,15 @@ typedef void (*loop_cb)(const char *line);
  * @param timeout_ms  timeout, in miliseconds, after which we should exit, even if no FDs are ready
  *                    0 means exit immediately after polling, NULL means we can block
  *                    under Linux, value of timeout_ms is updated to reflect the amount of time left
- * @retval NULL       no result, repeat (e.g. select() interrupted)
- * @return            a NEW thash with elements REFERENCING elements of fdlist, for which FDs are ready for reading
- * @note              all monitored FDs must be > 0 */
+ * @retval NULL       no result or no fd ready, repeat (e.g. select() interrupted)
+ * @return            a NEW thash with elements REFERENCING elements of fdlist, for which FDs are ready for reading */
 thash *asn_rselect(thash *fdlist, uint32_t *timeout_ms, mmatic *mm);
 
 /** Initialize generic main event loop */
-void asn_loop_init(mmatic *mm);
+void asn_loop_init(void);
+
+/** Free all memory */
+void asn_loop_deinit(void);
 
 /** Start the main event loop
  * @param timer   minimum time between two iterations [ms] */
@@ -58,20 +64,22 @@ void asn_loop(uint32_t timer);
 /** Monitor given file descriptor
  * @param fd   file descriptor to monitor
  * @param cb   callback function to call each time new line is read */
-void asn_loop_add_fd(int fd, loop_cb cb);
+void asn_loop_add_fd(int fd, loop_line_cb cb, void *prv);
 
 /** Connect using TCP/IP
  * @param ipaddr   IPv4 address to connect to
  * @param port     TCP/IP port to use
- * @param cb       callback function to call each time new line is read */
-FILE *asn_loop_connect_tcp(const char *ipaddr, const char *port, loop_cb cb);
+ * @param cb       callback function to call each time new line is read
+ * @return socket */
+int asn_loop_connect_tcp(const char *ipaddr, const char *port, loop_line_cb cb, void *prv);
 
 /** Create a UDP server
  * @param iface    interface to listen on (may be null)
  * @param ipaddr   IPv4 address to listen to (e.g. 0.0.0.0)
  * @param port     UDP port
- * @param cb       callback function to call each time new line is read */
-int asn_loop_listen_udp(const char *iface, const char *ipaddr, const char *port, loop_cb cb);
+ * @param cb       callback function to call each time new line is read
+ * @return socket */
+int asn_loop_listen_udp(const char *iface, const char *ipaddr, const char *port, loop_line_cb cb, void *prv);
 
 /** Create a UDP sender
  * @param iface    interface to send packets on (may be null)
@@ -84,5 +92,11 @@ void *asn_loop_udp_sender(const char *iface, const char *ipaddr, const char *por
  * @param sender   return value from asn_loop_udp_sender()
  * @param line     string to send (\0 is the ending character) */
 void asn_loop_send_udp(void *sender, const char *line);
+
+/** Schedule function call */
+void asn_loop_schedule(struct timeval *when, loop_timeout_cb cb, void *prv);
+
+/** Wrapper around asn_loop_schedule which accepts relative time */
+void asn_loop_schedule_in(uint32_t sec, uint32_t usec, loop_timeout_cb cb, void *prv);
 
 #endif /* _SELECT_H */

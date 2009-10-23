@@ -64,8 +64,7 @@ pid_t asn_fork(const char *cmd, const char *args, thash *env,
 	if (child_pid == 0) { /* child */
 		/* set environment */
 		if (env) {
-			thash_reset(env);
-			while ((val = thash_iter(env, &key)))
+			THASH_ITER_LOOP(env, key, val)
 				putenv(tmprintf("%s=%s", key, val));
 		}
 
