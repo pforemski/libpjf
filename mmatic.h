@@ -81,18 +81,23 @@ mmatic *mmatic_create(void);
 
 /** mmatic memory allocator
  * @remark it sits in *.h because its inline
- * @param shared    use mmap() and make memory writable after fork()
  * @param size      amount of memory to allocate (bytes)
  * @param mgr       memory manager
+ * @param zero      set memory to 0 after allocation
+ * @param shared    use mmap() and make memory writable after fork()
  * @param start     memory start address for mmap() to use
  * @param flags     additional flags for mmap()
  * @param cfile     C source code file
  * @param cline     C source code line
  * @note the start and flags arguments are ignored when shared is 0
  */
-static inline void *mmatic_allocate(bool shared, size_t size, mmatic *mgr, void *start, int flags, const char *cfile, unsigned int cline)
+static inline void *mmatic_allocate(
+	size_t size, mmatic *mgr, bool zero,
+	bool shared, void *start, int flags,
+	const char *cfile, unsigned int cline)
 {
 	mmchunk *chunk;
+	void *ptr;
 
 	chunk = (shared) ?
 		mmap(start, sizeof(mmchunk) + size, PROT_READ|PROT_WRITE, MAP_SHARED|MAP_ANONYMOUS|flags, 0, 0) :
@@ -110,13 +115,14 @@ static inline void *mmatic_allocate(bool shared, size_t size, mmatic *mgr, void 
 	mgr->last       = chunk;
 	mgr->totalloc  += size;
 
-	return (((uint8_t *) chunk) + sizeof(mmchunk)); /* XXX */
+	ptr = ((uint8_t *) chunk) + sizeof(mmchunk); /* XXX */
+	return zero ? memset(ptr, 0, size) : ptr;
 }
 
-#define mmatic_alloc(size, mgr)   (mmatic_allocate(0, (size), (mgr), NULL, 0, __FILE__, __LINE__))
-#define mmatic_shalloc(size, mgr) (mmatic_allocate(1, (size), (mgr), NULL, 0, __FILE__, __LINE__))
-#define mmalloc(size)   (mmatic_allocate(0, (size), mm, NULL, 0, __FILE__, __LINE__))
-#define mmshalloc(size) (mmatic_allocate(1, (size), mm, NULL, 0, __FILE__, __LINE__))
+#define mmatic_alloc(size, mgr)   mmatic_allocate((size), (mgr), 0, 0, NULL, 0, __FILE__, __LINE__)
+#define mmatic_shalloc(size, mgr) mmatic_allocate((size), (mgr), 0, 1, NULL, 0, __FILE__, __LINE__)
+#define mmalloc(size)   mmatic_alloc((size), mm)
+#define mmshalloc(size) mmatic_shalloc((size), mm)
 
 /** Frees all memory and destroys given manager
  * @param mgr       memory manager
@@ -139,18 +145,22 @@ void mmatic_freeptrs(void *ptr);
 void mmatic_summary(mmatic *mgr, int dbglevel);
 #define mmsummary(lvl) (mmatic_summary(mm, (lvl)))
 
+void *mmatic_realloc_(void *mem, size_t size, mmatic *mgr, const char *cfile, unsigned int cline);
+
 /** Allocate bigger chunk and copy contents
  * @param mem   already allocated memory to be moved
- * @param size  new size
- */
-void *mmatic_realloc(void *mem, size_t size, mmatic *mgr);
-#define mmrealloc(size, mem) (mmatic_realloc((mem), (size), mm))
+ * @param size  new size */
+#define mmatic_realloc(mem, size) mmatic_realloc_((mem), (size), NULL, __FILE__, __LINE__)
+
+/** Move chunk to another mgr
+ * @param mem    already allocated memory to be moved
+ * @param newmgr new mgr */
+#define mmatic_move(mem, newmgr) mmatic_realloc_((mem), 0, (newmgr), __FILE__, __LINE__)
 
 /** Checks if ptr was allocated at given manager
  * @param mem ptr
  * @retval 1 yes
- * @retval 0 no
- */
+ * @retval 0 no */
 int mmatic_isof(void *mem, mmatic *mm);
 
 /*********************/
@@ -165,7 +175,7 @@ int mmatic_isof(void *mem, mmatic *mm);
 static inline char *_mmatic_strdup(const char *s, mmatic *mgr, const char *cfile, unsigned int cline)
 {
 	char *newm;
-	newm = mmatic_allocate(0, strlen(s) + 1, mgr, NULL, 0, cfile, cline);
+	newm = mmatic_allocate(strlen(s) + 1, mgr, 0, 0, NULL, 0, cfile, cline);
 	strcpy(newm, s);
 	return newm;
 }
