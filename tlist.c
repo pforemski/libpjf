@@ -178,6 +178,9 @@ void *tlist_shift(tlist *list)
 	el = list->head;
 	val = el->val;
 
+	if (list->current == el)
+		list->current = el->next;
+
 	if (el->next) {
 		el->next->prev = NULL;
 		list->head = el->next;
