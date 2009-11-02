@@ -357,7 +357,7 @@ char *asn_readfile(const char *path, mmatic *mm)
 		bufsiz = bigbufsiz;
 		bigbufsiz *= 2;
 
-		rbuf = mmrealloc(bigbufsiz, rbuf);
+		rbuf = mmatic_realloc(rbuf, bigbufsiz);
 		buf = rbuf + bufsiz; /* start from half */
 	}
 
@@ -396,12 +396,18 @@ uint32_t asn_timediff(struct timeval *tv)
 	asnsert(tv);
 
 	asn_timenow(&tvnow);
-	return (
-		(tvnow.tv_sec > tv->tv_sec) ?
-			(tvnow.tv_sec  - tv->tv_sec) * 1000000 - tv->tv_usec + tvnow.tv_usec
-			:
-			(tvnow.tv_usec - tv->tv_usec)
-		);
+
+	dbg(9, "asn_timediff: comparing now=[%u.%06u] vs. then=[%u.%06u]\n",
+		(unsigned int) tvnow.tv_sec, (unsigned int) tvnow.tv_usec,
+		(unsigned int) tv->tv_sec,   (unsigned int) tv->tv_usec);
+
+	if (tvnow.tv_sec > tv->tv_sec)
+		return (tvnow.tv_sec  - tv->tv_sec) * 1000000 - tv->tv_usec + tvnow.tv_usec;
+	else if (tvnow.tv_sec == tv->tv_sec &&
+	         tvnow.tv_usec > tv->tv_usec)
+		return tvnow.tv_usec - tv->tv_usec;
+	else
+		return 0;
 }
 
 void asn_daemonize(const char *progname, const char *pidfile)

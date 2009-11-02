@@ -25,6 +25,7 @@
 #include <stdbool.h>
 #include <stdlib.h>
 #include <time.h>
+#include <errno.h>
 
 /** Debugging level for dbg() */
 extern int debug;
@@ -174,7 +175,7 @@ int asn_writefile(const char *path, const char *s);
 /** Wrapper around gettimeofday() */
 void asn_timenow(struct timeval *tv);
 
-/** Returns time difference vs. given tv in microseconds */
+/** Returns time difference in us vs. current time and the time given in tv */
 uint32_t asn_timediff(struct timeval *tv);
 
 /** Return current UNIX timestamp */

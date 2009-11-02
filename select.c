@@ -34,12 +34,14 @@
 /* used by asn_loop_ */
 static mmatic *mm;
 static thash *fds;           /** fds monitored in main loop via asn_rselect() */
+static tlist *todo;          /** event queue "to do" */
 
 struct reader {
-	char buf[8192];
-	int  pos;
-	FILE *io;
-	void (*cb)(const char *line);
+	bool isnet;
+	char buf[8192 * 4];
+	int  pos; /* XXX: dont unsign it */
+	loop_line_cb cb;
+	void *prv;
 };
 
 struct sender {
@@ -48,9 +50,15 @@ struct sender {
 	struct sockaddr_in addr;
 };
 
+struct timeout {
+	struct timeval when;
+	loop_timeout_cb cb;
+	void *prv;
+};
+
 thash *asn_rselect(thash *fdlist, uint32_t *timeout_ms, mmatic *mm)
 {
-	unsigned int fd, nfds = 0;
+	unsigned int fd, nfds = 0, r;
 	struct timeval tv;
 	thash *ret;
 	fd_set fds;
@@ -68,11 +76,11 @@ thash *asn_rselect(thash *fdlist, uint32_t *timeout_ms, mmatic *mm)
 		}
 
 		FD_SET(fd, &fds);
-		nfds = MAX(nfds, fd);
+		nfds = MAX(nfds, fd + 1);
 	}
 
 	/* no proper input, no output */
-	if (!nfds) return MMTHASH_CREATE_UINT(NULL);
+	if (!nfds) return NULL;
 
 	if (timeout_ms) {
 		tv.tv_sec = *timeout_ms / 1000;
@@ -80,8 +88,8 @@ thash *asn_rselect(thash *fdlist, uint32_t *timeout_ms, mmatic *mm)
 	}
 
 	dbg(11, "asn_rselect(): calling select() nfds=%d, timeout=%d\n", nfds, *timeout_ms);
-	if (select(nfds + 1, &fds, NULL, NULL, (timeout_ms) ? &tv : NULL) < 0) {
-		switch (errno) {
+	if ((r = select(nfds, &fds, NULL, NULL, (timeout_ms) ? &tv : NULL)) <= 0) {
+		if (r < 0) switch (errno) {
 			case EBADF:  dbg(0, "asn_rselect(): unexpected EBADF received\n"); break;
 			case EINTR:  break; /* signal handled, reload fds as they may have changed */
 			case EINVAL: dbg(0, "asn_rselect(): unexpected EINVAL received\n"); break;
@@ -108,10 +116,16 @@ thash *asn_rselect(thash *fdlist, uint32_t *timeout_ms, mmatic *mm)
 	return ret;
 }
 
-void asn_loop_init(mmatic *mymm)
+void asn_loop_init(void)
 {
-	mm = mymm; /* TODO: can be replaced by purely local one? */
+	mm = mmatic_create();
 	fds = MMTHASH_CREATE_UINT(NULL);
+	todo = MMTLIST_CREATE(NULL);
+}
+
+void asn_loop_deinit(void)
+{
+	mmatic_free(mm);
 }
 
 void asn_loop(uint32_t timer)
@@ -119,63 +133,102 @@ void asn_loop(uint32_t timer)
 	thash *ready;
 	uint32_t left;
 	struct reader *rd;
-	int fd;
+	struct timeout *tout;
+	int fd, r, i;
+	bool left_valid, overflow;
+	uint32_t delay;
+	char *n, c;
 
-	do {
+	while (true) {
 		left = timer;
-		ready = asn_rselect(fds, &left, mm);
+		left_valid = true;
 
+		if (thash_count(fds) == 0)
+			goto timeouts;
+
+		ready = asn_rselect(fds, &left, mm);
 		if (ready) {
 			thash_reset(ready);
 			while ((rd = (struct reader *) THASH_ITER_UINT(ready, &fd))) {
-read:
-				if (fgets(rd->buf + rd->pos, sizeof(rd->buf) - rd->pos, rd->io) == NULL)
-					continue;
+				if (rd->isnet) {
+					while ((rd->pos = recv(fd, rd->buf, sizeof(rd->buf) - 1, 0)) > 0) {
+						rd->buf[rd->pos] = '\0';
+						rd->cb(rd->buf, rd->prv);
+						left_valid = false;
+					}
+				} else {
+					while ((r = read(fd, rd->buf + rd->pos, sizeof(rd->buf) - rd->pos - 1)) > 0) {
+						overflow = (r == sizeof(rd->buf) - rd->pos - 1);
 
-				/* update pos */
-				rd->pos = strlen(rd->buf + rd->pos) + rd->pos; /* XXX: speed-up */
+						rd->pos += r;
+						rd->buf[rd->pos] = '\0';
 
-				if (rd->buf[rd->pos - 1] == '\n')
-					rd->pos = 0; /* success, we finished reading whole line */
-				else
-					goto read; /* carry on */
+						/* run callback for each line of text */
+						while ((n = strchr(rd->buf, '\n'))) {
+							n++;
+							c = *n;
+							*n = '\0';
+							rd->cb(rd->buf, rd->prv);
+							left_valid = false;
+							*n = c;
 
-				if (rd->cb)
-					rd->cb(rd->buf);
+							for (i = 0; n[i]; i++)
+								rd->buf[i] = n[i];
 
-				goto read;
+							rd->buf[i] = n[i]; /* copy \0 */
+							rd->pos = i;
+
+							overflow = false;
+						}
+
+						if (overflow)
+							rd->pos = 0; /* sorry ;) */
+					}
+
+					if (r < 0 && errno != EAGAIN)
+						dbg(3, "asn_loop(): read(%d): %m\n", fd);
+				}
 			}
 			thash_free(ready);
 		}
 
-		/* TODO: add support for periodical calls of fn-s */
-		/* TODO: add support for timeout-ed calls of fn-s */
+timeouts:
+		/* process todo tlist */
+		tlist_reset(todo);
+		while ((tout = tlist_peek(todo))) {
+			if ((delay = asn_timediff(&tout->when)) > 0) {
+				if (tout->cb) {
+					tout->cb(delay, tout->prv);
+					left_valid = false;
+				}
 
-		if (left > 0)
+				tlist_shift(todo);
+				tlist_reset(todo);
+			} else {
+				break;
+			}
+		}
+
+		if (left_valid && left > 0)
 			usleep(left * 1000);
-	} while (true);
+	}
 }
 
-void asn_loop_add_fd(int fd, loop_cb cb)
+void asn_loop_add_fd(int fd, loop_line_cb cb, void *prv)
 {
-	FILE *io;
+	long int fl;
 
-	io = fdopen(fd, "r");
-	if (io == NULL)
-		die_errno("asn_loop_add_fd(): fdopen");
-
-	/* use line-buffered I/O */
-	if (setvbuf(io, 0, _IOLBF, 0) != 0)
-		die_errno("asn_loop_add_fd(): setvbuf");
+	fl = fcntl(fd, F_GETFL);
+	if (fcntl(fd, F_SETFL, fl | O_NONBLOCK) < 0)
+		die_errno("asn_loop_add_fd(): fcntl");
 
 	/* add to monitored fds */
-	THASH_SET_UINT(fds, fd, (void *) mmake(struct reader, "", 0, io, cb));
+	THASH_SET_UINT(fds, fd, (void *) mmake(struct reader, false, "", 0, cb, prv));
 }
 
-FILE *asn_loop_connect_tcp(const char *ipaddr, const char *port, loop_cb cb)
+int asn_loop_connect_tcp(const char *ipaddr, const char *port, loop_line_cb cb, void *prv)
 {
 	int fd;
-	FILE *io;
 	struct sockaddr_in addr;
 
 	dbg(5, "asn_loop_connect_tcp(%s, %s, 0x%x)\n", ipaddr, port, cb);
@@ -196,35 +249,22 @@ FILE *asn_loop_connect_tcp(const char *ipaddr, const char *port, loop_cb cb)
 	if (fcntl(fd, F_SETFL, O_NONBLOCK) < 0)
 		die_errno("asn_loop_connect_tcp(): fcntl");
 
-	io = fdopen(fd, "w+");
-	if (io == NULL)
-		die_errno("asn_loop_connect_tcp(): fdopen");
-
-	/* use line-buffered I/O */
-	if (setvbuf(io, 0, _IOLBF, 0) != 0)
-		die_errno("asn_loop_connect_tcp(): setvbuf");
-
 	/* add to monitored fds */
-	THASH_SET_UINT(fds, fd, (void *) mmake(struct reader, "", 0, io, cb));
+	THASH_SET_UINT(fds, fd, (void *) mmake(struct reader, true, "", 0, cb, prv));
 
-	return io;
+	return fd;
 }
 
-FILE *asn_loop_listen_udp(const char *iface, const char *ipaddr, const char *port, loop_cb cb)
+int asn_loop_listen_udp(const char *iface, const char *ipaddr, const char *port, loop_line_cb cb, void *prv)
 {
 	int fd;
-	FILE *io;
 	struct sockaddr_in addr;
-	int one = 1;
 
 	dbg(5, "asn_loop_listen_udp(%s, %s, %s, 0x%x)\n", iface, ipaddr, port, cb);
 
 	fd = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
 	if (fd < 0)
 		die_errno("asn_loop_listen_udp(): socket");
-
-	if (setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, &one, sizeof(int)) < 0)
-		die_errno("asn_loop_listen_udp(): SO_REUSEADDR");
 
 	if (iface && *iface && setsockopt(fd, SOL_SOCKET, SO_BINDTODEVICE, iface, strlen(iface)) < 0)
 		die_errno("asn_loop_listen_udp(): SO_BINDTODEVICE");
@@ -242,18 +282,10 @@ FILE *asn_loop_listen_udp(const char *iface, const char *ipaddr, const char *por
 
 	dbg(2, "bound to %s:%s\n", ipaddr, port);
 
-	io = fdopen(fd, "r");
-	if (io == NULL)
-		die_errno("asn_loop_listen_udp(): fdopen");
-
-	/* use line-buffered I/O */
-	if (setvbuf(io, 0, _IOLBF, 0) != 0)
-		die_errno("asn_loop_listen_udp(): setvbuf");
-
 	/* add to monitored fds */
-	THASH_SET_UINT(fds, fd, (void *) mmake(struct reader, "", 0, io, cb));
+	THASH_SET_UINT(fds, fd, (void *) mmake(struct reader, true, "", 0, cb, prv));
 
-	return io;
+	return fd;
 }
 
 void *asn_loop_udp_sender(const char *iface, const char *ipaddr, const char *port)
@@ -294,4 +326,42 @@ void asn_loop_send_udp(void *sender, const char *line)
 	dbg(5, "asn_loop_send_udp: %s", line);
 
 	sendto(s->fd, line, strlen(line), 0, (struct sockaddr *) &(s->addr), sizeof(struct sockaddr_in));
+}
+
+/* FIXME: O(n) complexity (use heap?) */
+void asn_loop_schedule(struct timeval *when, loop_timeout_cb cb, void *prv)
+{
+	struct timeout *cmp, *new;
+
+	new = mmake(struct timeout, { when->tv_sec, when->tv_usec }, cb, prv);
+
+	tlist_reset(todo);
+	while ((cmp = tlist_peek(todo))) {
+		if ((cmp->when.tv_sec >  when->tv_sec) ||
+		    (cmp->when.tv_sec == when->tv_sec && cmp->when.tv_usec >= when->tv_usec))
+			break;
+
+		tlist_iter(todo);
+	}
+
+	if (cmp)
+		tlist_insertbefore(todo, new);
+	else
+		tlist_push(todo, new);
+}
+
+void asn_loop_schedule_in(uint32_t sec, uint32_t usec, loop_timeout_cb cb, void *prv)
+{
+	struct timeval tv;
+
+	asn_timenow(&tv);
+	tv.tv_sec += sec;
+	tv.tv_usec += usec;
+
+	while (tv.tv_usec >= 1000000) {
+		tv.tv_usec -= 1000000;
+		tv.tv_sec  += 1;
+	}
+
+	asn_loop_schedule(&tv, cb, prv);
 }
