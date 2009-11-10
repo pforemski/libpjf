@@ -9,7 +9,7 @@ ifeq (,$(NOFIFOS))
 C_OBJECTS+=fifos.o
 endif
 
-TARGETS=libasn.so libasn.a libasn_example fcmldump fcmldump_static
+TARGETS=libasn.so libasn.a libasn_example fcmldump fcmldump_static udpsend udprecv 822tojson jsonto822
 
 include rules.mk
 
@@ -30,6 +30,18 @@ fcmldump: fcmldump.o libasn.so
 
 fcmldump_static: fcmldump.o libasn.a
 	$(CC) fcmldump.o -o fcmldump_static libasn.a $(LDFLAGS)
+
+udpsend: udpsend.o libasn.so
+	$(CC) $^ -o $@ -lasn
+
+udprecv: udprecv.o libasn.so
+	$(CC) $^ -o $@ -lasn
+
+822tojson: 822tojson.o libasn.so
+	$(CC) $^ -o $@ -lasn
+
+jsonto822: jsonto822.o libasn.so
+	$(CC) $^ -o $@ -lasn
 
 install: install-std
 

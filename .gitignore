@@ -49,3 +49,8 @@ fcmldump
 fcmldump_static
 test/unitype
 test/json
+822tojson
+jsonto822
+udprecv
+udpsend
+

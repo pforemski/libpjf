@@ -25,4 +25,7 @@
 /** Parse RFC822 into thash */
 thash *rfc822_parse(const char *str, mmatic *mm);
 
+/** Print unitype thash as RFC822 */
+const char *rfc822_print(ut *var);
+
 #endif

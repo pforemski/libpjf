@@ -55,3 +55,23 @@ nextline:
 
 	return ret;
 }
+
+const char *rfc822_print(ut *var)
+{
+	mmatic *mm = var->mm;
+	xstr *xs = MMXSTR_CREATE("");
+	char *key;
+	ut *el;
+
+	if (var->type != T_HASH)
+		return ut_char(var);
+
+	THASH_ITER_LOOP(var->d.as_thash, key, el) {
+		xstr_append(xs, key);
+		xstr_append(xs, ": ");
+		xstr_append(xs, ut_char(el));
+		xstr_append_char(xs, '\n');
+	}
+
+	return xstr_string(xs);
+}
