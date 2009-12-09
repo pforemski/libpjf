@@ -39,7 +39,7 @@
 #include "lib.h"
 
 #ifndef NODEBUG
-void dbg(int level, char *dbg, ...)
+void _dbg(const char *file, unsigned int line, const char *fn, int level, char *fmt, ...)
 {
 	int i;
 	va_list args;
@@ -47,17 +47,25 @@ void dbg(int level, char *dbg, ...)
 
 	if (level > debug || level >= sizeof(buf)) return;
 
-	va_start(args, dbg);
+	va_start(args, fmt);
 	if ((void (*)()) debugcb == (void (*)()) syslog ||
 	    (void (*)()) debugcb == (void (*)()) vsyslog) {
-		vsyslog(LOG_INFO, dbg, args);
+		/* TODO: prepend fn */
+		vsyslog(LOG_INFO, fmt, args);
 		return;
 	}
-	else {
-		for (i = 0; i < level; i++) buf[i] = ' ';
-		if (vsnprintf(buf+level, sizeof(buf)-level-1, dbg, args))
-			buf[sizeof(buf)-1] = '\0';
-	}
+
+	for (i = 0; i < level && i < sizeof(buf); i++) buf[i] = ' ';
+
+	if (level >= 10)
+		snprintf(buf, sizeof(buf), "%s:%u (%s()): ", file, line, fn);
+	else
+		snprintf(buf, sizeof(buf), "%s(): ", fn);
+
+	i = strlen(buf);
+	vsnprintf(buf+i, sizeof(buf)-i-1, fmt, args);
+	buf[sizeof(buf)-1] = '\0';
+
 	va_end(args);
 
 	if (debugcb)

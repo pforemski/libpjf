@@ -37,7 +37,8 @@ extern void (*debugcb)(const char *msg);
  * @param level message debug level
  * @param dbg message to show, in printf-style format */
 #ifndef NODEBUG
-void dbg(int level, char *dbg, ...);
+void _dbg(const char *file, unsigned int line, const char *fn, int level, char *fmt, ...);
+#define dbg(...) _dbg(__FILE__, __LINE__, __func__, __VA_ARGS__)
 #else
 #define dbg(...) do { } while(0)
 #endif
@@ -50,6 +51,9 @@ void _die(const char *file, unsigned int line, char *msg, ...);
 #define die(...) (_die(__FILE__, __LINE__, __VA_ARGS__))
 #define asnsert(a) do { if(!(a)) die("Assertion failed\n"); } while(0);
 #define die_errno(msg) (die("%s: %s\n", (msg), strerror(errno)))
+
+/** Macro for simple error handling */
+#define reterr(val, lvl, msg) { dbg((lvl), "%s: %s\n", (msg), strerror(errno)); return (val); }
 
 /** From linux/stddef.h */
 #define offsetof(TYPE, MEMBER) ((size_t) &((TYPE *)0)->MEMBER)
@@ -71,6 +75,7 @@ void _die(const char *file, unsigned int line, char *msg, ...);
 #include "unitype.h"
 #include "json.h"
 #include "rfc822.h"
+#include "linux.h"
 
 /** Shortcut for programs using libasn */
 #define __USE_LIBASN int debug = 0; void (*debugcb)() = NULL;

@@ -56,14 +56,29 @@ typedef struct ut {
 	} d;
 } ut;
 
-/** Return type of variable */
-enum ut_type ut_type(ut *ut);
+/***** error handling *****/
 
 /** Checks if ut is not of err type */
 #define ut_ok(ut) (ut->type != T_ERR)
 
-/* big fat warning: if conversion needs to be done, a completely new memory is
- * allocated @ut->mm and it wont be referenced at our side - its your task if required */
+/** Returns human-readable error description */
+const char *ut_err(ut *ut);
+
+/** Returns error code */
+int ut_errcode(ut *ut);
+
+/***** type conversions *****/
+
+/** Return type of variable */
+enum ut_type ut_type(ut *ut);
+
+/* XXX: BIG FAT WARNINGS:
+ *
+ * 1. returned values are read-only
+ * 2. if conversion needs to be done, a completely new memory is allocated @ut->mm and the pointer
+ *    wont be cached at our side - its your task, if needed
+ */
+
 bool        ut_bool(ut *ut);
 int         ut_int(ut *ut);
 double      ut_double(ut *ut);
@@ -73,11 +88,7 @@ tlist      *ut_tlist(ut *ut);
 thash      *ut_thash(ut *ut);
 void       *ut_ptr(ut *ut);
 
-/** Returns human-readable error description */
-const char *ut_err(ut *ut);
-
-/** Returns error code */
-int ut_errcode(ut *ut);
+/***** create new unitype object - never fail ******/
 
 ut *ut_new_bool(bool val, mmatic *mm);
 ut *ut_new_int(int val, mmatic *mm);
@@ -88,17 +99,11 @@ ut *ut_new_ptr(void *val, mmatic *mm);
 ut *ut_new_null(mmatic *mm);
 ut *ut_new_err(int code, const char *msg, const char *data, mmatic *mm);
 
-/** Create a ut containing given list of strings
- * @param val may be NULL to create a new list */
-ut *ut_new_tlist(tlist *val, mmatic *mm);
+/***** hash list *****/
 
 /** Create a ut containing given hash of string->string
  * @param val may be NULL to create a new hash */
 ut *ut_new_thash(thash *val, mmatic *mm);
-
-/** Create a ut containing given list of ut objects
- * @param val may be NULL to create a new list */
-ut *ut_new_uttlist(tlist *val, mmatic *mm);
 
 /** Create a ut containing given hash of string->ut objects
  * @param val may be NULL to create a new hash */
@@ -114,6 +119,16 @@ ut *uth_add_xstr(ut *ut, const char *key, xstr *val);
 ut *uth_add_ptr(ut *ut, const char *key, void *ptr);
 ut *uth_add_tlist(ut *ut, const char *key, tlist *val); /** @note see ut_new_tlist */
 ut *uth_add_thash(ut *ut, const char *key, thash *val); /** @note see ut_new_thash */
+
+/***** linked list *****/
+
+/** Create a ut containing given list of ut objects
+ * @param val may be NULL to create a new list */
+ut *ut_new_uttlist(tlist *val, mmatic *mm);
+
+/** Create a ut containing given list of strings
+ * @param val may be NULL to create a new list */
+ut *ut_new_tlist(tlist *val, mmatic *mm);
 
 /* applicable for ut->type == T_LIST */
 ut *utl_add_ut(ut *var, ut *val);
