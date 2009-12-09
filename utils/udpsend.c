@@ -98,8 +98,11 @@ static int parse_argv(int argc, char *argv[])
 	return 1;
 }
 
-void input(const char *line, void *prv)
+void input(const char *line, int flags, void *prv)
 {
+	if (flags & LOOP_EOF)
+		exit(0);
+
 	asn_loop_send_udp(udp_sender, line);
 }
 

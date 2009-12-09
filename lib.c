@@ -57,8 +57,8 @@ void _dbg(const char *file, unsigned int line, const char *fn, int level, char *
 
 	for (i = 0; i < level && i < sizeof(buf); i++) buf[i] = ' ';
 
-	if (level >= 10)
-		snprintf(buf, sizeof(buf), "%s:%u (%s()): ", file, line, fn);
+	if (debug >= 10)
+		snprintf(buf, sizeof(buf), "%s:%u %s(): ", file, line, fn);
 	else
 		snprintf(buf, sizeof(buf), "%s(): ", fn);
 

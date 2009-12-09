@@ -54,7 +54,7 @@ void mmatic_free_(mmatic **mgrptr)
 	mmatic *mgr = *mgrptr;
 	mmchunk *chunk, *nchunk;
 
-	dbg(10, "mmatic_free(%p): freeing\n", mgr);
+	dbg(10, "%p: freeing\n", mgr);
 
 	chunk = mgr->first;
 	while (chunk) {
@@ -137,7 +137,7 @@ void *asn_malloc(size_t size)
 {
 	void *mem;
 
-	dbg(11, "asn_malloc(%u)\n", size);
+	dbg(15, "%u\n", size);
 
 	mem = malloc(size);
 	if (!mem)

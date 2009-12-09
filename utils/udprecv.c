@@ -24,6 +24,7 @@ void *udp_sender;
 char *bindif = "";
 char *ip = "127.0.0.1";
 char *port = "10000";
+bool remote = false;
 
 /** Prints usage help screen */
 static void help(void)
@@ -34,6 +35,7 @@ static void help(void)
 	printf("\n");
 	printf("Options:\n");
 	printf("  -i,--bind=<if>   bind to given interface\n");
+	printf("  -r,--remote      filter loopback packets\n");
 	printf("  --verbose        be verbose\n");
 	printf("  --debug=<num>    set debugging level\n");
 	printf("  --help,-h        show this usage help screen\n");
@@ -61,7 +63,7 @@ static int parse_argv(int argc, char *argv[])
 {
 	int i, c;
 
-	static char *short_opts = "hvi:";
+	static char *short_opts = "hvi:r";
 	static struct option long_opts[] = {
 		/* name, has_arg, NULL, short_ch */
 		{ "verbose",    0, NULL,  1  },
@@ -69,6 +71,7 @@ static int parse_argv(int argc, char *argv[])
 		{ "help",       0, NULL,  3  },
 		{ "version",    0, NULL,  4  },
 		{ "bind",       1, NULL,  5  },
+		{ "remote",     0, NULL,  6  },
 		{ 0, 0, 0, 0 }
 	};
 
@@ -85,6 +88,7 @@ static int parse_argv(int argc, char *argv[])
 			case  4 : version(); return 2;
 			case 'i':
 			case  5 : bindif = optarg; break;
+			case  6 : remote = true; break;
 			default: help(); return 0;
 		}
 	}
@@ -98,8 +102,11 @@ static int parse_argv(int argc, char *argv[])
 	return 1;
 }
 
-void input(const char *line, void *prv)
+void input(const char *line, int flags, void *prv)
 {
+	if (flags & LOOP_LOOPBACK && remote == true)
+		return;
+
 	fputs(line, stdout);
 }
 

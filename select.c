@@ -1,5 +1,5 @@
 /*
- * select - simpler interface to select(2)
+ * select - simpler interface to select(2) and global program loop implementation
  *
  * This file is part of libasn
  * Copyright (C) 2005-2009 ASN Sp. z o.o.
@@ -71,7 +71,7 @@ thash *asn_rselect(thash *fdlist, uint32_t *timeout_ms, mmatic *mm)
 		/* XXX: fcntl() is a bit hacky, since we just want to check if fd is valid (so we dont get e.g. a EBADF
 		 * immediately after call to select(); if someone knows better method - please fix */
 		if (fd >= FD_SETSIZE || fcntl(fd, F_GETFD) < 0) {
-			dbg(3, "asn_rselect(): invalid fd %d\n", fd);
+			dbg(3, "invalid fd %d\n", fd);
 			continue;
 		}
 
@@ -87,7 +87,7 @@ thash *asn_rselect(thash *fdlist, uint32_t *timeout_ms, mmatic *mm)
 		tv.tv_usec = (*timeout_ms % 1000) * 1000;
 	}
 
-	dbg(11, "asn_rselect(): calling select() nfds=%d, timeout=%d\n", nfds, *timeout_ms);
+	dbg(12, "calling select() nfds=%d, timeout=%d\n", nfds, *timeout_ms);
 	if ((r = select(nfds, &fds, NULL, NULL, (timeout_ms) ? &tv : NULL)) <= 0) {
 		if (r < 0) switch (errno) {
 			case EBADF:  dbg(0, "asn_rselect(): unexpected EBADF received\n"); break;
@@ -105,7 +105,7 @@ thash *asn_rselect(thash *fdlist, uint32_t *timeout_ms, mmatic *mm)
 	thash_reset(fdlist);
 	while ((prv = THASH_ITER_UINT(fdlist, &fd))) {
 		if (FD_ISSET(fd, &fds)) {
-			dbg(10, "asn_rselect(): fd %d ready\n", fd);
+			dbg(11, "fd %d ready\n", fd);
 			THASH_SET_UINT(ret, fd, prv); /* magic! */
 		}
 	}
@@ -138,6 +138,13 @@ void asn_loop(uint32_t timer)
 	bool left_valid, overflow;
 	uint32_t delay;
 	char *n, c;
+	struct sockaddr_in sa;
+	socklen_t sal;
+	char addr[INET_ADDRSTRLEN];
+	int flags;
+
+	/* all IPv4 addresses of this machine */
+	thash *locals = ut_thash(asn_ipa(true, mm));
 
 	while (true) {
 		left = timer;
@@ -147,50 +154,67 @@ void asn_loop(uint32_t timer)
 			goto timeouts;
 
 		ready = asn_rselect(fds, &left, mm);
-		if (ready) {
-			thash_reset(ready);
-			while ((rd = (struct reader *) THASH_ITER_UINT(ready, &fd))) {
-				if (rd->isnet) {
-					while ((rd->pos = recv(fd, rd->buf, sizeof(rd->buf) - 1, 0)) > 0) {
-						rd->buf[rd->pos] = '\0';
-						rd->cb(rd->buf, rd->prv);
-						left_valid = false;
-					}
-				} else {
-					while ((r = read(fd, rd->buf + rd->pos, sizeof(rd->buf) - rd->pos - 1)) > 0) {
-						overflow = (r == sizeof(rd->buf) - rd->pos - 1);
+		if (!ready)
+			goto timeouts;
 
-						rd->pos += r;
-						rd->buf[rd->pos] = '\0';
+		thash_reset(ready);
+		while ((rd = (struct reader *) THASH_ITER_UINT(ready, &fd))) {
+			flags = LOOP_OK;
 
-						/* run callback for each line of text */
-						while ((n = strchr(rd->buf, '\n'))) {
-							n++;
-							c = *n;
-							*n = '\0';
-							rd->cb(rd->buf, rd->prv);
-							left_valid = false;
-							*n = c;
+			if (rd->isnet) {
+				sal = sizeof(struct sockaddr_in);
 
-							for (i = 0; n[i]; i++)
-								rd->buf[i] = n[i];
+				while ((rd->pos = recvfrom(fd, rd->buf, sizeof(rd->buf) - 1, 0, (struct sockaddr *) &sa, &sal)) > 0) {
+					/* check if source address is on this machine */
+					inet_ntop(AF_INET, &(sa.sin_addr), addr, sizeof(addr));
+					if (thash_get(locals, addr))
+						flags |= LOOP_LOOPBACK;
 
-							rd->buf[i] = n[i]; /* copy \0 */
-							rd->pos = i;
-
-							overflow = false;
-						}
-
-						if (overflow)
-							rd->pos = 0; /* sorry ;) */
-					}
-
-					if (r < 0 && errno != EAGAIN)
-						dbg(3, "asn_loop(): read(%d): %m\n", fd);
+					rd->buf[rd->pos] = '\0';
+					rd->cb(rd->buf, flags, rd->prv);
+					left_valid = false;
 				}
+
+				continue;
 			}
-			thash_free(ready);
+
+			while ((r = read(fd, rd->buf + rd->pos, sizeof(rd->buf) - rd->pos - 1)) > 0) {
+				overflow = (r == sizeof(rd->buf) - rd->pos - 1);
+
+				rd->pos += r;
+				rd->buf[rd->pos] = '\0';
+
+				/* run callback for each line of text */
+				while ((n = strchr(rd->buf, '\n'))) {
+					n++;
+					c = *n;
+					*n = '\0';
+
+					rd->cb(rd->buf, LOOP_OK, rd->prv);
+
+					left_valid = false;
+					*n = c;
+
+					/* move still unhandled data backwards */
+					for (i = 0; n[i]; i++)
+						rd->buf[i] = n[i];
+
+					rd->buf[i] = n[i]; /* copy \0 */
+					rd->pos = i;
+
+					overflow = false;
+				}
+
+				if (overflow)
+					rd->pos = 0; /* oops - sorry ;) */
+			}
+
+			if (r == 0)
+				rd->cb("", LOOP_EOF, rd->prv);
+			else if (r < 0 && errno != EAGAIN)
+				dbg(3, "asn_loop(): read(%d): %m\n", fd);
 		}
+		thash_free(ready);
 
 timeouts:
 		/* process todo tlist */
