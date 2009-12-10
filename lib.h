@@ -47,8 +47,8 @@ void _dbg(const char *file, unsigned int line, const char *fn, int level, char *
  * @param file __FILE__
  * @param line __LINE__
  * @param msg  optional (!= NULL) message format + args to show on stderr */
-void _die(const char *file, unsigned int line, char *msg, ...);
-#define die(...) (_die(__FILE__, __LINE__, __VA_ARGS__))
+void _die(const char *file, unsigned int line, const char *fn, char *msg, ...);
+#define die(...) (_die(__FILE__, __LINE__, __func__, __VA_ARGS__))
 #define asnsert(a) do { if(!(a)) die("Assertion failed\n"); } while(0);
 #define die_errno(msg) (die("%s: %s\n", (msg), strerror(errno)))
 

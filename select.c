@@ -144,6 +144,7 @@ void asn_loop(uint32_t timer)
 	int flags;
 
 	/* all IPv4 addresses of this machine */
+	/* FIXME: we should monitor all changes to IP addresses */
 	thash *locals = ut_thash(asn_ipa(true, mm));
 
 	while (true) {
@@ -167,6 +168,8 @@ void asn_loop(uint32_t timer)
 				while ((rd->pos = recvfrom(fd, rd->buf, sizeof(rd->buf) - 1, 0, (struct sockaddr *) &sa, &sal)) > 0) {
 					/* check if source address is on this machine */
 					inet_ntop(AF_INET, &(sa.sin_addr), addr, sizeof(addr));
+					dbg(11, "received message from %s\n", addr);
+
 					if (thash_get(locals, addr))
 						flags |= LOOP_LOOPBACK;
 
@@ -284,17 +287,17 @@ int asn_loop_listen_udp(const char *iface, const char *ipaddr, const char *port,
 	int fd;
 	struct sockaddr_in addr;
 
-	dbg(5, "asn_loop_listen_udp(%s, %s, %s, 0x%x)\n", iface, ipaddr, port, cb);
+	dbg(5, "%s, %s, %s, 0x%x\n", iface, ipaddr, port, cb);
 
 	fd = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
 	if (fd < 0)
-		die_errno("asn_loop_listen_udp(): socket");
+		die_errno("socket");
 
 	if (iface && *iface && setsockopt(fd, SOL_SOCKET, SO_BINDTODEVICE, iface, strlen(iface)) < 0)
-		die_errno("asn_loop_listen_udp(): SO_BINDTODEVICE");
+		die_errno("SO_BINDTODEVICE");
 
 	if (fcntl(fd, F_SETFL, O_NONBLOCK) < 0)
-		die_errno("asn_loop_listen_udp(): fcntl");
+		die_errno("fcntl");
 
 	memset((char *) &addr, 0, sizeof(addr));
 	addr.sin_family = AF_INET;
@@ -317,23 +320,28 @@ void *asn_loop_udp_sender(const char *iface, const char *ipaddr, const char *por
 	int one = 1;
 	struct sender *s = mmake(struct sender, iface, 0, { 0 });
 
-	dbg(5, "asn_loop_udp_sender(%s, %s, %s)\n", iface, ipaddr, port);
+	dbg(5, "%s, %s, %s\n", iface, ipaddr, port);
 
 	s->fd = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
 	if (s->fd < 0)
-		die_errno("asn_udp_send_create(): socket");
+		die_errno("socket");
 
 	if (setsockopt(s->fd, SOL_SOCKET, SO_REUSEADDR, &one, sizeof(int)) < 0)
-		die_errno("asn_udp_send_create(): SO_REUSEADDR");
+		die_errno("SO_REUSEADDR");
 
 	if (iface && *iface && setsockopt(s->fd, SOL_SOCKET, SO_BINDTODEVICE, iface, strlen(iface)) < 0)
-		die_errno("asn_udp_send_create(): SO_BINDTODEVICE");
+		die_errno("SO_BINDTODEVICE");
 
 	if (setsockopt(s->fd, SOL_SOCKET, SO_BROADCAST, &one, sizeof(int)) < 0)
-		die_errno("asn_udp_send_create(): SO_BROADCAST");
+		die_errno("SO_BROADCAST");
+
+	/* maybe some day they'll implement http://www.mail-archive.com/linux-kernel@vger.kernel.org/msg196866.html
+	if (setsockopt(s->fd, IPPROTO_IP, IP_MULTICAST_LOOP, &zero, sizeof(zero)) < 0)
+		die_errno("IP_MULTICAST_LOOP");
+	*/
 
 	if (fcntl(s->fd, F_SETFL, O_NONBLOCK) < 0)
-		die_errno("asn_udp_send_create(): fcntl");
+		die_errno("fcntl");
 
 	memset((char *) &(s->addr), 0, sizeof(struct sockaddr_in));
 	s->addr.sin_family = AF_INET;

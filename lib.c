@@ -75,11 +75,11 @@ void _dbg(const char *file, unsigned int line, const char *fn, int level, char *
 }
 #endif
 
-void _die(const char *file, unsigned int line, char *msg, ...)
+void _die(const char *file, unsigned int line, const char *fn, char *msg, ...)
 {
 	va_list args;
 
-	fprintf(stderr, "%s:%u: ", file, line);
+	fprintf(stderr, "%s:%u %s(): ", file, line, fn);
 	if (msg) {
 		va_start(args, msg);
 		vfprintf(stderr, msg, args);
