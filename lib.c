@@ -405,7 +405,7 @@ uint32_t asn_timediff(struct timeval *tv)
 
 	asn_timenow(&tvnow);
 
-	dbg(9, "asn_timediff: comparing now=[%u.%06u] vs. then=[%u.%06u]\n",
+	dbg(14, "asn_timediff: comparing now=[%u.%06u] vs. then=[%u.%06u]\n",
 		(unsigned int) tvnow.tv_sec, (unsigned int) tvnow.tv_usec,
 		(unsigned int) tv->tv_sec,   (unsigned int) tv->tv_usec);
 

@@ -101,7 +101,11 @@ void asn_loop_send_udp(void *sender, const char *line);
 /** Schedule function call */
 void asn_loop_schedule(struct timeval *when, loop_timeout_cb cb, void *prv);
 
-/** Wrapper around asn_loop_schedule which accepts relative time */
+/** Wrapper around asn_loop_schedule which accepts relative time
+ * @param sec   number of seconds
+ * @param usec  number of microseconds
+ * @param cb    handler
+ * @param prv   argument to pass to handler */
 void asn_loop_schedule_in(uint32_t sec, uint32_t usec, loop_timeout_cb cb, void *prv);
 
 #endif /* _SELECT_H */

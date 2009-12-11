@@ -355,8 +355,7 @@ void asn_loop_send_udp(void *sender, const char *line)
 {
 	struct sender *s = (struct sender *) sender;
 
-	dbg(5, "asn_loop_send_udp: %s", line);
-
+	dbg(12, "%s\n", line);
 	sendto(s->fd, line, strlen(line), 0, (struct sockaddr *) &(s->addr), sizeof(struct sockaddr_in));
 }
 
