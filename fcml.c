@@ -624,7 +624,7 @@ fcmlfile *fcml_parse(fcmlparser *parser, char *path, int nocache)
 	}
 
 	file = pmmalloc(sizeof(fcmlfile));
-	thash_set(parser->files, file->path, (void *) file);
+	thash_set(parser->files, filepath, (void *) file);
 
 	fcml_init_file(file, filepath, parser);
 
