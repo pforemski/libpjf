@@ -184,6 +184,11 @@ void asn_loop(uint32_t timer)
 			while ((r = read(fd, rd->buf + rd->pos, sizeof(rd->buf) - rd->pos - 1)) > 0) {
 				overflow = (r == sizeof(rd->buf) - rd->pos - 1);
 
+				/* XXX workaroud '\0's read from fd */
+				for (i=0; i<r; i++)
+					if (r->buf[rd->pos + i] == '\0')
+						r->buf[rd->pos + i] = '\1';
+
 				rd->pos += r;
 				rd->buf[rd->pos] = '\0';
 
