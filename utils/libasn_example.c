@@ -45,6 +45,8 @@ int main(int argc, char **argv)
 	thash *hash;
 	tlist *list;
 	mmatic *mm;
+	json *js;
+	ut *unihash;
 
 	if (argc < 3) {
 		usage();
@@ -152,6 +154,17 @@ int main(int argc, char **argv)
 	        xstr_string(str), xstr_length(str), NULL, 0);
 
 	fprintf(stdout, "Once again sorted values:\n%s\n", xstr_string(str));
+
+	/* Now, let's use some unitype and json magic to turn our earlier hash table
+	 * into a string in the JSON format */
+
+	js = json_create(mm);
+	/* What we need to do is create an unitype object from our earlier hash. The
+	 * unitype library provides an abstraction layer for multi-typed objects.
+	 * The libasn json library works on unitype - and a valid ut object is all we
+	 * need to generate the JSON string */
+	unihash = ut_new_thash(hash, mm);
+	fprintf(stdout, "Now as a JSON string:\n%s\n", json_print(js, unihash));
 
 	/* We're finished using memory from 'mm', so we can now deallocate all
 	 * previously allocated memory using this manager */
