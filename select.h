@@ -32,10 +32,15 @@
 
 #include "lib.h"
 
+#define LOOP_OK        0x00
+#define LOOP_EOF       0x01
+#define LOOP_LOOPBACK  0x02
+
 /** Callback function that uses line of text
  * @param line      line of text that caused the callback call
+ * @param flags     see LOOP_*
  * @note do not reference line, its destroyed after callback exits */
-typedef void (*loop_line_cb)(const char *line, void *prv);
+typedef void (*loop_line_cb)(const char *line, int flags, void *prv);
 
 /** Callback function that is executed on timeout */
 typedef void (*loop_timeout_cb)(uint32_t delay, void *prv);
@@ -85,18 +90,22 @@ int asn_loop_listen_udp(const char *iface, const char *ipaddr, const char *port,
  * @param iface    interface to send packets on (may be null)
  * @param ipaddr   destination IP address
  * @param port     UDP port
- * @return address-token to pass to functions needing it */
+ * @return opaque sender handle to pass to functions needing it */
 void *asn_loop_udp_sender(const char *iface, const char *ipaddr, const char *port);
 
 /** Send a line of text via UDP
- * @param sender   return value from asn_loop_udp_sender()
+ * @param sender   sender handle from asn_loop_udp_sender()
  * @param line     string to send (\0 is the ending character) */
 void asn_loop_send_udp(void *sender, const char *line);
 
 /** Schedule function call */
 void asn_loop_schedule(struct timeval *when, loop_timeout_cb cb, void *prv);
 
-/** Wrapper around asn_loop_schedule which accepts relative time */
+/** Wrapper around asn_loop_schedule which accepts relative time
+ * @param sec   number of seconds
+ * @param usec  number of microseconds
+ * @param cb    handler
+ * @param prv   argument to pass to handler */
 void asn_loop_schedule_in(uint32_t sec, uint32_t usec, loop_timeout_cb cb, void *prv);
 
 #endif /* _SELECT_H */

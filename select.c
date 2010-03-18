@@ -1,5 +1,5 @@
 /*
- * select - simpler interface to select(2)
+ * select - simpler interface to select(2) and global program loop implementation
  *
  * This file is part of libasn
  * Copyright (C) 2005-2009 ASN Sp. z o.o.
@@ -71,7 +71,7 @@ thash *asn_rselect(thash *fdlist, uint32_t *timeout_ms, mmatic *mm)
 		/* XXX: fcntl() is a bit hacky, since we just want to check if fd is valid (so we dont get e.g. a EBADF
 		 * immediately after call to select(); if someone knows better method - please fix */
 		if (fd >= FD_SETSIZE || fcntl(fd, F_GETFD) < 0) {
-			dbg(3, "asn_rselect(): invalid fd %d\n", fd);
+			dbg(3, "invalid fd %d\n", fd);
 			continue;
 		}
 
@@ -87,7 +87,7 @@ thash *asn_rselect(thash *fdlist, uint32_t *timeout_ms, mmatic *mm)
 		tv.tv_usec = (*timeout_ms % 1000) * 1000;
 	}
 
-	dbg(11, "asn_rselect(): calling select() nfds=%d, timeout=%d\n", nfds, *timeout_ms);
+	dbg(12, "calling select() nfds=%d, timeout=%d\n", nfds, *timeout_ms);
 	if ((r = select(nfds, &fds, NULL, NULL, (timeout_ms) ? &tv : NULL)) <= 0) {
 		if (r < 0) switch (errno) {
 			case EBADF:  dbg(0, "asn_rselect(): unexpected EBADF received\n"); break;
@@ -105,7 +105,7 @@ thash *asn_rselect(thash *fdlist, uint32_t *timeout_ms, mmatic *mm)
 	thash_reset(fdlist);
 	while ((prv = THASH_ITER_UINT(fdlist, &fd))) {
 		if (FD_ISSET(fd, &fds)) {
-			dbg(10, "asn_rselect(): fd %d ready\n", fd);
+			dbg(11, "fd %d ready\n", fd);
 			THASH_SET_UINT(ret, fd, prv); /* magic! */
 		}
 	}
@@ -138,6 +138,14 @@ void asn_loop(uint32_t timer)
 	bool left_valid, overflow;
 	uint32_t delay;
 	char *n, c;
+	struct sockaddr_in sa;
+	socklen_t sal;
+	char addr[INET_ADDRSTRLEN];
+	int flags;
+
+	/* all IPv4 addresses of this machine */
+	/* FIXME: we should monitor all changes to IP addresses */
+	thash *locals = ut_thash(asn_ipa(true, mm));
 
 	while (true) {
 		left = timer;
@@ -147,50 +155,74 @@ void asn_loop(uint32_t timer)
 			goto timeouts;
 
 		ready = asn_rselect(fds, &left, mm);
-		if (ready) {
-			thash_reset(ready);
-			while ((rd = (struct reader *) THASH_ITER_UINT(ready, &fd))) {
-				if (rd->isnet) {
-					while ((rd->pos = recv(fd, rd->buf, sizeof(rd->buf) - 1, 0)) > 0) {
-						rd->buf[rd->pos] = '\0';
-						rd->cb(rd->buf, rd->prv);
-						left_valid = false;
-					}
-				} else {
-					while ((r = read(fd, rd->buf + rd->pos, sizeof(rd->buf) - rd->pos - 1)) > 0) {
-						overflow = (r == sizeof(rd->buf) - rd->pos - 1);
+		if (!ready)
+			goto timeouts;
 
-						rd->pos += r;
-						rd->buf[rd->pos] = '\0';
+		thash_reset(ready);
+		while ((rd = (struct reader *) THASH_ITER_UINT(ready, &fd))) {
+			flags = LOOP_OK;
 
-						/* run callback for each line of text */
-						while ((n = strchr(rd->buf, '\n'))) {
-							n++;
-							c = *n;
-							*n = '\0';
-							rd->cb(rd->buf, rd->prv);
-							left_valid = false;
-							*n = c;
+			if (rd->isnet) {
+				sal = sizeof(struct sockaddr_in);
 
-							for (i = 0; n[i]; i++)
-								rd->buf[i] = n[i];
+				while ((rd->pos = recvfrom(fd, rd->buf, sizeof(rd->buf) - 1, 0, (struct sockaddr *) &sa, &sal)) > 0) {
+					/* check if source address is on this machine */
+					inet_ntop(AF_INET, &(sa.sin_addr), addr, sizeof(addr));
+					dbg(11, "received message from %s\n", addr);
 
-							rd->buf[i] = n[i]; /* copy \0 */
-							rd->pos = i;
+					if (thash_get(locals, addr))
+						flags |= LOOP_LOOPBACK;
 
-							overflow = false;
-						}
-
-						if (overflow)
-							rd->pos = 0; /* sorry ;) */
-					}
-
-					if (r < 0 && errno != EAGAIN)
-						dbg(3, "asn_loop(): read(%d): %m\n", fd);
+					rd->buf[rd->pos] = '\0';
+					rd->cb(rd->buf, flags, rd->prv);
+					left_valid = false;
 				}
+
+				continue;
 			}
-			thash_free(ready);
+
+			while ((r = read(fd, rd->buf + rd->pos, sizeof(rd->buf) - rd->pos - 1)) > 0) {
+				overflow = (r == sizeof(rd->buf) - rd->pos - 1);
+
+				/* XXX workaroud '\0's read from fd */
+				for (i = 0; i < r; i++)
+					if (rd->buf[rd->pos + i] == '\0')
+						rd->buf[rd->pos + i] = '\1';
+
+				rd->pos += r;
+				rd->buf[rd->pos] = '\0';
+
+				/* run callback for each line of text */
+				while ((n = strchr(rd->buf, '\n'))) {
+					n++;
+					c = *n;
+					*n = '\0';
+
+					rd->cb(rd->buf, LOOP_OK, rd->prv);
+
+					left_valid = false;
+					*n = c;
+
+					/* move still unhandled data backwards */
+					for (i = 0; n[i]; i++)
+						rd->buf[i] = n[i];
+
+					rd->buf[i] = n[i]; /* copy \0 */
+					rd->pos = i;
+
+					overflow = false;
+				}
+
+				if (overflow)
+					rd->pos = 0; /* oops - sorry ;) */
+			}
+
+			if (r == 0)
+				rd->cb("", LOOP_EOF, rd->prv);
+			else if (r < 0 && errno != EAGAIN)
+				dbg(3, "asn_loop(): read(%d): %m\n", fd);
 		}
+		thash_free(ready);
 
 timeouts:
 		/* process todo tlist */
@@ -260,17 +292,17 @@ int asn_loop_listen_udp(const char *iface, const char *ipaddr, const char *port,
 	int fd;
 	struct sockaddr_in addr;
 
-	dbg(5, "asn_loop_listen_udp(%s, %s, %s, 0x%x)\n", iface, ipaddr, port, cb);
+	dbg(5, "%s, %s, %s, 0x%x\n", iface, ipaddr, port, cb);
 
 	fd = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
 	if (fd < 0)
-		die_errno("asn_loop_listen_udp(): socket");
+		die_errno("socket");
 
 	if (iface && *iface && setsockopt(fd, SOL_SOCKET, SO_BINDTODEVICE, iface, strlen(iface)) < 0)
-		die_errno("asn_loop_listen_udp(): SO_BINDTODEVICE");
+		die_errno("SO_BINDTODEVICE");
 
 	if (fcntl(fd, F_SETFL, O_NONBLOCK) < 0)
-		die_errno("asn_loop_listen_udp(): fcntl");
+		die_errno("fcntl");
 
 	memset((char *) &addr, 0, sizeof(addr));
 	addr.sin_family = AF_INET;
@@ -293,23 +325,28 @@ void *asn_loop_udp_sender(const char *iface, const char *ipaddr, const char *por
 	int one = 1;
 	struct sender *s = mmake(struct sender, iface, 0, { 0 });
 
-	dbg(5, "asn_loop_udp_sender(%s, %s, %s)\n", iface, ipaddr, port);
+	dbg(5, "%s, %s, %s\n", iface, ipaddr, port);
 
 	s->fd = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
 	if (s->fd < 0)
-		die_errno("asn_udp_send_create(): socket");
+		die_errno("socket");
 
 	if (setsockopt(s->fd, SOL_SOCKET, SO_REUSEADDR, &one, sizeof(int)) < 0)
-		die_errno("asn_udp_send_create(): SO_REUSEADDR");
+		die_errno("SO_REUSEADDR");
 
 	if (iface && *iface && setsockopt(s->fd, SOL_SOCKET, SO_BINDTODEVICE, iface, strlen(iface)) < 0)
-		die_errno("asn_udp_send_create(): SO_BINDTODEVICE");
+		die_errno("SO_BINDTODEVICE");
 
 	if (setsockopt(s->fd, SOL_SOCKET, SO_BROADCAST, &one, sizeof(int)) < 0)
-		die_errno("asn_udp_send_create(): SO_BROADCAST");
+		die_errno("SO_BROADCAST");
+
+	/* maybe some day they'll implement http://www.mail-archive.com/linux-kernel@vger.kernel.org/msg196866.html
+	if (setsockopt(s->fd, IPPROTO_IP, IP_MULTICAST_LOOP, &zero, sizeof(zero)) < 0)
+		die_errno("IP_MULTICAST_LOOP");
+	*/
 
 	if (fcntl(s->fd, F_SETFL, O_NONBLOCK) < 0)
-		die_errno("asn_udp_send_create(): fcntl");
+		die_errno("fcntl");
 
 	memset((char *) &(s->addr), 0, sizeof(struct sockaddr_in));
 	s->addr.sin_family = AF_INET;
@@ -323,8 +360,7 @@ void asn_loop_send_udp(void *sender, const char *line)
 {
 	struct sender *s = (struct sender *) sender;
 
-	dbg(5, "asn_loop_send_udp: %s", line);
-
+	dbg(12, "%s\n", line);
 	sendto(s->fd, line, strlen(line), 0, (struct sockaddr *) &(s->addr), sizeof(struct sockaddr_in));
 }
 

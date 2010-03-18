@@ -1,6 +1,8 @@
 /*
+ * linux - various utilities specific for Linux
+ *
  * This file is part of libasn
- * Copyright (C) 2009 ASN Sp. z o.o.
+ * Copyright (C) 2005-2009 ASN Sp. z o.o.
  * Author: Pawel Foremski <pjf@asn.pl>
  *
  * libasn is free software; you can redistribute it and/or modify it under
@@ -14,18 +16,17 @@
  * details.
  *
  * You should have received a copy of the GNU General Public License along with
- * this program.  If not, see <http://www.gnu.org/licenses/>.
+ * this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef _RFC822_H_
-#define _RFC822_H_
+#ifndef _LINUX_H_
+#define _LINUX_H_
 
 #include "lib.h"
 
-/** Parse RFC822 into thash */
-thash *rfc822_parse(const char *str, mmatic *mm);
+/** Fetch all IPv4 addresses on all interfaces
+ * @param index_by_ip   if false, returns IPs indexed by interfaces, swapped otherwise
+ * @retval NULL         request failed, error message sent to dbg() */
+ut *asn_ipa(bool index_by_ip, mmatic *mm);
 
-/** Print unitype thash as RFC822 */
-const char *rfc822_print(ut *var);
-
-#endif
+#endif /* _LINUX_H_ */
