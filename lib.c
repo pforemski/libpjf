@@ -294,7 +294,7 @@ int asn_rmdir(const char *path, const char *skip)
 	return 1;
 }
 
-static int vsort(const void *a, const void *b) { return strverscmp((*(const struct dirent **) a)->d_name, (*(const struct dirent **) b)->d_name); }
+static int vsort(const struct dirent **a, const struct dirent **b) { return strverscmp((*a)->d_name, (*b)->d_name); }
 static int filterdots(const struct dirent *d)  { return (!streq(d->d_name, ".") && !streq(d->d_name, "..")); }
 
 tlist *asn_ls(const char *path, mmatic *mm)
