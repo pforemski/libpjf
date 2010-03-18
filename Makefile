@@ -24,5 +24,8 @@ libasn.a: $(C_OBJECTS) pcre/.libs/libpcre.a
 
 install: install-std
 
+utilities:
+	$(MAKE) -C utils
+
 distclean: clean
 	$(MAKE) -C pcre distclean
