@@ -39,7 +39,7 @@ static int _regex_match(const char *regex, const char *str, int len, int offset,
 
 	/* read the pattern */
 	if (isalnum(delim) || delim == '\\') {
-		dbg(8, "regex_match(): no alphanumeric nor '\\' character allowed as delimiter\n");
+		dbg(8, "no alphanumeric nor '\\' character allowed as delimiter\n");
 		return -1;
 	}
 
@@ -47,7 +47,7 @@ static int _regex_match(const char *regex, const char *str, int len, int offset,
 		if (pp[0] == delim && pp[-1] != '\\') break;
 
 	if (!pp[0]) {
-		dbg(8, "regex_match(): no ending delimiter found\n");
+		dbg(8, "no ending delimiter found\n");
 		return -1;
 	}
 
@@ -67,16 +67,16 @@ static int _regex_match(const char *regex, const char *str, int len, int offset,
 	}
 
 	/* compile the pattern */
-	dbg(10, "regex_match(): compiling '%s'\n", pattern);
+	dbg(11, "compiling '%s'\n", pattern);
 	re = pcre_compile(pattern, mods, &err, &rc, 0);
 	free(pattern);
 	if (!re) {
-		dbg(3, "regex_match(): pcre_compile(): character %d: %s\n", rc, err);
+		dbg(3, "pcre_compile(): character %d: %s\n", rc, err);
 		return -1;
 	}
 
 	/* run it */
-	dbg(10, "regex_match(): matching '%s'\n", str);
+	dbg(11, " matching '%s'\n", str);
 	rc = pcre_exec(re, 0, str, len, offset, 0, cv, CVS);
 	if (cvn) *cvn = rc;
 
@@ -86,9 +86,9 @@ static int _regex_match(const char *regex, const char *str, int len, int offset,
 	else if (rc == PCRE_ERROR_NOMATCH)
 		rc = 0;
 	else if (rc == 0)
-		dbg(5, "regex_match(): cv not big enough\n");
+		dbg(5, "cv not big enough\n");
 	else {
-		dbg(8, "regex_match(): pcre_exec() failed with error code %d\n", rc);
+		dbg(8, "pcre_exec() failed with error code %d\n", rc);
 		rc = -1;
 	}
 
@@ -112,7 +112,7 @@ char *asn_replace(const char *regex, const char *rep, const char *str, mmatic *m
 	while ((rc = _regex_match(regex, str, len, offset, cv, &cvn)) == 1 && cv[0] >= 0 && cv[1] >= cv[0]) {
 		if (cv[0] >= len) break;
 
-		dbg(8, "asn_replace(): matched at %d-%d (rc=%d, offset=%d)\n", cv[0], cv[1], rc, offset);
+		dbg(11, "matched at %d-%d (rc=%d, offset=%d)\n", cv[0], cv[1], rc, offset);
 
 		/* copy text up to the first match */
 		xstr_append_size(xs, str+offset, cv[0]-offset);
@@ -134,11 +134,11 @@ char *asn_replace(const char *regex, const char *rep, const char *str, mmatic *m
 			if (br++ > 0 && br <= cvn) {
 #				define IB (2*br - 2)
 #				define IT (2*br - 1)
-				dbg(9, "asn_replace(): appending backreference %d between %d and %d\n", br-1, cv[IB], cv[IT]-1);
+				dbg(11, "appending backreference %d between %d and %d\n", br-1, cv[IB], cv[IT]-1);
 				xstr_append_size(xs, str + cv[IB], cv[IT] - cv[IB]);
 			}
 			else {
-				dbg(1, "asn_replace(): invalid backreference: %d\n", br-1);
+				dbg(1, "invalid backreference: %d\n", br-1);
 			}
 
 			bs = p;
@@ -150,7 +150,7 @@ char *asn_replace(const char *regex, const char *rep, const char *str, mmatic *m
 		/* start next match after
 		 * XXX: pcreapi(3) manual page says "The first element of a pair is set to the offset of the first character in
 		 * a substring, and the second is set to the offset of the first character *after* the end of a substring.", but
-		 * does not mention that e.g. a pattern of just /$/m will return cv[1] == cv[0]! */
+		 * does not mention that eg. a pattern of just /$/m will return cv[1] == cv[0]! */
 		offset = cv[1] + (cv[1] == cv[0]);
 		if (offset >= len) break;
 	}
