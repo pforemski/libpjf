@@ -58,6 +58,13 @@ void _die(const char *file, unsigned int line, const char *fn, char *msg, ...);
 /** From linux/stddef.h */
 #define offsetof(TYPE, MEMBER) ((size_t) &((TYPE *)0)->MEMBER)
 
+/** Number of elements in array */
+#define N(a) (sizeof(a)/sizeof(*a))
+
+/** A generic foreach */
+#define foreach(array, ptr) \
+	for (typeof((array)+0) (ptr) = (array)+0; (ptr) < (array)+N(array); (ptr) += 1)
+
 /* All libasn components included */
 #include "thash.h"
 #include "mmatic.h"
