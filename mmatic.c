@@ -130,7 +130,7 @@ void *mmatic_realloc_(void *mem, size_t size, mmatic *mgr, const char *cfile, un
 	memcpy(newmem, mem, chunk->alloc);
 	mmatic_freeptr(mem);
 
-	return newmem;
+	return (mem = newmem);
 }
 
 void *asn_malloc(size_t size)

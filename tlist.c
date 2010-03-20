@@ -134,8 +134,7 @@ void tlist_prepend(tlist *list, const void *val)
 
 	if (!list->head) {
 		list->head = list->tail = el;
-	}
-	else {
+	} else {
 		el->next = list->head;
 		list->head->prev = el;
 		list->head = el;

@@ -23,7 +23,9 @@
 
 /** Simple regex matching
  *
- * @param regex pattern
+ * @param regex pattern enclosed in delimeters, with optional flags
+ *              example: /^fooBAR$/i -- searches for ^fooBAR$ in caseless mode
+ *              supported flags: i, m, s, x, A, D, U, X (see PHP preg_match)
  * @param str   string
  *
  * @retval  1 matched
@@ -33,7 +35,7 @@ int asn_match(const char *regex, const char *str);
 
 /** Simple regex replace
  *
- * @param regex pattern
+ * @param regex pattern (see asn_match())
  * @param str   subject
  * @param rep   replacement (supports back-references)
  * @return      new char *, always succeeds */

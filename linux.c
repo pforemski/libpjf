@@ -47,14 +47,14 @@ ut *asn_ipa(bool index_by_ip, mmatic *mm)
 	int fd;
 
 	fd = socket(PF_NETLINK, SOCK_DGRAM, NETLINK_ROUTE);
-	if (fd < 0) reterr(NULL, 0, "socket");
+	if (fd < 0) reterrno(NULL, 0, "socket");
 
 	len = send(fd, &req, req.n.nlmsg_len, 0);
-	if (len < 0) reterr(NULL, 0, "send");
+	if (len < 0) reterrno(NULL, 0, "send");
 
 	/* XXX: tested on a 2.4 host with 59 interfaces and one recv() seems enough */
 	len = recv(fd, buf, sizeof(buf), 0);
-	if (len < 0) reterr(NULL, 1, "recv");
+	if (len < 0) reterrno(NULL, 1, "recv");
 
 	/*** parse ***/
 	struct nlmsghdr *h1;

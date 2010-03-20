@@ -53,7 +53,8 @@ void _die(const char *file, unsigned int line, const char *fn, char *msg, ...);
 #define die_errno(msg) (die("%s: %s\n", (msg), strerror(errno)))
 
 /** Macro for simple error handling */
-#define reterr(val, lvl, msg) { dbg((lvl), "%s: %s\n", (msg), strerror(errno)); return (val); }
+#define reterr(val, lvl, msg1, msg2) { dbg((lvl), "%s: %s\n", (msg1), (msg2)); return (val); }
+#define reterrno(val, lvl, msg) reterr((val), (lvl), (msg), strerror(errno))
 
 /** From linux/stddef.h */
 #define offsetof(TYPE, MEMBER) ((size_t) &((TYPE *)0)->MEMBER)

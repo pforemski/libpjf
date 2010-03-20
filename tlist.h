@@ -117,8 +117,11 @@ void *tlist_iter_dec(tlist *list, int i);
 
 #define TLIST_ITER_LOOP(list, v) tlist_reset(list); while (((v) = tlist_iter(list)))
 
-/** Pushes a value at the end of the list */
+/** Pushes a value at the end of a list */
 void tlist_push(tlist *list, const void *val);
+
+/** Pushes a value at the beginning of a list */
+void tlist_prepend(tlist *list, const void *val);
 
 /** Pops a value off the end */
 void *tlist_pop(tlist *list);
@@ -144,7 +147,10 @@ void tlist_insertafter(tlist *list, const void *val);
 
 /** Remove value from the position pointed by the iterator-1
  *
+ * Note that removing iterator-1 is designed to be used with tlist_iter()
+ *
  * @param list the list
+ * @return value of removed item
  * @retval NULL if iterator not set properly
  */
 void *tlist_remove(tlist *list);
@@ -158,6 +164,7 @@ int tlist_size(tlist *list);
  * @param  sep     separator (cant be null!)
  * @return char *  (always, even just an mm-ed "") */
 char *tlist_stringify(tlist *list, const char *sep, mmatic *mm);
+
 /***/
 #define MMTLIST_CREATE(fn) (tlist_create((fn), mm))
 
