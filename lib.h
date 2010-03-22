@@ -209,4 +209,8 @@ char *asn_trim(char *txt);
 
 #define msec_to_Hz Hz_to_msec
 
+/** Decode base64 encoded string
+ * @note resulting string may contain \0 - check xs->len */
+xstr *asn_b64dec(const char *text, mmatic *mm);
+
 #endif /* _MISC_H_ */
