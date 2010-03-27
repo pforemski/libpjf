@@ -92,10 +92,10 @@ ut *asn_ipa(bool index_by_ip, mmatic *mm)
 
 		/*** write the answer ***/
 		if (index_by_ip) {
-			uth_add_char(db, address, interface);
+			uth_set_char(db, address, interface);
 		} else {
 			if (!(list = thash_get(dbh, interface)))
-				list = uth_add_tlist(db, interface, NULL);
+				list = uth_set_tlist(db, interface, NULL);
 
 			utl_add_char(list, address);
 		}

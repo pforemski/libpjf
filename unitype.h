@@ -56,6 +56,16 @@ typedef struct ut {
 	} d;
 } ut;
 
+/***** check type wrappers *****/
+
+#define ut_is_ptr(ut)    (ut->type == T_PTR)
+#define ut_is_bool(ut)   (ut->type == T_BOOL)
+#define ut_is_int(ut)    (ut->type == T_INT)
+#define ut_is_double(ut) (ut->type == T_DOUBLE)
+#define ut_is_string(ut) (ut->type == T_STRING)
+#define ut_is_tlist(ut)  (ut->type == T_LIST)
+#define ut_is_thash(ut)  (ut->type == T_HASH)
+
 /***** error handling *****/
 
 /** Checks if ut is not of err type */
@@ -110,15 +120,16 @@ ut *ut_new_thash(thash *val, mmatic *mm);
 ut *ut_new_utthash(thash *val, mmatic *mm);
 
 /* applicable for ut->type == T_HASH */
-ut *uth_add_ut(ut *var, const char *key, ut *val);
-ut *uth_add_bool(ut *ut, const char *key, bool val);
-ut *uth_add_int(ut *ut, const char *key, int val);
-ut *uth_add_double(ut *ut, const char *key, double val);
-ut *uth_add_char(ut *ut, const char *key, const char *val);
-ut *uth_add_xstr(ut *ut, const char *key, xstr *val);
-ut *uth_add_ptr(ut *ut, const char *key, void *ptr);
-ut *uth_add_tlist(ut *ut, const char *key, tlist *val); /** @note see ut_new_tlist */
-ut *uth_add_thash(ut *ut, const char *key, thash *val); /** @note see ut_new_thash */
+ut *uth_get(ut *var, const char *key);
+ut *uth_set(ut *var, const char *key, ut *val);
+ut *uth_set_bool(ut *ut, const char *key, bool val);
+ut *uth_set_int(ut *ut, const char *key, int val);
+ut *uth_set_double(ut *ut, const char *key, double val);
+ut *uth_set_char(ut *ut, const char *key, const char *val);
+ut *uth_set_xstr(ut *ut, const char *key, xstr *val);
+ut *uth_set_ptr(ut *ut, const char *key, void *ptr);
+ut *uth_set_tlist(ut *ut, const char *key, tlist *val); /** @note see ut_new_tlist */
+ut *uth_set_thash(ut *ut, const char *key, thash *val); /** @note see ut_new_thash */
 
 /***** linked list *****/
 
@@ -131,7 +142,7 @@ ut *ut_new_uttlist(tlist *val, mmatic *mm);
 ut *ut_new_tlist(tlist *val, mmatic *mm);
 
 /* applicable for ut->type == T_LIST */
-ut *utl_add_ut(ut *var, ut *val);
+ut *utl_add(ut *var, ut *val);
 ut *utl_add_bool(ut *ut, bool val);
 ut *utl_add_int(ut *ut, int val);
 ut *utl_add_double(ut *ut, double val);
