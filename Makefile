@@ -16,10 +16,12 @@ include rules.mk
 pcre/.libs/libpcre.a:
 	./pcre-build.sh
 
-libasn.so: pcre/.libs/libpcre.a $(C_OBJECTS)
+$(C_OBJECTS): pcre/.libs/libpcre.a
+
+libasn.so: $(C_OBJECTS)
 	$(CC) $(C_OBJECTS) -shared -o libasn.so pcre/.libs/libpcre.a $(LDFLAGS)
 
-libasn.a: $(C_OBJECTS) pcre/.libs/libpcre.a
+libasn.a: $(C_OBJECTS)
 	$(AR) rc libasn.a $(C_OBJECTS) pcre/.libs/libpcre.a
 
 install: install-std
