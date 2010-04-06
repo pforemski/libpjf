@@ -129,9 +129,6 @@ void xstr_append_size(xstr *sx, const char *s, int size)
 
 void xstr_append_char(xstr *sx, char s)
 {
-	if (!s)
-		return;
-
 	/* hack to overcome relocating memory sequential calls (eg. loops) */
 	if (sx->len + 2 >= sx->a);
 		xstr_reserve(sx, MAX(8, 2 * sx->len));

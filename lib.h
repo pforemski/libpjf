@@ -85,6 +85,7 @@ void _die(const char *file, unsigned int line, const char *fn, char *msg, ...);
 #include "rfc822.h"
 #include "linux.h"
 #include "encode.h"
+#include "blowfish.h"
 
 /** Shortcut for programs using libasn */
 #define __USE_LIBASN int debug = 0; void (*debugcb)() = NULL;
@@ -209,21 +210,5 @@ char *asn_trim(char *txt);
 #define Hz_to_msec(f) (f ? (1.0/f * 1000.0) : 0)
 
 #define msec_to_Hz Hz_to_msec
-
-/** Decode base64 encoded string
- * @note resulting string may contain \0 - check xs->len */
-xstr *asn_b64dec(const char *text, mmatic *mm);
-
-/** Decode base32
- * @retval NULL decoding failed
- * @note resulting string may contain \0 - check xs->len
- * @note we use alternative base32 - see http://www.crockford.com/wrmg/base32.html
- */
-xstr *asn_b32dec(const char *text, mmatic *mm);
-
-/** Encode base32
- * @note we use alternative base32 - see http://www.crockford.com/wrmg/base32.html
- */
-const char *asn_b32enc(xstr *text, mmatic *mm);
 
 #endif /* _MISC_H_ */
