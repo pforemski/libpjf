@@ -131,6 +131,16 @@ ut *uth_set_ptr(ut *ut, const char *key, void *ptr);
 ut *uth_set_tlist(ut *ut, const char *key, tlist *val); /** @note see ut_new_tlist */
 ut *uth_set_thash(ut *ut, const char *key, thash *val); /** @note see ut_new_thash */
 
+/* shortcuts */
+#define uth_bool(var, key)   ut_bool(uth_get(var, key))
+#define uth_int(var, key)    ut_int(uth_get(var, key))
+#define uth_double(var, key) ut_double(uth_get(var, key))
+#define uth_xstr(var, key)   ut_xstr(uth_get(var, key))
+#define uth_char(var, key)   ut_char(uth_get(var, key))
+#define uth_tlist(var, key)  ut_tlist(uth_get(var, key))
+#define uth_thash(var, key)  ut_thash(uth_get(var, key))
+#define uth_ptr(var, key)    ut_ptr(uth_get(var, key))
+
 /***** linked list *****/
 
 /** Create a ut containing given list of ut objects

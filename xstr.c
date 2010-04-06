@@ -85,7 +85,7 @@ void xstr_reserve(xstr *xs, size_t l)
 	new_str = xmmalloc(l + 1);
 
 	if (xs->s) {
-		strcpy(new_str, xs->s);
+		memcpy(new_str, xs->s, xs->len + 1);
 		mmfreeptr(xs->s);
 		xs->s = new_str;
 	} else {

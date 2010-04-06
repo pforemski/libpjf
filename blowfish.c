@@ -452,7 +452,7 @@ static void check_ctx(xstr *key)
 }
 
 #define MB(a, b) (((uint32_t) (a) & 0xff) << ((3 - b) * 8))
-#define GB(a, b) ((char) (((uint32_t) (a)) >> ((3 - b) * 8) & 0xff))
+#define GB(a, b) ((uint8_t) (((uint32_t) (a)) >> ((3 - b) * 8) & 0xff))
 
 xstr *asn_blowfish_enc(const char text[8], xstr *out, xstr *key)
 {

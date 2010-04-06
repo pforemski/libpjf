@@ -19,7 +19,7 @@
 
 #include "lib.h"
 
-xstr *asn_b64dec(const char *text, mmatic *mm)
+xstr *asn_b64_dec(const char *text, mmatic *mm)
 {
 	static const char d[] = {
 		62, -1, -1, -1, 63, 52, 53, 54,
@@ -67,7 +67,7 @@ xstr *asn_b64dec(const char *text, mmatic *mm)
 	return xs;
 }
 
-xstr *asn_b32dec(const char *text, mmatic *mm)
+xstr *asn_b32_dec(const char *text, mmatic *mm)
 {
 	static const char d[] = {
 		 0,  1,  2,  3,  4,  5,  6,  7,  8,  9, // 9
@@ -128,7 +128,7 @@ xstr *asn_b32dec(const char *text, mmatic *mm)
 	return xs;
 }
 
-const char *asn_b32enc(xstr *text, mmatic *mm)
+const char *asn_b32_enc(xstr *text, mmatic *mm)
 {
 	static const char d[] = {
 		'0', '1', '2', '3', '4', '5', '6', '7',

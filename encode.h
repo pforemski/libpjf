@@ -22,18 +22,18 @@
 
 /** Decode base64 encoded string
  * @note resulting string may contain \0 - check xs->len */
-xstr *asn_b64dec(const char *text, mmatic *mm);
+xstr *asn_b64_dec(const char *text, mmatic *mm);
 
 /** Decode base32
  * @retval NULL decoding failed
  * @note resulting string may contain \0 - check xs->len
  * @note we use alternative base32 - see http://www.crockford.com/wrmg/base32.html
  */
-xstr *asn_b32dec(const char *text, mmatic *mm);
+xstr *asn_b32_dec(const char *text, mmatic *mm);
 
 /** Encode base32
  * @note we use alternative base32 - see http://www.crockford.com/wrmg/base32.html
  */
-const char *asn_b32enc(xstr *text, mmatic *mm);
+const char *asn_b32_enc(xstr *text, mmatic *mm);
 
 #endif
