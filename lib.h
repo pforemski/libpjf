@@ -21,7 +21,6 @@
 #define _LIBASN_H_
 
 #include <stdio.h>
-#include <stdint.h>
 #include <stdbool.h>
 #include <stdlib.h>
 #include <time.h>
@@ -73,10 +72,10 @@ void _die(const char *file, unsigned int line, const char *fn, char *msg, ...);
 #include "tsort.h"
 #include "fifos.h"
 #include "math.h"
-#include "sfork.h"
 #include "regex.h"
 #include "xstr.h"
 #include "wstr.h"
+#include "sfork.h"
 #include "fc.h"
 #include "select.h"
 #include "fcml.h"

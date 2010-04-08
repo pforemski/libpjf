@@ -20,9 +20,7 @@
 #ifndef _SFORK_H_
 #define _SFORK_H_
 
-#include <sys/types.h>
-
-#include "thash.h"
+#include "lib.h"
 
 /**
  * @file sfork.h
@@ -80,10 +78,6 @@ pid_t asn_waitany(int *code);
  * @returns exit code of the command
  * @retval  -1      error in asn_cmd()
  */
-int asn_cmd(const char *cmd, const char *args,
-	thash *envh,
-	char *in, int inlen,
-	char *out, int outlen,
-	char *err, int errlen);
+int asn_cmd(const char *cmd, const char *args, thash *env, xstr *in, xstr *out, xstr *err);
 
 #endif /* _SFORK_H_*/

@@ -425,14 +425,14 @@ void fcml_parse_exec(fcmlfile *file, fcmlvar *var)
 			/* read filespace */
 			ONE_BACK;
 			fcml_read_key(file, space);
-			dbg(10, "fcml_parse_exec(): has a filespace '%s'\n", space);
+			dbg(10, "has a filespace '%s'\n", space);
 
 			/* get filespace definition */
 			fs = thash_get(file->parser->spaces, space);
 			if (!fs) { dbg(1, "Filespace not defined: '%s'\n", space); longjmp(jb, 10); }
 
 			/* position on command */
-			if (GET_ONE != '"') { dbg(4, "fcml_parse_exec(): command name not enclosed in double braces\n"); longjmp(jb, 11); }
+			if (GET_ONE != '"') { dbg(4, "command name not enclosed in double braces\n"); longjmp(jb, 11); }
 
 			/* now read the command */
 			fcml_parse_string(file, &cmd);
@@ -455,19 +455,22 @@ void fcml_parse_exec(fcmlfile *file, fcmlvar *var)
 	}
 
 	/* run */
-	rc = asn_cmd(cmd.in.string, NULL, env, NULL, 0, buf, sizeof(buf), buf2, sizeof(buf2));
-	if (rc != 0 || !buf[0]) {
-		dbg(2, "fcml_parse_exec(): child failed\n");
+	xstr *output = xstr_create("", MM);
+	rc = asn_cmd(cmd.in.string, NULL, env, NULL, output, NULL);
+	if (rc != 0 || xstr_length(output) == 0) {
+		dbg(2, "child failed\n");
 		var->in.string = fmmstrdup("");
 		goto exec_free;
 	}
 
 	/* make a description */
-	if (inlinescript) snprintf(buf2, sizeof(buf2), "inline script");
-	else snprintf(buf2, sizeof(buf2), "external command '%s'", cmd.in.string);
+	if (inlinescript)
+		snprintf(buf2, sizeof(buf2), "inline script");
+	else
+		snprintf(buf2, sizeof(buf2), "external command '%s'", cmd.in.string);
 
-	dbg(9, "fcml_parse_exec(): child succeeded, parsing\n");
-	fcml_push_src(file, fmmstrdup(buf2), fmmstrdup(buf));
+	dbg(9, "child succeeded, parsing\n");
+	fcml_push_src(file, fmmstrdup(buf2), xstr_string(output));
 	fcml_parse_value(file, var);
 
 exec_free:

@@ -123,8 +123,10 @@ void xstr_append_size(xstr *sx, const char *s, int size)
 
 	slen = sx->len + size;
 	xstr_reserve(sx, slen);
-	strncat(sx->s, s, size);
+
+	memcpy(sx->s + sx->len, s, size);
 	sx->len = slen;
+	sx->s[sx->len] = '\0';
 }
 
 void xstr_append_char(xstr *sx, char s)
