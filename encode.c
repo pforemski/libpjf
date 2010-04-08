@@ -67,6 +67,52 @@ xstr *asn_b64_dec(const char *text, mmatic *mm)
 	return xs;
 }
 
+const char *asn_b64_enc(xstr *text, mmatic *mm)
+{
+	static const char d[] = {
+		'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H',
+		'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P',
+		'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X',
+		'Y', 'Z', 'a', 'b', 'c', 'd', 'e', 'f',
+		'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n',
+		'o', 'p', 'q', 'r', 's', 't', 'u', 'v',
+		'w', 'x', 'y', 'z', '0', '1', '2', '3',
+		'4', '5', '6', '7', '8', '9', '+', '/'
+	};
+
+	xstr *xs = MMXSTR_CREATE("");
+
+	int i, m = 0;
+	unsigned char b, c;
+	char *s;
+
+	for (i = 0, s = xstr_string(text); i < xstr_length(text); i++) {
+		c = s[i];
+
+		switch (m) {
+			case 0:
+				xstr_append_char(xs, d[c >> 2]);
+				b = (c & 3) << 4;
+				m++; break;
+			case 1:
+				xstr_append_char(xs, d[b | c >> 4]);
+				b = (c & 15) << 2;
+				m++; break;
+			case 2:
+				xstr_append_char(xs, d[b | c >> 6]);
+				xstr_append_char(xs, d[c & 63]);
+				m = 0; break;
+		}
+	}
+
+	if (m > 0) {
+		xstr_append_char(xs, d[b]);
+		while (m++ < 3) xstr_append_char(xs, '=');
+	}
+
+	return xstr_string(xs);
+}
+
 xstr *asn_b32_dec(const char *text, mmatic *mm)
 {
 	static const char d[] = {
