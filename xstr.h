@@ -80,10 +80,10 @@ void xstr_set_size(xstr *xs, const char *s, int size);
 void xstr_free(xstr *xs);
 
 /** Return the xstr as a standard char string */
-#define xstr_string(xs) xs->s
+#define xstr_string(xs) (xs ? xs->s : "")
 
 /** Return the length of the string */
-#define xstr_length(xs) xs->len
+#define xstr_length(xs) (xs ? xs->len : 0)
 
 /** Return (duplicated) stripped version of xs
  *

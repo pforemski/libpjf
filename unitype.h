@@ -69,7 +69,7 @@ typedef struct ut {
 /***** error handling *****/
 
 /** Checks if ut is not of err type */
-#define ut_ok(ut) (ut->type != T_ERR)
+#define ut_ok(ut) (ut && ut->type != T_ERR)
 
 /** Returns human-readable error description */
 const char *ut_err(ut *ut);
@@ -80,7 +80,7 @@ int ut_errcode(ut *ut);
 /***** type conversions *****/
 
 /** Return type of variable */
-enum ut_type ut_type(ut *ut);
+#define ut_type(ut) (ut ? ut->type : T_NULL)
 
 /* XXX: BIG FAT WARNINGS:
  *

@@ -19,13 +19,10 @@
 
 #include "lib.h"
 
-enum ut_type ut_type(ut *var)
-{
-	return var->type;
-}
-
 bool   ut_bool(ut *var)
 {
+	if (!var) return false;
+
 	switch (var->type) {
 		case T_BOOL:   return var->d.as_bool;
 		case T_INT:    return (bool) var->d.as_int;
@@ -39,6 +36,8 @@ bool   ut_bool(ut *var)
 
 int    ut_int(ut *var)
 {
+	if (!var) return 0;
+
 	switch (var->type) {
 		case T_INT:    return var->d.as_int;
 		case T_DOUBLE: return (int) var->d.as_double;
@@ -49,6 +48,8 @@ int    ut_int(ut *var)
 
 double ut_double(ut *var)
 {
+	if (!var) return 0.0;
+
 	switch (var->type) {
 		case T_DOUBLE: return var->d.as_double;
 		case T_INT:    return (double) var->d.as_int;
@@ -59,6 +60,8 @@ double ut_double(ut *var)
 
 xstr  *ut_xstr(ut *var)
 {
+	if (!var) return NULL;
+
 	char buf[BUFSIZ], *key;
 	xstr *xs;
 	ut *el;
@@ -106,11 +109,15 @@ xstr  *ut_xstr(ut *var)
 
 const char *ut_char(ut *var)
 {
+	if (!var) return NULL;
+
 	return xstr_string(ut_xstr(var));
 }
 
 tlist *ut_tlist(ut *var)
 {
+	if (!var) return NULL;
+
 	tlist *list;
 	char *key;
 	ut *el;
@@ -131,6 +138,8 @@ tlist *ut_tlist(ut *var)
 
 thash *ut_thash(ut *var)
 {
+	if (!var) return NULL;
+
 	mmatic *mm = var->mm;
 
 	switch (var->type) {
@@ -143,6 +152,8 @@ thash *ut_thash(ut *var)
 
 void  *ut_ptr(ut *var)
 {
+	if (!var) return NULL;
+
 	switch (var->type) {
 		case T_PTR:
 			return var->d.as_ptr;
@@ -159,7 +170,7 @@ void  *ut_ptr(ut *var)
 
 const char *ut_err(ut *var)
 {
-	if (var->type == T_ERR) {
+	if (var && var->type == T_ERR) {
 		if (var->d.as_err->data)
 			return mmatic_printf(var->mm, "#%d: %s (%s)",
 				var->d.as_err->code, var->d.as_err->msg, var->d.as_err->data);
@@ -174,7 +185,7 @@ const char *ut_err(ut *var)
 
 int ut_errcode(ut *var)
 {
-	if (var->type == T_ERR)
+	if (var && var->type == T_ERR)
 		return var->d.as_err->code;
 	else
 		return 0;
