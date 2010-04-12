@@ -39,7 +39,7 @@ xstr *asn_b64_dec(const char *text, mmatic *mm)
 
 	for (; *text >= 43; text++) {
 		c = d[(*text - 43) % sizeof(d)];
-		if (c < 0)
+		if (c > 63)
 			continue;
 
 		switch (m) {
