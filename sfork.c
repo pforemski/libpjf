@@ -94,11 +94,17 @@ pid_t asn_fork(const char *cmd, const char *args, thash *env,
 		if (script) {
 			execl("/bin/sh", "sh", "-s", "--", args, NULL);
 		} else {
-			char *combined = asn_malloc(strlen(cmd) + strlen(args) + 2);
+			char *combined;
 
-			strcpy(combined, cmd);
-			strcat(combined, " ");
-			strcat(combined, args);
+			if (args) {
+				combined = asn_malloc(strlen(cmd) + strlen(args) + 2);
+
+				strcpy(combined, cmd);
+				strcat(combined, " ");
+				strcat(combined, args);
+			} else {
+				combined = (char *) cmd;
+			}
 
 			execl("/bin/sh", "sh", "-c", "--", combined, NULL);
 		}
