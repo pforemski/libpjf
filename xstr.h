@@ -55,6 +55,9 @@ void xstr_init(xstr *sx, mmatic *mm);
 /** Init xstr with value */
 void xstr_init_val(xstr *sx, const char *ch, mmatic *mm);
 
+/** Return C string */
+char *xstr_to_char(xstr *sx);
+
 /** Duplicate string */
 char *xstr_dup(xstr *sx, mmatic *mm);
 
