@@ -78,6 +78,24 @@ pid_t asn_waitany(int *code);
  * @returns exit code of the command
  * @retval  -1      error in asn_cmd()
  */
-int asn_cmd(const char *cmd, const char *args, thash *env, xstr *in, xstr *out, xstr *err);
+int asn_cmd(const char *cmd, const char *args,
+	thash *envh,
+	char *in, int inlen,
+	char *out, int outlen,
+	char *err, int errlen);
+
+/** Another flavour of wrapper around asn_fork()
+ *
+ * @param cmd      command to execute (may be a shell script code)
+ * @param args     optional arguments
+ * @param envh     optional environmental variables to set
+ * @param in       optional input for the command
+ * @param out      optional buffer for output of the command
+ * @param err      optional buffer for errors of the command
+ *
+ * @returns exit code of the command
+ * @retval  -1      error in asn_cmd()
+ */
+int asn_cmd2(const char *cmd, const char *args, thash *env, xstr *in, xstr *out, xstr *err);
 
 #endif /* _SFORK_H_*/

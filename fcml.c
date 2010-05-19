@@ -456,7 +456,7 @@ void fcml_parse_exec(fcmlfile *file, fcmlvar *var)
 
 	/* run */
 	xstr *output = xstr_create("", MM);
-	rc = asn_cmd(cmd.in.string, NULL, env, NULL, output, NULL);
+	rc = asn_cmd2(cmd.in.string, NULL, env, NULL, output, NULL);
 	if (rc != 0 || xstr_length(output) == 0) {
 		dbg(2, "child failed\n");
 		var->in.string = fmmstrdup("");

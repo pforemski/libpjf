@@ -174,7 +174,51 @@ pid_t asn_waitany(int *code)
 	return pid;
 }
 
-int asn_cmd(const char *cmd, const char *args, thash *env, xstr *in, xstr *out, xstr *err)
+int asn_cmd(const char *cmd, const char *args, thash *env,
+	char *in,  int inlen,
+	char *out, int outlen,
+	char *err, int errlen)
+{
+	int rc = -1, e = 0, c, pin = 0, pout = 0, perr = 0;
+	pid_t child;
+
+	if (!(child = asn_fork(cmd, args, env, &pin, &pout, &perr))) {
+		e = 1; dbg(2, "asn_cmd(): asn_fork() failed\n");
+		goto end;
+	}
+
+	/* write stdin to child from in */
+	if (in) {
+		rc = write(pin, in, inlen);
+#		define CHECKRC2(arg) if (rc < 0) { e = 1; dbg(4, "asn_cmd(): %s: %m\n", arg); }
+		CHECKRC2("write(pin)");
+	}
+	close(pin);
+
+	/* read stdout of child to out */
+	if (out) {
+		for (c = 0; (rc = read(pout, out+c, outlen-c-1)) > 0; c += rc); out[c] = 0;
+		CHECKRC2("read(pout)");
+		if (out[0]) dbg(6, "asn_cmd(): stdout: %s", out);
+	}
+	close(pout);
+
+	/* read stderr of child to err */
+	if (err) {
+		for (c = 0; (rc = read(perr, err+c, errlen-c-1)) > 0; c += rc); err[c] = 0;
+		CHECKRC2("read(perr)");
+		if (err[0]) dbg(2, "asn_cmd(): stderr: %s", err);
+	}
+	close(perr);
+
+	rc = asn_wait(child);
+	dbg((rc) ? 2 : 5, "asn_cmd(): error code: %d\n", rc);
+
+end:
+	return (e) ? -1 : rc;
+}
+
+int asn_cmd2(const char *cmd, const char *args, thash *env, xstr *in, xstr *out, xstr *err)
 {
 	int rc = -1, e = 0, pin = 0, pout = 0, perr = 0;
 	pid_t child;
