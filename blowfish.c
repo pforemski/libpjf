@@ -307,6 +307,7 @@ static uint32_t F(BLOWFISH_CTX *ctx, uint32_t x)
 	b = (uint8_t)(x & 0xFF);
 	x >>= 8;
 	a = (uint8_t)(x & 0xFF);
+
 	y = ctx->S[0][a] + ctx->S[1][b];
 	y = y ^ ctx->S[2][c];
 	y = y + ctx->S[3][d];
