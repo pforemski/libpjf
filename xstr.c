@@ -151,7 +151,7 @@ void xstr_set(xstr *xs, const char *s)
 void xstr_set_size(xstr *xs, const char *s, int size)
 {
 	xstr_reserve(xs, size);
-	strncpy(xs->s, s, size);
+	memcpy(xs->s, s, size);
 	xs->len = size;
 	xs->s[size] = '\0';
 }
