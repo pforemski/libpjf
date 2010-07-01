@@ -61,9 +61,6 @@ xstr *asn_b64_dec(const char *text, mmatic *mm)
 		}
 	}
 
-	if (m > 0)
-		xstr_append_char(xs, b);
-
 	return xs;
 }
 
