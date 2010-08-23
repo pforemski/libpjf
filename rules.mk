@@ -5,6 +5,7 @@
 CC ?= gcc
 AR ?= ar
 ME ?= $(shell basename `pwd`)
+PWD ?= $(shell pwd)
 
 CFLAGS += -std=gnu99 -g -Wall -pedantic -fPIC -Dinline='inline __attribute__ ((gnu_inline))' $(CFLAGS_ADD)
 LDFLAGS += -Wall -pedantic $(LDFLAGS_ADD)
@@ -64,8 +65,9 @@ install-std: all
 	for i in $(TARGETS); do test "$${i##*.}" = "$$i" && install -m 755 $$i $(PKGDST)/bin; done || true
 
 install-lns: all
-	mkdir -m 755 -p $(PKGDST)/{include,lib}/$(ME)
-	ln -s $(PWD)/*.h $(PKGDST)/include/$(ME)/
+	mkdir -m 755 -p $(PKGDST)/include/$(ME)
+	mkdir -m 755 -p $(PKGDST)/lib/$(ME)
+	-sh -c "ln -s $(PWD)/*.h $(PKGDST)/include/$(ME)/"
 	for i in $(TARGETS); do \
 		[ "$${i##*.}" = "so" ] && ln -s $(PWD)/$$i $(PKGDST)/lib/; \
 		[ "$${i##*.}" = "a" ]  && ln -s $(PWD)/$$i $(PKGDST)/lib/; \
