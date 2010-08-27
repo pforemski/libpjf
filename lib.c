@@ -84,10 +84,10 @@ void _die(const char *file, unsigned int line, const char *fn, char *msg, ...)
 		va_start(args, msg);
 		vfprintf(stderr, msg, args);
 		va_end(args);
+	} else {
+		fprintf(stderr, "aborting");
 	}
-	else {
-		fprintf(stderr, "aborting\n");
-	}
+	fprintf(stderr, "\n");
 
 	abort();
 }
@@ -422,6 +422,9 @@ void asn_daemonize(const char *progname, const char *pidfile)
 {
 	int fd;
 	char pwd[PATH_MAX], pid[16];
+
+	if (open(pidfile, O_CREAT | O_TRUNC, 00644) < 0)
+		die("PID file not writable: %s", pidfile);
 
 	for (fd = getdtablesize(); fd >= 0; fd--) close(fd);
 
