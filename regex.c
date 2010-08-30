@@ -100,6 +100,8 @@ int asn_match(const char *regex, const char *str)
 {
 	int cv[CVS];
 
+	if (!str) return 0;
+
 	return _regex_match(regex, str, strlen(str), 0, cv, NULL);
 }
 

@@ -322,5 +322,5 @@ unsigned int thash_str_hash(const void *vkey)
 
 unsigned int thash_ptr_hash(const void *key)
 {
-	return ((unsigned int) key);
+	return ((unsigned long) key);
 }

@@ -26,7 +26,7 @@
 
 struct fifos_el {
 	char *value;       /**> value to show */
-	uint32_t wd;       /**> ID under inotify */
+	long wd;           /**> ID under inotify */
 	int fd;            /**> fifo opened for r/w */
 	int state;         /**> what were currently waiting for */
 };

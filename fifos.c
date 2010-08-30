@@ -91,7 +91,7 @@ int fifos_update(struct fifos *f, thash *state)
 {
 	char *n, *v, *p;
 	int i, fd;
-	uint32_t wd;
+	long wd;
 	mmatic *mm = mmatic_create(); /* temp. memory */
 	struct fifos_el *data;
 
@@ -162,7 +162,7 @@ void fifos_read(struct fifos *f)
 
 	dbg(5, "fifos_read(): e.mask=%d\n", e.mask);
 
-	n = thash_get(f->wd2n, (void *) e.wd);
+	n = thash_get(f->wd2n, (void *) (long) e.wd);
 	if (!n) { dbg(e.mask == IN_IGNORED ? 9 : 0, "fifos_read(): unknown wd %d\n", e.wd); return; }
 
 	data = thash_get(f->data, n);
