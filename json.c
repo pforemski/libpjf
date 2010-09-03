@@ -299,8 +299,14 @@ static ut *parse_object(json *json)
 		if (!ut_ok(val)) return val;
 
 		c = SKIPWS();
-		if (!(c == ',' || c == '}'))
-			return err(json, 7, "object: expected ',' or '}'");
+		if (!(c == ',' || c == '}')) {
+			if (json->loose) {
+				UNGETC();
+				c = ',';
+			} else {
+				return err(json, 7, "object: expected ',' or '}'");
+			}
+		}
 
 		thash_set(hash, ut_char(key), val);
 

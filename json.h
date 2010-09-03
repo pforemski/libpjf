@@ -31,7 +31,9 @@ json *json_create(mmatic *mm);
 /** Set parser options */
 bool json_setopt(json *j, enum json_option o, long v);
 
-/** Parse given string into unitype node */
+/** Parse given string into unitype node
+ * Never fails. In case of syntax error will return a unitype err object.
+ * Given string is copied, not referenced */
 ut *json_parse(json *j, const char *txt);
 
 /** Print ut as text */
