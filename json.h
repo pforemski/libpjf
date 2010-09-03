@@ -13,13 +13,23 @@
 typedef struct json {
 	mmatic *mm;
 	int depth;          /** recurrency depth */
+	bool loose;         /** if true, be more permissive about standard strictness */
 
 	const char *txt;    /** text representation */
 	int i;              /** position in txt */
 } json;
 
+enum json_option {
+	JSON_LOOSE = 1
+};
+
+#define IS_LOOSE_KEYCHAR(c) (isalnum(c) || c == '-' || c == '_')
+
 /** Create json parser */
 json *json_create(mmatic *mm);
+
+/** Set parser options */
+bool json_setopt(json *j, enum json_option o, long v);
 
 /** Parse given string into unitype node */
 ut *json_parse(json *j, const char *txt);

@@ -63,18 +63,32 @@ static ut *err(json *json, int code, const char *msg)
 
 static ut *parse_string(json *json)
 {
+	bool loose = 0;
 	char c;
 	xstr *str = xstr_create("", json->mm);
 
 	c = SKIPWS();
-	if (c != '"')
-		return err(json, 8, "string: expected \" at the start");
+	if (c != '"') {
+		if (json->loose) { /* allow for keys in object without apostrophes */
+			loose = 1;
+			UNGETC();
+		} else {
+			return err(json, 8, "string: expected \" at the start");
+		}
+	}
 
-	while ((c = GETC()) && c != '"') {
+	while ((c = GETC())) {
+		if (c == '"') {
+			break;
+		} else if (loose && !IS_LOOSE_KEYCHAR(c)) {
+			UNGETC();
+			c = '"';
+			break;
+		}
+
 		if (c >= 0 && c <= 31) {
 			return err(json, 9, "string: control characters not allowed");
-		}
-		else if (c == '\\') {
+		} else if (c == '\\') {
 			c = GETC();
 			switch (c) {
 				case 'b': c = '\b'; break;
@@ -278,7 +292,7 @@ static ut *parse_object(json *json)
 		if (!ut_ok(key)) return key;
 
 		c = SKIPWS();
-		if (c != ':')
+		if (c != ':' && !(json->loose && c == '='))
 			return err(json, 6, "object: expected ':'");
 
 		val = parse_value(json);
@@ -316,8 +330,22 @@ json *json_create(mmatic *mm)
 	j->txt = NULL;
 	j->i = 0;
 	j->depth = 0;
+	j->loose = false;
 
 	return j;
+}
+
+bool json_setopt(json *j, enum json_option o, long v)
+{
+	switch (o) {
+		case JSON_LOOSE:
+			j->loose = (bool) v;
+			break;
+		default:
+			return false;
+	}
+
+	return true;
 }
 
 char *json_escape(json *json, const char *str)

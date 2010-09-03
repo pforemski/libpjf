@@ -41,16 +41,13 @@ int main(int argc, char *argv[])
 	mmatic *mm = mmatic_create();
 
 	json *js = json_create(mm);
+	json_setopt(js, JSON_LOOSE, true);
 
-	do {
-		ret = fgets(buf, sizeof(buf), stdin);
-
+	while ((ret = fgets(buf, sizeof(buf), stdin))) {
 		fputs(
 			rfc822_print(
 				json_parse(js, buf)), stdout);
-		fputc('\n', stdout);
-
-	} while (ret);
+	}
 
 	return 1;
 }

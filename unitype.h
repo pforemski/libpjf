@@ -122,6 +122,7 @@ ut *ut_new_utthash(thash *val, mmatic *mm);
 /* applicable for ut->type == T_HASH */
 ut *uth_get(ut *var, const char *key);
 ut *uth_set(ut *var, const char *key, ut *val);
+ut *uth_set_null(ut *ut, const char *key);
 ut *uth_set_bool(ut *ut, const char *key, bool val);
 ut *uth_set_int(ut *ut, const char *key, int val);
 ut *uth_set_double(ut *ut, const char *key, double val);
@@ -153,6 +154,7 @@ ut *ut_new_tlist(tlist *val, mmatic *mm);
 
 /* applicable for ut->type == T_LIST */
 ut *utl_add(ut *var, ut *val);
+ut *utl_add_null(ut *ut);
 ut *utl_add_bool(ut *ut, bool val);
 ut *utl_add_int(ut *ut, int val);
 ut *utl_add_double(ut *ut, double val);

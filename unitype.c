@@ -331,6 +331,11 @@ ut *uth_set(ut *var, const char *key, ut *val)
 	return val;
 }
 
+ut *uth_set_null(ut *var, const char *key)
+{
+	return uth_set(var, key, ut_new_null(var->mm));
+}
+
 ut *uth_set_bool(ut *var, const char *key, bool val)
 {
 	return uth_set(var, key, ut_new_bool(val, var->mm));
@@ -377,6 +382,11 @@ ut *utl_add(ut *var, ut *val)
 {
 	tlist_push(var->d.as_tlist, val);
 	return val;
+}
+
+ut *utl_add_null(ut *var)
+{
+	return utl_add(var, ut_new_null(var->mm));
 }
 
 ut *utl_add_bool(ut *var, bool val)
