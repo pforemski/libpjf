@@ -109,6 +109,9 @@ ut *ut_new_ptr(void *val, mmatic *mm);
 ut *ut_new_null(mmatic *mm);
 ut *ut_new_err(int code, const char *msg, const char *data, mmatic *mm);
 
+/** Create new ut err object out of current errno */
+#define ut_new_errno(mm) (ut_new_err(errno, strerror(errno), mmatic_printf((mm), "%s:%u", __FILE__, __LINE__), (mm)))
+
 /***** hash list *****/
 
 /** Create a ut containing given hash of string->string

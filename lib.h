@@ -85,6 +85,7 @@ void _die(const char *file, unsigned int line, const char *fn, char *msg, ...);
 #include "linux.h"
 #include "encode.h"
 #include "blowfish.h"
+#include "mime.h"
 
 /** Shortcut for programs using libasn */
 #define __USE_LIBASN int debug = 0; void (*debugcb)() = NULL;
