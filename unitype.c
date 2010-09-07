@@ -322,12 +322,13 @@ ut *ut_new_err(int code, const char *msg, const char *data, mmatic *mm)
 
 ut *uth_get(ut *var, const char *key)
 {
-	return thash_get(var->d.as_thash, key);
+	return (ut_is_thash(var) ? thash_get(var->d.as_thash, key) : NULL);
 }
 
 ut *uth_set(ut *var, const char *key, ut *val)
 {
-	thash_set(var->d.as_thash, key, val);
+	if (ut_is_thash(var))
+		thash_set(var->d.as_thash, key, val);
 	return val;
 }
 
@@ -380,7 +381,8 @@ ut *uth_set_ptr(ut *var, const char *key, void *ptr)
 
 ut *utl_add(ut *var, ut *val)
 {
-	tlist_push(var->d.as_tlist, val);
+	if (ut_is_tlist(var))
+		tlist_push(var->d.as_tlist, val);
 	return val;
 }
 
