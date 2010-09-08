@@ -43,9 +43,6 @@ typedef struct tlist {
 
 	/** Function used to free memory occupied by an element. */
 	void (*free_func)(void *val);
-
-	/** mmatic memory */
-	mmatic *mm;
 } tlist;
 
 /** Element of list */
@@ -67,14 +64,14 @@ struct tlist_el {
  * @param  free_func function to use to free an element; if NULL, then memory won't be freed
  * @note   always succeeds
  */
-tlist *tlist_create(void (*free_func)(void *val), mmatic *mm);
+tlist *tlist_create(void (*free_func)(void *val), void *mm);
 
 /** Wrapper around tlist_create() which tlist_push()es given arguments
  * @param  free_func function to use to free an element; if NULL, then memory won't be freed
  * @param  ...       arguments to tlist_push(); REMEMBER to end the list with \0
  * @remark the last argument should be \0
  */
-tlist *tlist_listify(void (*free_func)(void *val), mmatic *mm, ...);
+tlist *tlist_listify(void (*free_func)(void *val), void *mm, ...);
 
 /** Flushes a list
  * @param list the list to flush
@@ -126,7 +123,7 @@ void tlist_prepend(tlist *list, const void *val);
 /** Pops a value off the end */
 void *tlist_pop(tlist *list);
 
-/** Shift whole list left - ie. removes element and the beginning */
+/** Shift whole list left - ie. removes element at the beginning */
 void *tlist_shift(tlist *list);
 
 /** Insert value before the element pointed by the iterator
@@ -163,7 +160,7 @@ int tlist_size(tlist *list);
  * @param  list    list to stringify
  * @param  sep     separator (cant be null!)
  * @return char *  (always, even just an mm-ed "") */
-char *tlist_stringify(tlist *list, const char *sep, mmatic *mm);
+char *tlist_stringify(tlist *list, const char *sep, void *mm);
 
 /***/
 #define MMTLIST_CREATE(fn) (tlist_create((fn), mm))

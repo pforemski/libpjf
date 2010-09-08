@@ -57,15 +57,15 @@ static ut *err(json *json, int code, const char *msg)
 	return ut_new_err(
 		code,
 		msg,
-		mmatic_printf(json->mm, "i=%d", json->i), // TODO
-		json->mm);
+		mmatic_printf(json, "i=%d", json->i), // TODO
+		json);
 }
 
 static ut *parse_string(json *json)
 {
 	bool loose = 0;
 	char c;
-	xstr *str = xstr_create("", json->mm);
+	xstr *str = xstr_create("", json);
 
 	c = SKIPWS();
 	if (c != '"') {
@@ -115,7 +115,7 @@ static ut *parse_string(json *json)
 	if (c != '"')
 		return err(json, 11, "string: expected \" at the end");
 
-	return ut_new_xstr(str, json->mm);
+	return ut_new_xstr(str, json);
 }
 
 static ut *parse_number(json *json)
@@ -176,11 +176,11 @@ skipexpo:
 	if (dbl)
 		return ut_new_double(
 			(sign * ((long long) ival + frac)) * pow(10.0, (double) signexpo * expo),
-			json->mm);
+			json);
 	else
 		return ut_new_int(
 			sign * ival,
-			json->mm);
+			json);
 }
 
 static bool check_literal(json *json, const char *s)
@@ -194,7 +194,7 @@ static bool check_literal(json *json, const char *s)
 static ut *parse_true(json *json)
 {
 	if (check_literal(json, "true"))
-		return ut_new_bool(true, json->mm);
+		return ut_new_bool(true, json);
 	else
 		return err(json, 12, "true: expected \"true\"");
 }
@@ -202,7 +202,7 @@ static ut *parse_true(json *json)
 static ut *parse_false(json *json)
 {
 	if (check_literal(json, "false"))
-		return ut_new_bool(false, json->mm);
+		return ut_new_bool(false, json);
 	else
 		return err(json, 13, "false: expected \"false\"");
 }
@@ -210,7 +210,7 @@ static ut *parse_false(json *json)
 static ut *parse_null(json *json)
 {
 	if (check_literal(json, "null"))
-		return ut_new_null(json->mm);
+		return ut_new_null(json);
 	else
 		return err(json, 14, "null: expected \"null\"");
 }
@@ -237,7 +237,7 @@ static ut *parse_value(json *json)
 
 static ut *parse_array(json *json)
 {
-	tlist *list = tlist_create(NULL, json->mm);
+	tlist *list = tlist_create(NULL, json);
 	ut *val;
 	char c;
 
@@ -269,13 +269,13 @@ static ut *parse_array(json *json)
 		return err(json, 5, "array: expected ']'");
 
 	DEC_DEPTH();
-	return ut_new_uttlist(list, json->mm);
+	return ut_new_uttlist(list, json);
 }
 
 static ut *parse_object(json *json)
 {
 	char c;
-	thash *hash = thash_create(NULL, NULL, NULL, true, json->mm);
+	thash *hash = thash_create(NULL, NULL, NULL, true, json);
 	ut *key, *val;
 
 	c = SKIPWS();
@@ -318,7 +318,7 @@ static ut *parse_object(json *json)
 		return err(json, 19, "object: expected '}'");
 
 	DEC_DEPTH();
-	return ut_new_utthash(hash, json->mm);
+	return ut_new_utthash(hash, json);
 }
 
 ut *json_parse(json *json, const char *txt)
@@ -328,11 +328,10 @@ ut *json_parse(json *json, const char *txt)
 	return parse_value(json);
 }
 
-json *json_create(mmatic *mm)
+json *json_create(void *mm)
 {
 	json *j = mmalloc(sizeof(json));
 
-	j->mm = mm;
 	j->txt = NULL;
 	j->i = 0;
 	j->depth = 0;
@@ -358,7 +357,7 @@ char *json_escape(json *json, const char *str)
 {
 	bool bs;
 	char c;
-	xstr *xs = xstr_create("", json->mm);
+	xstr *xs = xstr_create("", json);
 
 	xstr_reserve(xs, 1.1 * strlen(str));
 
@@ -386,7 +385,7 @@ char *json_escape(json *json, const char *str)
 
 char *json_print(json *json, ut *var)
 {
-	mmatic *mm = json->mm;
+	void *mm = json;
 	char *k, *str;
 	ut *el;
 	xstr *xs;

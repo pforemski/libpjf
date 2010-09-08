@@ -2,8 +2,8 @@
  * mmatic - memory allocation manager, or a manual garbage collector
  *
  * This file is part of libasn
- * Copyright (C) 2005-2009 ASN Sp. z o.o.
- * Author: Pawel Foremski <pjf@asn.pl>
+ * Copyright (C) 2005-2010 ASN Sp. z o.o.
+ * Author: Pawel Foremski <pforemski@asn.pl>
  *
  * libasn is free software; you can redistribute it and/or modify it under
  * the terms of the GNU General Public License as published by the Free
@@ -34,123 +34,54 @@
 struct mmatic;
 
 typedef struct mmchunk {
-	/** Allocation type */
-	bool shared;
-
-	/** Number of bytes allocated for this chunk */
-	unsigned int alloc;
-
-	/** Source code file which requested allocation */
-	const char *cfile;
-
-	/** Source code line which requested allocation */
-	unsigned int cline;
-
-	/** Next chunk */
-	struct mmchunk *next;
-
-	/** Previus chunk */
-	struct mmchunk *prev;
-
-	/** Manager */
-	struct mmatic *mgr;
+	uint32_t tag;              /** For sanity checks */
+	struct mmatic *mgr;        /** Manager */
+	struct mmchunk *next;      /** Next chunk */
+	struct mmchunk *prev;      /** Previus chunk */
+	const char *cfile;         /** Source code file which requested allocation */
+	unsigned int cline;        /** Source code line which requested allocation */
+	unsigned long alloc;       /** Number of bytes allocated for this chunk */
+	bool shared;               /** Allocation type */
 } mmchunk;
 
 typedef struct mmatic {
-	/** First chunk */
-	mmchunk *first;
-
-	/** Last chunk */
-	mmchunk *last;
-
-	/** Total allocation */
-	unsigned int totalloc;
+	uint32_t tag;              /** For sanity checks */
+	mmchunk *first;            /** First chunk */
+	mmchunk *last;             /** Last chunk */
+	unsigned int totalloc;     /** Total allocation */
 } mmatic;
 
-/*
- * Functions
- */
+/*****************************************************************************/
+
 /** Creates new mmatic object */
-mmatic *mmatic_create(void);
-
-/** Hacky shortcut to initialize a new mmatic under the default symbol name */
-#define MMNEW() mmatic *mm = mmatic_create()
-
-/** A shortcut for freeing the default mm */
-#define MMEND() mmatic_free(mm)
+void *mmatic_create(void);
 
 /** mmatic memory allocator
- * @remark it sits in *.h because its inline
- * @param size      amount of memory to allocate (bytes)
- * @param mgr       memory manager
- * @param zero      set memory to 0 after allocation
- * @param shared    use mmap() and make memory writable after fork()
- * @param start     memory start address for mmap() to use
- * @param flags     additional flags for mmap()
- * @param cfile     C source code file
- * @param cline     C source code line
- * @note the start and flags arguments are ignored when shared is 0
- */
-static inline void *mmatic_allocate(
-	size_t size, mmatic *mgr, bool zero,
-	bool shared, void *start, int flags,
-	const char *cfile, unsigned int cline)
-{
-	mmchunk *chunk;
-	void *ptr;
+ * @param size        amount of memory to allocate (bytes)
+ * @param mgr_or_mem  memory manager or any variable allocated in mmatic
+ * @param zero        set memory to 0 after allocation
+ * @param shared      use mmap() and make memory writable after fork()
+ * @param start       memory start address for mmap() to use
+ * @param flags       additional flags for mmap()
+ * @param cfile       C source code file
+ * @param cline       C source code line
+ * @note the start and flags arguments are ignored when shared is 0 */
+void *mmatic_allocate(size_t size, void *mgr_or_mem, bool zero, bool shared, void *start, int flags,
+	const char *cfile, unsigned int cline);
 
-	chunk = (shared) ?
-		mmap(start, sizeof(mmchunk) + size, PROT_READ|PROT_WRITE, MAP_SHARED|MAP_ANONYMOUS|flags, 0, 0) :
-		malloc(sizeof(mmchunk) + size);
-	if (!chunk) _exit(150);
-
-	chunk->shared   = shared;
-	chunk->alloc    = size;
-	chunk->cfile    = cfile;
-	chunk->cline    = cline;
-	chunk->next     = NULL;
-	chunk->prev     = mgr->last;
-	chunk->mgr      = mgr;
-	mgr->last->next = chunk;
-	mgr->last       = chunk;
-	mgr->totalloc  += size;
-
-	ptr = ((uint8_t *) chunk) + sizeof(mmchunk); /* XXX */
-	return zero ? memset(ptr, 0, size) : ptr;
-}
-
-#define mmatic_alloc(size, mgr)   mmatic_allocate((size), (mgr), 0, 0, NULL, 0, __FILE__, __LINE__)
-#define mmatic_shalloc(size, mgr) mmatic_allocate((size), (mgr), 0, 1, NULL, 0, __FILE__, __LINE__)
+#define mmatic_alloc(size, mgr)   mmatic_allocate((size), ((void *) mgr), 0, 0, NULL, 0, __FILE__, __LINE__)
+#define mmatic_shalloc(size, mgr) mmatic_allocate((size), ((void *) mgr), 0, 1, NULL, 0, __FILE__, __LINE__)
 #define mmalloc(size)   mmatic_alloc((size), mm)
 #define mmshalloc(size) mmatic_shalloc((size), mm)
 
-#define mmatic_zalloc(size, mgr)   mmatic_allocate((size), (mgr), 1, 0, NULL, 0, __FILE__, __LINE__)
-#define mmatic_shzalloc(size, mgr) mmatic_allocate((size), (mgr), 1, 1, NULL, 0, __FILE__, __LINE__)
+#define mmatic_zalloc(size, mgr)   mmatic_allocate((size), ((void *) mgr), 1, 0, NULL, 0, __FILE__, __LINE__)
+#define mmatic_shzalloc(size, mgr) mmatic_allocate((size), ((void *) mgr), 1, 1, NULL, 0, __FILE__, __LINE__)
 #define mmzalloc(size)   mmatic_zalloc((size), mm)
 #define mmzshalloc(size) mmatic_zshalloc((size), mm)
 
-/** Frees all memory and destroys given manager
- * @param mgr       memory manager
- * @note sets *mgr = 0 */
-void mmatic_free_(mmatic **mgr);
-#define mmatic_free(a) (mmatic_free_(&(a)))
-#define mmfree() (mmatic_free(mm))
-
-/** Frees one specific pointer
- * @param mem       memory from mmatic_alloc()
- * @note set *mem = 0 */
-void mmatic_freeptr_(void **mem);
-#define mmatic_freeptr(a) (mmatic_freeptr_((void **) &(a)))
-
-/** A counterpart to mmatic_freeptr which doesnt do mem=0 */
-void mmatic_freeptrs(void *ptr);
-#define mmfreeptr mmatic_freeptrs
-
-/** Print memory usage summary */
-void mmatic_summary(mmatic *mgr, int dbglevel);
-#define mmsummary(lvl) (mmatic_summary(mm, (lvl)))
-
-void *mmatic_realloc_(void *mem, size_t size, mmatic *mgr, const char *cfile, unsigned int cline);
+/** Reallocate memory, possibly changing manager and/or size
+ * @param mgr_or_mem    see mmatic_allocate(), may be NULL = no manager change */
+void *mmatic_realloc_(void *mem, size_t size, void *mgr_or_mem, const char *cfile, unsigned int cline);
 
 /** Allocate bigger chunk and copy contents
  * @param mem   already allocated memory to be moved
@@ -160,52 +91,57 @@ void *mmatic_realloc_(void *mem, size_t size, mmatic *mgr, const char *cfile, un
 /** Move chunk to another mgr
  * @param mem    already allocated memory to be moved
  * @param newmgr new mgr */
-#define mmatic_move(mem, newmgr) mmatic_realloc_((mem), 0, (newmgr), __FILE__, __LINE__)
+#define mmatic_move(mem, newmgr) mmatic_realloc_((mem), 0, ((void *) newmgr), __FILE__, __LINE__)
 
-/** Checks if ptr was allocated at given manager
- * @param mem ptr
- * @retval 1 yes
- * @retval 0 no */
-int mmatic_isof(void *mem, mmatic *mm);
+/*****************************************************************************/
 
-/*********************/
-/***   Utilities   ***/
-/*********************/
+/** Frees all memory and destroys given manager
+ * @param mgr_or_mem    memory manager or memory (see mmatic_allocate())
+ * @note sets *mgr = 0 */
+void mmatic_free_(void **mgr_or_mem, const char *cfile, unsigned int cline);
+#define mmatic_free(a) mmatic_free_((void **) &(a), __FILE__, __LINE__)
+#define mmfree() mmatic_free(mm, __FILE__, __LINE__)
+
+/** Frees one specific pointer
+ * @param mem       memory from mmatic_alloc()
+ * @note set *mem = 0 */
+void mmatic_freeptr_(void **mem);
+#define mmatic_freeptr(a) mmatic_freeptr_((void **) &(a))
+
+/** A counterpart to mmatic_freeptr which doesnt do mem=0 */
+void mmatic_freeptrs(void *ptr);
+#define mmfreeptr mmatic_freeptrs
+
+/*****************************************************************************/
+
+/** Print memory usage summary */
+void mmatic_summary(mmatic *mgr, int dbglevel);
+#define mmsummary(lvl) (mmatic_summary(mm, (lvl)))
 
 /** strdup() using mmatic_alloc
  * @param s         string to duplicate
  * @param cfile     C source code file
  * @param cline     C source code line
  */
-static inline char *_mmatic_strdup(const char *s, mmatic *mgr, const char *cfile, unsigned int cline)
+static inline char *_mmatic_strdup(const char *s, void *mgr, const char *cfile, unsigned int cline)
 {
 	char *newm;
 	newm = mmatic_allocate(strlen(s) + 1, mgr, 0, 0, NULL, 0, cfile, cline);
 	strcpy(newm, s);
 	return newm;
 }
-#define mmatic_strdup(str, mgr) (_mmatic_strdup(str, mgr, __FILE__, __LINE__))
+#define mmatic_strdup(str, mgr) (_mmatic_strdup(str, (void *) mgr, __FILE__, __LINE__))
 #define mmstrdup(str) (mmatic_strdup((str), mm))
-
-/** Wrapper around malloc() which prints an error message and exits() with 1 in
- * case of an error
- *
- * @param size same as in stdlib's malloc()
- */
-void *asn_malloc(size_t size);
 
 /** An in-place snprintf()
  * @return allocated buffer, filled using snprintf()
  */
-char *mmatic_printf(mmatic *mm, const char *fmt, ...);
-#define mmprintf(...) (mmatic_printf(mm, __VA_ARGS__))
-
-/** mmatic_printf() using asn_malloc() */
-char *asn_malloc_printf(const char *fmt, ...);
-#define tmprintf asn_malloc_printf
+char *mmatic_printf_(void *mm, const char *fmt, ...);
+#define mmatic_printf(mm, ...) mmatic_printf_((void *) mm, __VA_ARGS__)
+#define mmprintf(...) mmatic_printf(mm, __VA_ARGS__)
 
 /** Generic struct maker: allocates memory for given struct and fills it with given data */
-#define mmatic_make(mmatic, type, ...) memcpy(mmatic_alloc(sizeof(type), (mmatic)), &(type){ __VA_ARGS__ }, sizeof(type))
+#define mmatic_make(mgr, type, ...) memcpy(mmatic_alloc(sizeof(type), (mgr)), &(type){ __VA_ARGS__ }, sizeof(type))
 
 /** A wrapper around mmatic_make() which uses global "mm" object */
 #define mmake(type, ...) mmatic_make(mm, type, __VA_ARGS__)

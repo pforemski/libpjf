@@ -64,7 +64,7 @@ static struct item *loop = NULL;
 static size_t n_strings = 0;
 
 /* Create a new item/node for STR.  */
-static struct item *new_item(const char *str, mmatic *mm)
+static struct item *new_item(const char *str, void *mm)
 {
 	struct item *k = mmalloc(sizeof *k);
 
@@ -87,7 +87,7 @@ static struct item *new_item(const char *str, mmatic *mm)
  This is done according to Algorithm A (Balanced tree search and
  insertion) in Donald E. Knuth, The Art of Computer Programming,
  Volume 3/Searching and Sorting, pages 455--457.  */
-static struct item *search_item(struct item *root, const char *str, mmatic *mm)
+static struct item *search_item(struct item *root, const char *str, void *mm)
 {
 	struct item *p, *q, *r, *s, *t;
 	int a;
@@ -202,7 +202,7 @@ static struct item *search_item(struct item *root, const char *str, mmatic *mm)
 }
 
 /* Record the fact that J precedes K.  */
-static void record_relation(struct item *j, struct item *k, mmatic *mm)
+static void record_relation(struct item *j, struct item *k, void *mm)
 {
 	struct successor *p;
 
@@ -336,7 +336,7 @@ static void walk_tree (struct item *root, int (*action) (struct item *))
 		recurse_tree(root->right, action);
 }
 
-int asn_tsort(tlist *input, tlist *output, mmatic *mm)
+int asn_tsort(tlist *input, tlist *output, void *mm)
 {
 	int ok = 1;
 	struct item *root;

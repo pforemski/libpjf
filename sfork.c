@@ -65,7 +65,7 @@ pid_t asn_fork(const char *cmd, const char *args, thash *env,
 		/* set environment */
 		if (env) {
 			THASH_ITER_LOOP(env, key, val)
-				putenv(tmprintf("%s=%s", key, val));
+				putenv(asn_malloc_printf("%s=%s", key, val));
 		}
 
 		/* close all unneeded fds */

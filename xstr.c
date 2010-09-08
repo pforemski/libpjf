@@ -28,7 +28,7 @@
 
 #include "lib.h"
 
-#define xmmalloc(size) (mmatic_alloc((size), xs->mm))
+#define xmmalloc(size) (mmatic_alloc((size), xs))
 
 /**
  * @file xstr.c
@@ -36,24 +36,23 @@
  * appending.
  */
 
-xstr *xstr_create(const char *str, mmatic *mm)
+xstr *xstr_create(const char *str, void *mm)
 {
 	xstr *new = mmalloc(sizeof(xstr));
 	xstr_init_val(new, (str) ? str : "", mm);
 	return new;
 }
 
-void xstr_init(xstr *sx, mmatic *mm)
+void xstr_init(xstr *sx, void *mm)
 {
 	xstr_init_val(sx, "", mm);
 }
 
-void xstr_init_val(xstr *sx, const char *ch, mmatic *mm)
+void xstr_init_val(xstr *sx, const char *ch, void *mm)
 {
 	sx->s = 0;
 	sx->len = 0;
 	sx->a = 0;
-	sx->mm = mm;
 	xstr_set(sx, ch);
 }
 
@@ -62,7 +61,7 @@ char *xstr_to_char(xstr *sx)
 	return sx->s;
 }
 
-char *xstr_dup(xstr *sx, mmatic *mm)
+char *xstr_dup(xstr *sx, void *mm)
 {
 	char *ret;
 
@@ -182,7 +181,7 @@ char *xstr_strip(xstr *xs)
 	return ret;
 }
 
-char *xstr_stripch(char *string, mmatic *mm)
+char *xstr_stripch(char *string, void *mm)
 {
 	xstr xs;
 	char *s;

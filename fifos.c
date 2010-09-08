@@ -32,7 +32,7 @@
 
 struct fifos *fifos_init(const char *dir)
 {
-	mmatic *mm = mmatic_create();
+	void *mm = mmatic_create();
 	struct fifos *f = mmalloc(sizeof(struct fifos));
 	int i, fd;
 	struct dirent **ls;
@@ -42,17 +42,15 @@ struct fifos *fifos_init(const char *dir)
 	f->data  = MMTHASH_CREATE_STR(mmfreeptr);
 	f->fd    = inotify_init();
 	f->wd2n  = MMTHASH_CREATE_PTR(mmfreeptr); /* strings indexed by integers (equiv. to pointers) */
-	f->mm    = mm;
 
 	if (asn_isdir(f->dir) == -1) {
-		asn_mkdir(f->dir, f->mm, NULL); /* XXX: dont care about errors */
-	}
-	else {
+		asn_mkdir(f->dir, f, NULL); /* XXX: dont care about errors */
+	} else {
 		i = scandir(f->dir, &ls, 0, alphasort);
 		if (i < 0) { dbg(1, "fifos_init(%s): %m\n", f->dir); return f; }
 
 		while (i--) {
-			p = tmprintf("%s/%s", f->dir, ls[i]->d_name);
+			p = asn_malloc_printf("%s/%s", f->dir, ls[i]->d_name);
 			if (asn_isfifo(p) > 0) {
 				fd = open(p, O_RDWR); /* in case someone is waiting */
 				unlink(p);
@@ -80,10 +78,10 @@ void fifos_deinit(struct fifos *f)
 	thash_reset(f->data);
 	while (thash_iter(f->data, &n)) {
 		dbg(8, "fifos_deinit(): removing %s\n", n);
-		unlink(mmatic_printf(f->mm, "%s/%s", f->dir, n));
+		unlink(mmatic_printf(f, "%s/%s", f->dir, n));
 	}
 
-	mmatic_free(f->mm);
+	mmatic_free(f);
 	f = 0;
 }
 
@@ -92,7 +90,7 @@ int fifos_update(struct fifos *f, thash *state)
 	char *n, *v, *p;
 	int i, fd;
 	long wd;
-	mmatic *mm = mmatic_create(); /* temp. memory */
+	void *mm = mmatic_create(); /* temp. memory */
 	struct fifos_el *data;
 
 	/* handle new */
@@ -100,9 +98,8 @@ int fifos_update(struct fifos *f, thash *state)
 	while ((v = thash_iter(state, &n))) {
 		if ((data = thash_get(f->data, n))) { /* just update the value */
 			mmatic_freeptr(data->value);
-			data->value = mmatic_strdup(v, f->mm);
-		}
-		else {
+			data->value = mmatic_strdup(v, f);
+		} else {
 			p = mmprintf("%s/%s", f->dir, n);
 			if (mkfifo(p, 0666) < 0) { dbg(1, "mkfifo(%s): %m\n", p); continue; }
 
@@ -112,14 +109,14 @@ int fifos_update(struct fifos *f, thash *state)
 			wd = inotify_add_watch(f->fd, p, IN_OPEN | IN_CLOSE);
 			if (wd < 0) { dbg(1, "inotify_add_watch(%s): %m\n", p); continue; }
 
-			data         = mmatic_alloc(sizeof(*data), f->mm);
-			data->value  = mmatic_strdup(v, f->mm);  /* XXX: copy the value */
+			data         = mmatic_alloc(sizeof(*data), f);
+			data->value  = mmatic_strdup(v, f);  /* XXX: copy the value */
 			data->wd     = wd;
 			data->fd     = fd;
 			data->state  = 1;
 
 			thash_set(f->data, n, data);
-			thash_set(f->wd2n, (void *) wd, mmatic_strdup(n, f->mm));
+			thash_set(f->wd2n, (void *) wd, mmatic_strdup(n, f));
 
 			dbg(8, "fifos_update(): added watch on %s\n", p);
 		}
@@ -168,14 +165,14 @@ void fifos_read(struct fifos *f)
 	data = thash_get(f->data, n);
 	if (!data) die("fifos_read(): no data for '%s' (wd %d)\n", n, e.wd);
 
-	p = tmprintf("%s/%s", f->dir, n);
+	p = asn_malloc_printf("%s/%s", f->dir, n);
 	switch (e.mask) {
 		case IN_OPEN:
 			dbg(11, "fifos_read(): IN_OPEN\n");
 			if (data->state == 4) { data->state = 1; goto fr_end; }
 			else if (data->state != 1) goto fr_end;
 
-			v = tmprintf("%s", data->value);
+			v = asn_malloc_printf("%s", data->value);
 			i = write(data->fd, v, strlen(v));
 			if (i < 0) dbg(0, "fifos_read(): write(): %m\n");
 

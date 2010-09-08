@@ -23,7 +23,7 @@
 
 #include "lib.h"
 
-static void _asn_fcdir(thash *hash, const char *path, mmatic *mm)
+static void _asn_fcdir(thash *hash, const char *path, void *mm)
 {
 	struct dirent *dirp;
 	DIR *subd;
@@ -55,7 +55,7 @@ static void _asn_fcdir(thash *hash, const char *path, mmatic *mm)
 	closedir(subd);
 }
 
-thash *asn_fcdir(const char *path, mmatic *mm)
+thash *asn_fcdir(const char *path, void *mm)
 {
 	thash *ret;
 	char *pwd;
@@ -84,7 +84,7 @@ const char *asn_fcget(thash *hash, const char *path)
 	return value;
 }
 
-tlist *asn_fcparselist(const char *listorder, mmatic *mm)
+tlist *asn_fcparselist(const char *listorder, void *mm)
 {
 	char *buf;
 	int i, j, l;

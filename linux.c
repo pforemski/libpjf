@@ -29,7 +29,7 @@
 
 #include "lib.h"
 
-ut *asn_ipa(bool index_by_ip, mmatic *mm)
+ut *asn_ipa(bool index_by_ip, void *mm)
 {
 	int len;
 	char buf[16384];

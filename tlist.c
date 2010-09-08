@@ -24,21 +24,20 @@
 
 #include "lib.h"
 
-#define tmmalloc(size) (mmatic_alloc((size), list->mm))
+#define tmmalloc(size) (mmatic_alloc((size), list))
 
-tlist *tlist_create(void (*free_func)(void *val), mmatic *mm)
+tlist *tlist_create(void (*free_func)(void *val), void *mm)
 {
 	tlist *ret = mmalloc(sizeof(tlist));
 
 	ret->head = ret->tail = ret->current = NULL;
 	ret->free_func = free_func;
-	ret->mm = mm;
 	ret->size = 0;
 
 	return ret;
 }
 
-tlist *tlist_listify(void (*free_func)(void *val), mmatic *mm, ...)
+tlist *tlist_listify(void (*free_func)(void *val), void *mm, ...)
 {
 	va_list args;
 	const void *arg;
@@ -253,7 +252,7 @@ void tlist_insertafter(tlist *list, const void *val)
 	INSERT_EL(list->current->next, list->current, list->tail);
 }
 
-char *tlist_stringify(tlist *list, const char *sep, mmatic *mm)
+char *tlist_stringify(tlist *list, const char *sep, void *mm)
 {
 	int l = 0, sl = strlen(sep);
 	char *s, *ret, *p;

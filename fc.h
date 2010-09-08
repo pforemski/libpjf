@@ -27,7 +27,7 @@
 /** Read recursively a Flatconf datatree
  * @return thash - keys are relative paths (e.g. "foo", "foo/bar/woo")
  * @param  path   directory path */
-thash *asn_fcdir(const char *path, mmatic *mm);
+thash *asn_fcdir(const char *path, void *mm);
 
 /** A safe wrapper around thash_get to fetch config values
  * @param hash   configuration hash returned from asn_fcdir()
@@ -43,6 +43,6 @@ struct fcel {
 
 /** Return a list of struct fcel representing contents of given list
  * @param  listorder  contents of *.order file */
-tlist *asn_fcparselist(const char *listorder, mmatic *mm);
+tlist *asn_fcparselist(const char *listorder, void *mm);
 
 #endif /* _FC_H_ */

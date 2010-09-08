@@ -1,7 +1,7 @@
 /*
  * This file is part of libasn
- * Copyright (C) 2009 ASN Sp. z o.o.
- * Author: Pawel Foremski <pjf@asn.pl>
+ * Copyright (C) 2009-2010 ASN Sp. z o.o.
+ * Author: Pawel Foremski <pf:remski@asn.pl>
  *
  * libasn is free software; you can redistribute it and/or modify it under
  * the terms of the GNU General Public License as published by the Free
@@ -18,6 +18,8 @@
  */
 
 #include "lib.h"
+
+#define mm var
 
 bool   ut_bool(ut *var)
 {
@@ -65,7 +67,6 @@ xstr  *ut_xstr(ut *var)
 	char buf[BUFSIZ], *key;
 	xstr *xs;
 	ut *el;
-	mmatic *mm = var->mm;
 
 	switch (var->type) {
 		case T_STRING:
@@ -121,7 +122,6 @@ tlist *ut_tlist(ut *var)
 	tlist *list;
 	char *key;
 	ut *el;
-	mmatic *mm = var->mm;
 
 	switch (var->type) {
 		case T_LIST:
@@ -139,8 +139,6 @@ tlist *ut_tlist(ut *var)
 thash *ut_thash(ut *var)
 {
 	if (!var) return NULL;
-
-	mmatic *mm = var->mm;
 
 	switch (var->type) {
 		case T_HASH:
@@ -172,11 +170,9 @@ const char *ut_err(ut *var)
 {
 	if (var && var->type == T_ERR) {
 		if (var->d.as_err->data)
-			return mmatic_printf(var->mm, "#%d: %s (%s)",
-				var->d.as_err->code, var->d.as_err->msg, var->d.as_err->data);
+			return mmprintf("#%d: %s (%s)", var->d.as_err->code, var->d.as_err->msg, var->d.as_err->data);
 		else
-			return mmatic_printf(var->mm, "#%d: %s",
-				var->d.as_err->code, var->d.as_err->msg);
+			return mmprintf("#%d: %s", var->d.as_err->code, var->d.as_err->msg);
 	}
 	else {
 		return "";
@@ -193,67 +189,62 @@ int ut_errcode(ut *var)
 
 /****************************************************************/
 
-ut *ut_new_bool(bool val, mmatic *mm)
+ut *ut_new_bool(bool val, void *mm)
 {
 	ut *ret = mmatic_alloc(sizeof(struct ut), mm);
 
-	ret->mm = mm;
 	ret->type = T_BOOL;
 	ret->d.as_bool= val;
 
 	return ret;
 }
 
-ut *ut_new_int(int val, mmatic *mm)
+ut *ut_new_int(int val, void *mm)
 {
 	ut *ret = mmatic_alloc(sizeof(struct ut), mm);
 
-	ret->mm = mm;
 	ret->type = T_INT;
 	ret->d.as_int = val;
 
 	return ret;
 }
 
-ut *ut_new_double(double val, mmatic *mm)
+ut *ut_new_double(double val, void *mm)
 {
 	ut *ret = mmatic_alloc(sizeof(struct ut), mm);
 
-	ret->mm = mm;
 	ret->type = T_DOUBLE;
 	ret->d.as_double = val;
 
 	return ret;
 }
 
-ut *ut_new_char(const char *val, mmatic *mm)
+ut *ut_new_char(const char *val, void *mm)
 {
 	return ut_new_xstr(xstr_create(val ? val : "", mm), mm);
 }
 
-ut *ut_new_xstr(xstr *val, mmatic *mm)
+ut *ut_new_xstr(xstr *val, void *mm)
 {
 	ut *ret = mmatic_alloc(sizeof(struct ut), mm);
 
-	ret->mm = mm;
 	ret->type = T_STRING;
 	ret->d.as_xstr = val ? val : MMXSTR_CREATE("");
 
 	return ret;
 }
 
-ut *ut_new_uttlist(tlist *val, mmatic *mm)
+ut *ut_new_uttlist(tlist *val, void *mm)
 {
 	ut *ret = mmatic_alloc(sizeof(struct ut), mm);
 
-	ret->mm = mm;
 	ret->type = T_LIST;
 	ret->d.as_tlist = val ? val : MMTLIST_CREATE(NULL); /* TODO: make a freeing system */
 
 	return ret;
 }
 
-ut *ut_new_tlist(tlist *val, mmatic *mm)
+ut *ut_new_tlist(tlist *val, void *mm)
 {
 	char *v;
 	ut *ret = ut_new_uttlist(NULL, mm);
@@ -262,18 +253,17 @@ ut *ut_new_tlist(tlist *val, mmatic *mm)
 	return ret;
 }
 
-ut *ut_new_utthash(thash *val, mmatic *mm)
+ut *ut_new_utthash(thash *val, void *mm)
 {
 	ut *ret = mmatic_alloc(sizeof(struct ut), mm);
 
-	ret->mm = mm;
 	ret->type = T_HASH;
 	ret->d.as_thash = val ? val : MMTHASH_CREATE_STR(NULL); /* TODO: make a freeing system */
 
 	return ret;
 }
 
-ut *ut_new_thash(thash *val, mmatic *mm)
+ut *ut_new_thash(thash *val, void *mm)
 {
 	char *k, *v;
 	ut *ret = ut_new_utthash(NULL, mm);
@@ -282,32 +272,29 @@ ut *ut_new_thash(thash *val, mmatic *mm)
 	return ret;
 }
 
-ut *ut_new_ptr(void *val, mmatic *mm)
+ut *ut_new_ptr(void *val, void *mm)
 {
 	ut *ret = mmatic_alloc(sizeof(struct ut), mm);
 
-	ret->mm = mm;
 	ret->type = T_PTR;
 	ret->d.as_ptr = val;
 
 	return ret;
 }
 
-ut *ut_new_null(mmatic *mm)
+ut *ut_new_null(void *mm)
 {
 	ut *ret = mmatic_alloc(sizeof(struct ut), mm);
 
-	ret->mm = mm;
 	ret->type = T_NULL;
 
 	return ret;
 }
 
-ut *ut_new_err(int code, const char *msg, const char *data, mmatic *mm)
+ut *ut_new_err(int code, const char *msg, const char *data, void *mm)
 {
 	ut *ret = mmatic_alloc(sizeof(struct ut), mm);
 
-	ret->mm = mm;
 	ret->type = T_ERR;
 	ret->d.as_err = mmatic_alloc(sizeof(struct ut_err), mm);
 
@@ -334,47 +321,47 @@ ut *uth_set(ut *var, const char *key, ut *val)
 
 ut *uth_set_null(ut *var, const char *key)
 {
-	return uth_set(var, key, ut_new_null(var->mm));
+	return uth_set(var, key, ut_new_null(var));
 }
 
 ut *uth_set_bool(ut *var, const char *key, bool val)
 {
-	return uth_set(var, key, ut_new_bool(val, var->mm));
+	return uth_set(var, key, ut_new_bool(val, var));
 }
 
 ut *uth_set_int(ut *var, const char *key, int val)
 {
-	return uth_set(var, key, ut_new_int(val, var->mm));
+	return uth_set(var, key, ut_new_int(val, var));
 }
 
 ut *uth_set_double(ut *var, const char *key, double val)
 {
-	return uth_set(var, key, ut_new_double(val, var->mm));
+	return uth_set(var, key, ut_new_double(val, var));
 }
 
 ut *uth_set_char(ut *var, const char *key, const char *val)
 {
-	return uth_set(var, key, ut_new_char(val, var->mm));
+	return uth_set(var, key, ut_new_char(val, var));
 }
 
 ut *uth_set_xstr(ut *var, const char *key, xstr *val)
 {
-	return uth_set(var, key, ut_new_xstr(val, var->mm));
+	return uth_set(var, key, ut_new_xstr(val, var));
 }
 
 ut *uth_set_tlist(ut *var, const char *key, tlist *val)
 {
-	return uth_set(var, key, ut_new_tlist(val, var->mm));
+	return uth_set(var, key, ut_new_tlist(val, var));
 }
 
 ut *uth_set_thash(ut *var, const char *key, thash *val)
 {
-	return uth_set(var, key, ut_new_thash(val, var->mm));
+	return uth_set(var, key, ut_new_thash(val, var));
 }
 
 ut *uth_set_ptr(ut *var, const char *key, void *ptr)
 {
-	return uth_set(var, key, ut_new_ptr(ptr, var->mm));
+	return uth_set(var, key, ut_new_ptr(ptr, var));
 }
 
 /****************************************************************/
@@ -388,45 +375,45 @@ ut *utl_add(ut *var, ut *val)
 
 ut *utl_add_null(ut *var)
 {
-	return utl_add(var, ut_new_null(var->mm));
+	return utl_add(var, ut_new_null(var));
 }
 
 ut *utl_add_bool(ut *var, bool val)
 {
-	return utl_add(var, ut_new_bool(val, var->mm));
+	return utl_add(var, ut_new_bool(val, var));
 }
 
 ut *utl_add_int(ut *var, int val)
 {
-	return utl_add(var, ut_new_int(val, var->mm));
+	return utl_add(var, ut_new_int(val, var));
 }
 
 ut *utl_add_double(ut *var, double val)
 {
-	return utl_add(var, ut_new_double(val, var->mm));
+	return utl_add(var, ut_new_double(val, var));
 }
 
 ut *utl_add_char(ut *var, const char *val)
 {
-	return utl_add(var, ut_new_char(val, var->mm));
+	return utl_add(var, ut_new_char(val, var));
 }
 
 ut *utl_add_xstr(ut *var, xstr *val)
 {
-	return utl_add(var, ut_new_xstr(val, var->mm));
+	return utl_add(var, ut_new_xstr(val, var));
 }
 
 ut *utl_add_tlist(ut *var, tlist *val)
 {
-	return utl_add(var, ut_new_tlist(val, var->mm));
+	return utl_add(var, ut_new_tlist(val, var));
 }
 
 ut *utl_add_thash(ut *var, thash *val)
 {
-	return utl_add(var, ut_new_thash(val, var->mm));
+	return utl_add(var, ut_new_thash(val, var));
 }
 
 ut *utl_add_ptr(ut *var, void *ptr)
 {
-	return utl_add(var, ut_new_ptr(ptr, var->mm));
+	return utl_add(var, ut_new_ptr(ptr, var));
 }

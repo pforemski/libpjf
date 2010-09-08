@@ -37,8 +37,6 @@ struct fifos {
 	int fd;            /**> inotify fd */
 	thash *data;       /**> current state "on disk", name => struct fifos_el */
 	thash *wd2n;       /**> for inotify, wd => name */
-
-	mmatic *mm;        /**> our memory */
 };
 
 /** Inits fifos in given dir

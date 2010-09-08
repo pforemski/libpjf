@@ -54,7 +54,7 @@ typedef void (*loop_timeout_cb)(uint32_t delay, void *prv);
  *                    under Linux, value of timeout_ms is updated to reflect the amount of time left
  * @retval NULL       no result or no fd ready, repeat (e.g. select() interrupted)
  * @return            a NEW thash with elements REFERENCING elements of fdlist, for which FDs are ready for reading */
-thash *asn_rselect(thash *fdlist, uint32_t *timeout_ms, mmatic *mm);
+thash *asn_rselect(thash *fdlist, uint32_t *timeout_ms, void *mm);
 
 /** Initialize generic main event loop */
 void asn_loop_init(void);

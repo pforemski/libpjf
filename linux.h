@@ -27,6 +27,6 @@
 /** Fetch all IPv4 addresses on all interfaces
  * @param index_by_ip   if false, returns IPs indexed by interfaces, swapped otherwise
  * @retval NULL         request failed, error message sent to dbg() */
-ut *asn_ipa(bool index_by_ip, mmatic *mm);
+ut *asn_ipa(bool index_by_ip, void *mm);
 
 #endif /* _LINUX_H_ */

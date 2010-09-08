@@ -23,8 +23,6 @@
 #include "lib.h"
 
 typedef struct ut {
-	mmatic *mm;
-
 	enum ut_type {
 		T_PTR,       /* void*  */
 		T_BOOL,      /* bool   */
@@ -100,14 +98,14 @@ void       *ut_ptr(ut *ut);
 
 /***** create new unitype object - never fail ******/
 
-ut *ut_new_bool(bool val, mmatic *mm);
-ut *ut_new_int(int val, mmatic *mm);
-ut *ut_new_double(double val, mmatic *mm);
-ut *ut_new_char(const char *val, mmatic *mm);
-ut *ut_new_xstr(xstr *val, mmatic *mm);
-ut *ut_new_ptr(void *val, mmatic *mm);
-ut *ut_new_null(mmatic *mm);
-ut *ut_new_err(int code, const char *msg, const char *data, mmatic *mm);
+ut *ut_new_bool(bool val, void *mm);
+ut *ut_new_int(int val, void *mm);
+ut *ut_new_double(double val, void *mm);
+ut *ut_new_char(const char *val, void *mm);
+ut *ut_new_xstr(xstr *val, void *mm);
+ut *ut_new_ptr(void *val, void *mm);
+ut *ut_new_null(void *mm);
+ut *ut_new_err(int code, const char *msg, const char *data, void *mm);
 
 /** Create new ut err object out of current errno */
 #define ut_new_errno(mm) (ut_new_err(errno, strerror(errno), mmatic_printf((mm), "%s:%u", __FILE__, __LINE__), (mm)))
@@ -116,11 +114,11 @@ ut *ut_new_err(int code, const char *msg, const char *data, mmatic *mm);
 
 /** Create a ut containing given hash of string->string
  * @param val may be NULL to create a new hash */
-ut *ut_new_thash(thash *val, mmatic *mm);
+ut *ut_new_thash(thash *val, void *mm);
 
 /** Create a ut containing given hash of string->ut objects
  * @param val may be NULL to create a new hash */
-ut *ut_new_utthash(thash *val, mmatic *mm);
+ut *ut_new_utthash(thash *val, void *mm);
 
 /* applicable for ut->type == T_HASH */
 ut *uth_get(ut *var, const char *key);
@@ -149,11 +147,11 @@ ut *uth_set_thash(ut *ut, const char *key, thash *val); /** @note see ut_new_tha
 
 /** Create a ut containing given list of ut objects
  * @param val may be NULL to create a new list */
-ut *ut_new_uttlist(tlist *val, mmatic *mm);
+ut *ut_new_uttlist(tlist *val, void *mm);
 
 /** Create a ut containing given list of strings
  * @param val may be NULL to create a new list */
-ut *ut_new_tlist(tlist *val, mmatic *mm);
+ut *ut_new_tlist(tlist *val, void *mm);
 
 /* applicable for ut->type == T_LIST */
 ut *utl_add(ut *var, ut *val);

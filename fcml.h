@@ -35,9 +35,6 @@ typedef struct fcmlparser {
 
 	/** Filespaces (of fcmlfspace type) */
 	thash *spaces;
-
-	/** mmatic */
-	mmatic *mm;
 } fcmlparser;
 
 /** Source to use instead of file->fp */
@@ -104,7 +101,7 @@ typedef struct fcmlvar {
 void fcml_free_parser(void *arg);
 void fcml_free_file(void *arg);
 void fcml_free_var(void *arg);
-void fcml_init_parser(fcmlparser *parser, mmatic *mm);
+void fcml_init_parser(fcmlparser *parser, void *mm);
 void fcml_init_file(fcmlfile *file, char *path, fcmlparser *parser);
 void fcml_init_string(fcmlvar *var);
 void fcml_init_array(fcmlvar *var, fcmlparser *parser);

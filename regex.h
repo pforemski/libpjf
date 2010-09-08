@@ -39,6 +39,6 @@ int asn_match(const char *regex, const char *str);
  * @param str   subject
  * @param rep   replacement (supports back-references)
  * @return      new char *, always succeeds */
-char *asn_replace(const char *regex, const char *rep, const char *str, mmatic *mm);
+char *asn_replace(const char *regex, const char *rep, const char *str, void *mm);
 
 #endif /* _REGEX_H_ */

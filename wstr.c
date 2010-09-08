@@ -22,19 +22,18 @@
 #include <string.h>
 #include "lib.h"
 
-#define wmmalloc(size) (mmatic_alloc((size), ws->mm))
+#define wmmalloc(size) (mmatic_alloc((size), ws))
 
-void wstr_init(wstr *ws, mmatic *mm)
+void wstr_init(wstr *ws, void *mm)
 {
 	ws->s = 0;
 	ws->len = 0;
 	ws->a = 0;
-	ws->mm = mm;
 	wstr_reserve(ws, 20);
 	wstr_set(ws, L"");
 }
 
-wstr * wstr_create(const wchar_t *s, mmatic *mm)
+wstr * wstr_create(const wchar_t *s, void *mm)
 {
 	wstr *new = mmalloc(sizeof(wstr));
 	wstr_init(new, mm);
@@ -158,12 +157,12 @@ void wstr_free(wstr *ws)
 	wcscpy(ret, str); \
 	return ret;
 
-wchar_t * wstr_dup(wstr *ws, mmatic *mm)
+wchar_t * wstr_dup(wstr *ws, void *mm)
 {
 	DUP_STRING(ws->s, ws->len);
 }
 
-wchar_t * wstr_dup_ch(const wchar_t *s, mmatic *mm)
+wchar_t * wstr_dup_ch(const wchar_t *s, void *mm)
 {
 	DUP_STRING(s, wcslen(s));
 }

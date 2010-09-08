@@ -40,7 +40,7 @@ static int _thash_compare(const void *key1, const void *key2)
 
 thash *thash_create(unsigned int (*hash_func)(const void *key),
                     int (*cmp_func)(const void *key1, const void *key2),
-                    void (*free_func)(void *val), bool strings, mmatic *mm)
+                    void (*free_func)(void *val), bool strings, void *mm)
 {
 	thash *hash;
 
@@ -262,6 +262,9 @@ void *thash_get(const thash *hash, const void *key)
 	void *val = NULL;
 	int index;
 
+	if (!hash)
+		return NULL;
+
 	index = (hash->hash_func)(key) % hash->size;
 	dbg(15, "thash_get(%p, %p): index %d\n", hash, key, index);
 
@@ -293,7 +296,7 @@ void thash_dump(int lvl, thash *hash)
 		dbg(lvl, "%s = %s\n", k, v);
 }
 
-thash *thash_clone(thash *hash, mmatic *mm)
+thash *thash_clone(thash *hash, void *mm)
 {
 	thash *ret;
 	const char *k, *v;

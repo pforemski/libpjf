@@ -32,7 +32,7 @@
 #include "lib.h"
 
 /* used by asn_loop_ */
-static mmatic *mm;
+static void *mm;
 static thash *fds;           /** fds monitored in main loop via asn_rselect() */
 static tlist *todo;          /** event queue "to do" */
 
@@ -56,7 +56,7 @@ struct timeout {
 	void *prv;
 };
 
-thash *asn_rselect(thash *fdlist, uint32_t *timeout_ms, mmatic *mm)
+thash *asn_rselect(thash *fdlist, uint32_t *timeout_ms, void *mm)
 {
 	unsigned int fd, nfds = 0, r;
 	struct timeval tv;

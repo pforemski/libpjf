@@ -38,28 +38,25 @@ typedef struct xstr {
 
 	/** Reserved memory; always a >= len + 1 */
 	unsigned int a;
-
-	/** mmatic to use */
-	mmatic *mm;
 } xstr;
 
 /** Create an xstr object
  * @param str    initial value; if NULL, "" is assumed
  * @return allocated memory */
-xstr *xstr_create(const char *str, mmatic *mm);
+xstr *xstr_create(const char *str, void *mm);
 #define MMXSTR_CREATE(str) xstr_create((str), mm)
 
 /** Init xstr, ie. set it to "" value */
-void xstr_init(xstr *sx, mmatic *mm);
+void xstr_init(xstr *sx, void *mm);
 
 /** Init xstr with value */
-void xstr_init_val(xstr *sx, const char *ch, mmatic *mm);
+void xstr_init_val(xstr *sx, const char *ch, void *mm);
 
 /** Return C string */
 char *xstr_to_char(xstr *sx);
 
 /** Duplicate string */
-char *xstr_dup(xstr *sx, mmatic *mm);
+char *xstr_dup(xstr *sx, void *mm);
 
 /** Allocate more space in buffer */
 void xstr_reserve(xstr *sx, size_t l);
@@ -95,7 +92,7 @@ void xstr_free(xstr *xs);
 char *xstr_strip(xstr *xs);
 
 /** Like xstr_strip() but on char* */
-char *xstr_stripch(char *s, mmatic *mm);
+char *xstr_stripch(char *s, void *mm);
 
 /** sprintf to xstr, allocating memory if necessary
  *

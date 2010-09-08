@@ -2,8 +2,8 @@
  * mmatic - memory allocation manager, or a manual garbage collector
  *
  * This file is part of libasn
- * Copyright (C) 2005-2009 ASN Sp. z o.o.
- * Author: Pawel Foremski <pjf@asn.pl>
+ * Copyright (C) 2005-2010 ASN Sp. z o.o.
+ * Author: Pawel Foremski <pforemski@asn.pl>
  *
  * libasn is free software; you can redistribute it and/or modify it under
  * the terms of the GNU General Public License as published by the Free
@@ -25,36 +25,133 @@
 #include <stdint.h>
 #include <stdarg.h>
 #include <sys/mman.h>
-
 #include "lib.h"
 
-#define PTR(ptr) ((uint8_t *) ptr)
+/** Memory tag for type detection */
+#define TAG_MGR   0xBABBA777
 
-mmatic *mmatic_create(void)
+/** Memory tag for type detection */
+#define TAG_CHUNK 0xABBA1234
+
+/** Get mmatic memory chunk out of a pointer */
+#define PTR_TO_CHUNK(ptr)   ((ptr) ? (mmchunk *) (((uint8_t *) ptr) - sizeof(mmchunk)) : NULL)
+
+/** Get mmatic memory manager out of a chunk */
+#define CHUNK_TO_PTR(chunk) ((chunk) ? (void *)  (((uint8_t *) chunk) + sizeof(mmchunk)) : NULL)
+
+/** Verify chunk tag if run in debug mode */
+#define IS_CHUNK(chunk)  ((chunk) && (chunk)->tag == TAG_CHUNK)
+
+/** Verify manager tag if run in debug mode */
+#define IS_MGR(mgr)      ((mgr) && (mgr)->tag == TAG_MGR)
+
+#define ALLOC(ptr, size) if (!(ptr = malloc(size))) die("Out of memory");
+
+/*****************************************************************************/
+/***************************** Allocations ***********************************/
+/*****************************************************************************/
+
+void *mmatic_create(void)
 {
 	mmatic *mgr;
 
-	mgr = asn_malloc(sizeof(mmatic));
+	ALLOC(mgr, sizeof(mmatic));
+	mgr->tag = TAG_MGR;
 	mgr->totalloc = 0;
 
-	mgr->first = mgr->last = asn_malloc(sizeof(mmchunk));
+	ALLOC(mgr->first, sizeof(mmchunk));
+	mgr->last = mgr->first;
 	bzero(mgr->first, sizeof(mmchunk));
 	mgr->first->mgr = mgr;
 
 	return mgr;
 }
 
-void mmatic_freeptrs(void *ptr)
+void *mmatic_allocate(size_t size, void *mgr_or_mem, bool zero, bool shared, void *start, int flags,
+	const char *cfile, unsigned int cline)
 {
-	mmatic_freeptr_((void **) &ptr);
+	mmatic *mgr;
+	mmchunk *chunk;
+	void *ptr;
+
+	mgr = mgr_or_mem;
+	if (!IS_MGR(mgr)) {
+		chunk = PTR_TO_CHUNK(mgr_or_mem);
+
+		if (IS_CHUNK(chunk))
+			mgr = chunk->mgr;
+		else
+			die("Requested allocation in invalid space (called from %s:%u)", cfile, cline);
+	}
+
+	if (shared) {
+		chunk = mmap(start, (sizeof *chunk) + size,
+			PROT_READ | PROT_WRITE,
+			MAP_SHARED | MAP_ANONYMOUS | flags, 0, 0);
+	} else {
+		chunk = malloc((sizeof *chunk) + size);
+	}
+
+	if (!chunk)
+		die("Out of memory (called from %s:%u)", cfile, cline);
+
+	chunk->tag      = TAG_CHUNK;
+	chunk->shared   = shared;
+	chunk->alloc    = size;
+	chunk->cfile    = cfile;
+	chunk->cline    = cline;
+	chunk->next     = NULL;
+	chunk->prev     = mgr->last;
+	chunk->mgr      = mgr;
+	mgr->last->next = chunk;
+	mgr->last       = chunk;
+	mgr->totalloc  += size;
+
+	ptr = CHUNK_TO_PTR(chunk);
+	return zero ? memset(ptr, 0, size) : ptr;
 }
 
-void mmatic_free_(mmatic **mgrptr)
+void *mmatic_realloc_(void *mem, size_t size, void *mgr_or_mem, const char *cfile, unsigned int cline)
 {
-	mmatic *mgr = *mgrptr;
+	mmchunk *chunk;
+	void *newmem;
+
+	chunk = PTR_TO_CHUNK(mem);
+	asnsert(IS_CHUNK(chunk));
+
+	if (!mgr_or_mem)
+		mgr_or_mem = (void *) chunk->mgr;
+
+	if (!size)
+		size = chunk->alloc;
+
+	newmem = mmatic_allocate(size, mgr_or_mem, 0, chunk->shared, NULL, 0, cfile, cline);
+	memcpy(newmem, mem, chunk->alloc);
+	mmatic_freeptr(mem);
+
+	return (mem = newmem);
+}
+
+/*****************************************************************************/
+/************************** Free functions ***********************************/
+/*****************************************************************************/
+
+void mmatic_free_(void **mgr_or_mem, const char *cfile, unsigned int cline)
+{
+	mmatic *mgr = *mgr_or_mem;
 	mmchunk *chunk, *nchunk;
 
-	dbg(10, "%p: freeing\n", mgr);
+	if (!IS_MGR(mgr)) {
+		chunk = PTR_TO_CHUNK(*mgr_or_mem);
+
+		if (IS_CHUNK(chunk))
+			mgr = chunk->mgr;
+		else
+			die("Requested deallocation of invalid space (called from %s:%u)", cfile, cline);
+	}
+
+	asnsert(IS_MGR(mgr));
+	dbg(12, "%p: freeing\n", mgr);
 
 	chunk = mgr->first;
 	while (chunk) {
@@ -67,12 +164,15 @@ void mmatic_free_(mmatic **mgrptr)
 	}
 
 	free(mgr);
-	*mgrptr = 0;
+	*mgr_or_mem = 0;
 }
 
 void mmatic_freeptr_(void **memptr)
 {
-	mmchunk *chunk = (mmchunk *) (PTR(*memptr) - sizeof(mmchunk)); /* XXX */
+	void *mem = *memptr;
+	mmchunk *chunk = PTR_TO_CHUNK(mem);
+
+	asnsert(IS_CHUNK(chunk));
 
 	chunk->prev->next = chunk->next;
 	if (chunk->next)
@@ -90,11 +190,14 @@ void mmatic_freeptr_(void **memptr)
 	*memptr = 0;
 }
 
-int mmatic_isof(void *mem, mmatic *mm)
+void mmatic_freeptrs(void *ptr)
 {
-	mmchunk *chunk = (mmchunk *) (PTR(mem) - sizeof(mmchunk)); /* XXX */
-	return (chunk->mgr == mm);
+	mmatic_freeptr_((void **) &ptr);
 }
+
+/*****************************************************************************/
+/****************************** Utilities ************************************/
+/*****************************************************************************/
 
 void mmatic_summary(mmatic *mgr, int dbglevel)
 {
@@ -106,8 +209,7 @@ void mmatic_summary(mmatic *mgr, int dbglevel)
 	if (mgr->first) {
 		chunk = mgr->first->next;
 		while (chunk) {
-			dbg(dbglevel, "  %p: %uB for %s:%u\n",
-			    PTR(chunk) + sizeof(mmchunk), chunk->alloc, chunk->cfile, chunk->cline);
+			dbg(dbglevel, "  %p: %uB for %s:%u\n", CHUNK_TO_PTR(chunk), chunk->alloc, chunk->cfile, chunk->cline);
 			chunk = chunk->next;
 		}
 	}
@@ -115,49 +217,15 @@ void mmatic_summary(mmatic *mgr, int dbglevel)
 	dbg(dbglevel, "--- MMATIC MEMORY SUMMARY END (%p) ---\n", mgr);
 }
 
-void *mmatic_realloc_(void *mem, size_t size, mmatic *mgr, const char *cfile, unsigned int cline)
-{
-	mmchunk *chunk = (mmchunk *) (PTR(mem) - sizeof(mmchunk)); /* XXX */
-	void *newmem;
-
-	if (!mgr)
-		mgr = chunk->mgr;
-
-	if (!size)
-		size = chunk->alloc;
-
-	newmem = mmatic_allocate(size, mgr, 0, chunk->shared, NULL, 0, cfile, cline);
-	memcpy(newmem, mem, chunk->alloc);
-	mmatic_freeptr(mem);
-
-	return (mem = newmem);
-}
-
-void *asn_malloc(size_t size)
-{
-	void *mem;
-
-	dbg(15, "%u\n", size);
-
-	mem = malloc(size);
-	if (!mem)
-		die("asn_malloc(%u) failed, out of memory\n", (unsigned int) size);
-
-	return mem;
-}
-
 /* now then, that's a handy tool! */
-char *mmatic_printf(mmatic *mm, const char *fmt, ...)
+char *mmatic_printf_(void *mm, const char *fmt, ...)
 {
 	va_list args; char *buf;
-	va_start(args, fmt); buf = mmalloc(BUFSIZ); vsnprintf(buf, BUFSIZ, fmt, args); va_end(args);
-	return buf;
-}
 
-/* it seems its easier to have code duplication than coping with va_lists */
-char *asn_malloc_printf(const char *fmt, ...)
-{
-	va_list args; char *buf;
-	va_start(args, fmt); buf = asn_malloc(BUFSIZ); vsnprintf(buf, BUFSIZ, fmt, args); va_end(args);
+	va_start(args, fmt);
+	buf = mmalloc(BUFSIZ);
+	vsnprintf(buf, BUFSIZ, fmt, args);
+	va_end(args);
+
 	return buf;
 }

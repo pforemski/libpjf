@@ -59,10 +59,10 @@
 #define KEYLEN 128
 
 /** Shortcuts */
-#define MM (file->parser->mm)
-#define fmmalloc(size) (mmatic_alloc((size), file->parser->mm))
-#define pmmalloc(size) (mmatic_alloc((size),       parser->mm))
-#define fmmstrdup(str) (mmatic_strdup((str), file->parser->mm))
+#define MM (file->parser)
+#define fmmalloc(size) (mmatic_alloc((size), file->parser))
+#define pmmalloc(size) (mmatic_alloc((size),       parser))
+#define fmmstrdup(str) (mmatic_strdup((str), file->parser))
 
 #define THASH_NEW_STR(ffn, mm) (thash_create(NULL, NULL, (ffn), 1, (mm)))
 #define THASH_NEW_PTR(ffn, mm) (thash_create(thash_ptr_hash, NULL, (ffn), 0, (mm)))
@@ -247,17 +247,16 @@ void fcml_free_var(void *arg)
 }
 
 /*****/
-void fcml_init_parser(fcmlparser *parser, mmatic *mm)
+void fcml_init_parser(fcmlparser *parser, void *mm)
 {
 	parser->files = THASH_NEW_STR(fcml_free_file, mm);
 	parser->spaces = THASH_NEW_STR(mmfreeptr, mm);
-	parser->mm = mm;
 }
 
 void fcml_init_file(fcmlfile *file, char *path, fcmlparser *parser)
 {
 	strncpy(file->path, path, PATH_MAX);
-	file->vars = THASH_NEW_STR(fcml_free_var, parser->mm);
+	file->vars = THASH_NEW_STR(fcml_free_var, parser);
 	file->addsrc = NULL;
 	file->parser = parser;
 }
@@ -271,7 +270,7 @@ void fcml_init_string(fcmlvar *var)
 void fcml_init_array(fcmlvar *var, fcmlparser *parser)
 {
 	var->type = ARRAY;
-	var->in.array = THASH_NEW_STR(fcml_free_var, parser->mm);
+	var->in.array = THASH_NEW_STR(fcml_free_var, parser);
 }
 
 /*****/

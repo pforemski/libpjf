@@ -105,7 +105,7 @@ int asn_match(const char *regex, const char *str)
 	return _regex_match(regex, str, strlen(str), 0, cv, NULL);
 }
 
-char *asn_replace(const char *regex, const char *rep, const char *str, mmatic *mm)
+char *asn_replace(const char *regex, const char *rep, const char *str, void *mm)
 {
 	int cv[CVS], cvn, rc, br, offset = 0, len = strlen(str);
 	xstr *xs = MMXSTR_CREATE("");

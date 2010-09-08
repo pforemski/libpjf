@@ -76,7 +76,7 @@ typedef struct thash {
 	bool strings_mode;
 
 	/** mmatic */
-	mmatic *mm;
+	void *mm;
 
 	/** Iterator: key number. */
 	unsigned int counter_x;
@@ -100,7 +100,7 @@ typedef struct thash {
  */
 thash *thash_create(unsigned int (*hash_func)(const void *key),
                     int (*cmp_func)(const void *key1, const void *key2),
-                    void (*free_func)(void *val), bool strings, mmatic *mm);
+                    void (*free_func)(void *val), bool strings, void *mm);
 
 /** Create a thash indexed by string, holding pointers to arbitrary data */
 #define MMTHASH_CREATE_STR(ffn) (thash_create(NULL, NULL, (ffn), 1, mm))
@@ -176,7 +176,7 @@ void thash_dump(int lvl, thash *hash);
 
 /** Clone a thash using given mmatic
  * @note hash table needs to be a pure "string -> string" one */
-thash *thash_clone(thash *hash, mmatic *mm);
+thash *thash_clone(thash *hash, void *mm);
 
 /*
  * Hashing functions

@@ -11,7 +11,6 @@
 #define _JSON_H_
 
 typedef struct json {
-	mmatic *mm;
 	int depth;          /** recurrency depth */
 	bool loose;         /** if true, be more permissive about standard strictness */
 
@@ -26,7 +25,7 @@ enum json_option {
 #define IS_LOOSE_KEYCHAR(c) (isalnum(c) || c == '-' || c == '_')
 
 /** Create json parser */
-json *json_create(mmatic *mm);
+json *json_create(void *mm);
 
 /** Set parser options */
 bool json_setopt(json *j, enum json_option o, long v);

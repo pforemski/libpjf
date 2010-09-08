@@ -92,6 +92,27 @@ void _die(const char *file, unsigned int line, const char *fn, char *msg, ...)
 	abort();
 }
 
+void *asn_malloc(size_t size)
+{
+	void *mem;
+
+	dbg(15, "%u\n", size);
+
+	mem = malloc(size);
+	if (!mem)
+		die("asn_malloc(%u) failed, out of memory\n", (unsigned int) size);
+
+	return mem;
+}
+
+/* it seems its easier to have code duplication than coping with va_lists */
+char *asn_malloc_printf(const char *fmt, ...)
+{
+	va_list args; char *buf;
+	va_start(args, fmt); buf = asn_malloc(BUFSIZ); vsnprintf(buf, BUFSIZ, fmt, args); va_end(args);
+	return buf;
+}
+
 int asn_isfile(const char *path)
 {
 	struct stat stats;
@@ -133,14 +154,14 @@ void asn_cd(const char *path)
 	}
 }
 
-char *asn_pwd(mmatic *mm)
+char *asn_pwd(void *mm)
 {
 	char *ret = mmalloc(PATH_MAX);
 	asnsert(getcwd(ret, PATH_MAX));
 	return ret;
 }
 
-void asn_parsepath(const char *path, tlist *lpath, mmatic *mm)
+void asn_parsepath(const char *path, tlist *lpath, void *mm)
 {
 	char *part, *ptr;
 
@@ -176,7 +197,7 @@ void asn_parsepath(const char *path, tlist *lpath, mmatic *mm)
 	}
 }
 
-char *asn_parsedoubleslashes(const char *vcwd, const char *vpath, mmatic *mm)
+char *asn_parsedoubleslashes(const char *vcwd, const char *vpath, void *mm)
 {
 	tlist *list;
 
@@ -188,7 +209,7 @@ char *asn_parsedoubleslashes(const char *vcwd, const char *vpath, mmatic *mm)
 	return asn_makepath(list, mm);
 }
 
-char *asn_makepath(tlist *pathparts, mmatic *mm)
+char *asn_makepath(tlist *pathparts, void *mm)
 {
 	char *part;
 	xstr *ret = xstr_create("", mm);
@@ -214,7 +235,7 @@ int asn_isdir(const char *path)
 	return 1;
 }
 
-char *asn_abspath(const char *path, mmatic *mm)
+char *asn_abspath(const char *path, void *mm)
 {
 	char cwd[PATH_MAX];
 
@@ -224,7 +245,7 @@ char *asn_abspath(const char *path, mmatic *mm)
 		return mmprintf("%s/%s", getcwd(cwd, sizeof(cwd)), path);
 }
 
-int asn_mkdir(const char *path, mmatic *mm, int (*filter)(const char *part))
+int asn_mkdir(const char *path, void *mm, int (*filter)(const char *part))
 {
 	tlist *list = MMTLIST_CREATE(NULL);
 	char *curdir, *part;
@@ -297,7 +318,7 @@ int asn_rmdir(const char *path, const char *skip)
 static int vsort(const struct dirent **a, const struct dirent **b) { return strverscmp((*a)->d_name, (*b)->d_name); }
 static int filterdots(const struct dirent *d)  { return (!streq(d->d_name, ".") && !streq(d->d_name, "..")); }
 
-tlist *asn_ls(const char *path, mmatic *mm)
+tlist *asn_ls(const char *path, void *mm)
 {
 	int i, n;
 	struct dirent **entries;
@@ -324,7 +345,7 @@ int isnumber(const char *str)
 	return 1;
 }
 
-char *asn_sanepath(const char *path, mmatic *mm)
+char *asn_sanepath(const char *path, void *mm)
 {
 	int i, j;
 	char *ret, prev = 0;
@@ -344,7 +365,7 @@ char *asn_sanepath(const char *path, mmatic *mm)
 	return ret;
 }
 
-char *asn_readfile(const char *path, mmatic *mm)
+char *asn_readfile(const char *path, void *mm)
 {
 	FILE *fp;
 	char *buf, *rbuf;

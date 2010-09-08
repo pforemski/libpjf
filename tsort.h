@@ -42,4 +42,4 @@ typedef struct _tsort_pair {
  * @return 1 if successful
  * @return 0 otherwise
  */
-int asn_tsort(tlist *input, tlist *output, mmatic *mm);
+int asn_tsort(tlist *input, tlist *output, void *mm);

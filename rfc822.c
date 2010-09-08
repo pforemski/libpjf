@@ -19,7 +19,7 @@
 
 #include "lib.h"
 
-thash *rfc822_parse(const char *str, mmatic *mm)
+thash *rfc822_parse(const char *str, void *mm)
 {
 	char *k, *v, *txt = mmstrdup(str);
 	int i, l;
@@ -58,7 +58,7 @@ nextline:
 
 const char *rfc822_print(ut *var)
 {
-	mmatic *mm = var->mm;
+	void *mm = var;
 	xstr *xs = MMXSTR_CREATE("");
 	char *key;
 	ut *el;
