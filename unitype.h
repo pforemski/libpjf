@@ -56,13 +56,13 @@ typedef struct ut {
 
 /***** check type wrappers *****/
 
-#define ut_is_ptr(ut)    (ut->type == T_PTR)
-#define ut_is_bool(ut)   (ut->type == T_BOOL)
-#define ut_is_int(ut)    (ut->type == T_INT)
-#define ut_is_double(ut) (ut->type == T_DOUBLE)
-#define ut_is_string(ut) (ut->type == T_STRING)
-#define ut_is_tlist(ut)  (ut->type == T_LIST)
-#define ut_is_thash(ut)  (ut->type == T_HASH)
+#define ut_is_ptr(ut)    (ut && ut->type == T_PTR)
+#define ut_is_bool(ut)   (ut && ut->type == T_BOOL)
+#define ut_is_int(ut)    (ut && ut->type == T_INT)
+#define ut_is_double(ut) (ut && ut->type == T_DOUBLE)
+#define ut_is_string(ut) (ut && ut->type == T_STRING)
+#define ut_is_tlist(ut)  (ut && ut->type == T_LIST)
+#define ut_is_thash(ut)  (ut && ut->type == T_HASH)
 
 /***** error handling *****/
 
@@ -139,6 +139,7 @@ ut *uth_set_thash(ut *ut, const char *key, thash *val); /** @note see ut_new_tha
 #define uth_double(var, key) ut_double(uth_get(var, key))
 #define uth_xstr(var, key)   ut_xstr(uth_get(var, key))
 #define uth_char(var, key)   ut_char(uth_get(var, key))
+#define uth_ptr(var, key)    ut_ptr(uth_get(var, key))
 #define uth_tlist(var, key)  ut_tlist(uth_get(var, key))
 #define uth_thash(var, key)  ut_thash(uth_get(var, key))
 #define uth_ptr(var, key)    ut_ptr(uth_get(var, key))

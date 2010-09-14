@@ -171,6 +171,9 @@ char *asn_makepath(tlist *pathparts, void *mm);
  * @note always returns the value in given mm */
 char *asn_abspath(const char *path, void *mm);
 
+/** Return last element after "/" in path */
+const char *asn_basename(const char *path);
+
 /** Check if path is a directory
  * @param   path   path to check
  * @retval  1      is a dir

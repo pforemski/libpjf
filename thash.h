@@ -103,12 +103,17 @@ thash *thash_create(unsigned int (*hash_func)(const void *key),
                     void (*free_func)(void *val), bool strings, void *mm);
 
 /** Create a thash indexed by string, holding pointers to arbitrary data */
-#define MMTHASH_CREATE_STR(ffn) (thash_create(NULL, NULL, (ffn), 1, mm))
+#define thash_create_strkey(ffn, mm) thash_create(NULL, NULL, (ffn), 1, (mm))
 
 /** Create a thash indexed by pointers, holding pointers to arbitrary data */
-#define MMTHASH_CREATE_PTR(ffn) (thash_create(NULL, NULL, (ffn), 0, mm))
+#define thash_create_ptrkey(ffn, mm) thash_create(NULL, NULL, (ffn), 0, (mm))
 
 /** Create a thash indexed by unsigned integers, holding pointers to arbitrary data */
+#define thash_create_intkey thash_create_ptrkey
+
+/* deprecated */
+#define MMTHASH_CREATE_STR(ffn) thash_create_strkey((ffn), mm)
+#define MMTHASH_CREATE_PTR(ffn) thash_create_ptrkey((ffn), mm)
 #define MMTHASH_CREATE_UINT MMTHASH_CREATE_PTR
 
 /** Frees a hash table.

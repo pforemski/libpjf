@@ -245,6 +245,13 @@ char *asn_abspath(const char *path, void *mm)
 		return mmprintf("%s/%s", getcwd(cwd, sizeof(cwd)), path);
 }
 
+const char *asn_basename(const char *path)
+{
+	char *l;
+	l = strrchr(path, '/');
+	return l ? l+1 : path;
+}
+
 int asn_mkdir(const char *path, void *mm, int (*filter)(const char *part))
 {
 	tlist *list = MMTLIST_CREATE(NULL);
