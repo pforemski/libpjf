@@ -57,6 +57,8 @@ void tlist_flush(tlist *list)
 {
 	void *val;
 
+	if (!list) return;
+
 	while ((val = tlist_pop(list)))
 		if (list->free_func)
 			(list->free_func)(val);
@@ -66,6 +68,8 @@ void tlist_free(tlist *list)
 {
 	void *val;
 
+	if (!list) return;
+
 	if (list->free_func)
 		while ((val = tlist_pop(list)))
 			(list->free_func)(val);
@@ -73,13 +77,15 @@ void tlist_free(tlist *list)
 	mmfreeptr(list);
 }
 
-void tlist_reset(tlist *list) { list->current = list->head; }
-void tlist_resetend(tlist *list) { list->current = list->tail; }
-int tlist_size(tlist *list) { return list->size; }
+void tlist_reset(tlist *list) { if (list) list->current = list->head; }
+void tlist_resetend(tlist *list) { if (list) list->current = list->tail; }
+int tlist_size(tlist *list) { return list ? list->size : 0; }
 
 void *tlist_iter_inc(tlist *list, int i)
 {
 	void *val;
+
+	if (!list) return NULL;
 
 	while (list->current && --i > 0) list->current = list->current->next;
 	if (!list->current) return NULL;
@@ -94,6 +100,8 @@ void *tlist_iter_dec(tlist *list, int i)
 {
 	void *val;
 
+	if (!list) return NULL;
+
 	while (list->current && --i > 0) list->current = list->current->prev;
 	if (!list->current) return NULL;
 
@@ -105,8 +113,10 @@ void *tlist_iter_dec(tlist *list, int i)
 
 void tlist_push(tlist *list, const void *val)
 {
-	tlist_el *el = tmmalloc(sizeof(tlist_el));
+	tlist_el *el;
 
+	if (!list) return;
+	el = tmmalloc(sizeof(tlist_el));
 	el->val = (void *) val;
 	el->list = list;
 	el->next = el->prev = NULL;
@@ -125,8 +135,10 @@ void tlist_push(tlist *list, const void *val)
 
 void tlist_prepend(tlist *list, const void *val)
 {
-	tlist_el *el = tmmalloc(sizeof(tlist_el));
+	tlist_el *el;
 
+	if (!list) return;
+	el = tmmalloc(sizeof(tlist_el));
 	el->val = (void *) val;
 	el->list = list;
 	el->next = el->prev = NULL;
@@ -147,7 +159,7 @@ void *tlist_pop(tlist *list)
 	tlist_el *el;
 	void *val;
 
-	if (!list->tail) return NULL;
+	if (!list || !list->tail) return NULL;
 
 	el = list->tail;
 	val = el->val;
@@ -171,7 +183,7 @@ void *tlist_shift(tlist *list)
 	tlist_el *el;
 	void *val;
 
-	if (!list->head) return NULL;
+	if (!list || !list->head) return NULL;
 
 	el = list->head;
 	val = el->val;
@@ -197,6 +209,8 @@ void *tlist_remove(tlist *list)
 {
 	tlist_el *el;
 	void *val;
+
+	if (!list) return NULL;
 
 	if (list->current)
 		el = (list->current->prev) ? list->current->prev : list->current;
@@ -242,6 +256,7 @@ void *tlist_remove(tlist *list)
 
 void tlist_insertbefore(tlist *list, const void *val)
 {
+	if (!list) return;
 	if (!list->current) tlist_reset(list);
 	INSERT_EL(list->current, list->current->prev, list->head);
 }
@@ -249,6 +264,7 @@ void tlist_insertbefore(tlist *list, const void *val)
 void tlist_insertafter(tlist *list, const void *val)
 {
 	/* XXX: assuming dereference of list->current->next AFTER checking if list->current != NULL */
+	if (!list) return;
 	INSERT_EL(list->current->next, list->current, list->tail);
 }
 
@@ -256,6 +272,8 @@ char *tlist_stringify(tlist *list, const char *sep, void *mm)
 {
 	int l = 0, sl = strlen(sep);
 	char *s, *ret, *p;
+
+	if (!list) return NULL;
 
 	tlist_reset(list);
 	while ((s = tlist_iter(list)))

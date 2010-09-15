@@ -78,7 +78,7 @@ void thash_flush(thash *hash)
 	unsigned int i;
 	thash_el *el, *el2;
 
-	dbg(12, "thash_flush(%p)\n", hash);
+	if (!hash) return;
 
 	for (i = 0; i < hash->size; i++) {
 		el = hash->tbl[i];
@@ -101,6 +101,7 @@ void thash_flush(thash *hash)
 
 void thash_free(thash *hash)
 {
+	if (!hash) return;
 	thash_flush(hash);
 	_thash_free(hash, hash->tbl);
 	_thash_free(hash, hash);
@@ -110,6 +111,8 @@ void *_thash_iter(thash *hash, void **key)
 {
 	unsigned int i;
 	thash_el *el;
+
+	if (!hash) return NULL;
 
 	/* we're at the end */
 	if (hash->counter_x >= hash->size) return NULL;
@@ -139,7 +142,7 @@ void *_thash_iter(thash *hash, void **key)
 	return el->val;
 }
 
-void thash_reset(thash *hash) { hash->counter_x = hash->counter_y = 0; }
+void thash_reset(thash *hash) { if (hash) hash->counter_x = hash->counter_y = 0; }
 
 /** Resizes a hash table.
  * It doesn't use realloc() because table indices will change as they depend on hash->size.
@@ -150,7 +153,7 @@ static void thash_resize(thash *hash)
 	thash_el **old_tbl, *el, *el2;
 	int i;
 
-	dbg(10, "thash_resize(%p)\n", hash);
+	if (!hash) return;
 
 	old_size = hash->size;
 	old_tbl = hash->tbl;
@@ -186,7 +189,7 @@ void thash_set(thash *hash, const void *key, const void *val)
 	unsigned int index;
 	thash_el *root_el, *el = NULL, *parent_el = NULL;
 
-	dbg(12, "thash_set(%p, %p, %p)\n", hash, key, val);
+	if (!hash) return;
 
 	/* resize table if usage ratio > THASH_MAX_USAGE */
 	if ((double) hash->used / hash->size > THASH_MAX_USAGE)
@@ -230,14 +233,10 @@ void thash_set(thash *hash, const void *key, const void *val)
 		hash->used++;
 	}
 	else if (val) { /* update */
-		dbg(12, "thash_set(): updating %p\n", key);
 		/* XXX: old value not freed */
 		el->val = (void *) val;
 	}
 	else { /* val = null, delete */
-		if (parent_el)
-			dbg(12, "thash_set(): deleting %p (parent_el key=%p)\n", key, parent_el->key);
-
 		if (hash->strings_mode)
 			_thash_free(hash, el->key);
 
@@ -262,15 +261,12 @@ void *thash_get(const thash *hash, const void *key)
 	void *val = NULL;
 	int index;
 
-	if (!hash)
-		return NULL;
+	if (!hash) return NULL;
 
 	index = (hash->hash_func)(key) % hash->size;
-	dbg(15, "thash_get(%p, %p): index %d\n", hash, key, index);
 
 	el = hash->tbl[index];
 	while (el) {
-		dbg(14, "thash_get(%p, %p): checking %p\n", hash, key, el->key);
 		if ((hash->cmp_func)(el->key, key) == 0) {
 			val = el->val;
 			break;
@@ -284,12 +280,14 @@ void *thash_get(const thash *hash, const void *key)
 
 unsigned int thash_count(thash *hash)
 {
-	return hash->used;
+	return hash ? hash->used : 0;
 }
 
 void thash_dump(int lvl, thash *hash)
 {
 	char *v, *k;
+
+	if (!hash) return;
 
 	thash_reset(hash);
 	while ((v = thash_iter(hash, &k)))
@@ -300,6 +298,8 @@ thash *thash_clone(thash *hash, void *mm)
 {
 	thash *ret;
 	const char *k, *v;
+
+	if (!hash) return NULL;
 
 	ret = thash_create(
 		hash->hash_func, hash->cmp_func, hash->free_func,
