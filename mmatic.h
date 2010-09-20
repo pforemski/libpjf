@@ -100,7 +100,7 @@ void *mmatic_realloc_(void *mem, size_t size, void *mgr_or_mem, const char *cfil
  * @note sets *mgr = 0 */
 void mmatic_free_(void **mgr_or_mem, const char *cfile, unsigned int cline);
 #define mmatic_free(a) mmatic_free_((void **) &(a), __FILE__, __LINE__)
-#define mmfree() mmatic_free(mm, __FILE__, __LINE__)
+#define mmfree() mmatic_free(mm)
 
 /** Frees one specific pointer
  * @param mem       memory from mmatic_alloc()
@@ -121,17 +121,10 @@ void mmatic_summary(mmatic *mgr, int dbglevel);
 /** strdup() using mmatic_alloc
  * @param s         string to duplicate
  * @param cfile     C source code file
- * @param cline     C source code line
- */
-static inline char *_mmatic_strdup(const char *s, void *mgr, const char *cfile, unsigned int cline)
-{
-	char *newm;
-	newm = mmatic_allocate(strlen(s) + 1, mgr, 0, 0, NULL, 0, cfile, cline);
-	strcpy(newm, s);
-	return newm;
-}
-#define mmatic_strdup(str, mgr) (_mmatic_strdup(str, (void *) mgr, __FILE__, __LINE__))
-#define mmstrdup(str) (mmatic_strdup((str), mm))
+ * @param cline     C source code line */
+char *mmatic_strdup_(const char *s, void *mgr, const char *cfile, unsigned int cline);
+#define mmatic_strdup(str, mgr) mmatic_strdup_(str, (void *) mgr, __FILE__, __LINE__)
+#define mmstrdup(str) mmatic_strdup((str), mm)
 
 /** An in-place snprintf()
  * @return allocated buffer, filled using snprintf()

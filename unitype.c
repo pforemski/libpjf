@@ -17,6 +17,7 @@
  * this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <stdarg.h>
 #include "lib.h"
 
 #define mm var
@@ -362,6 +363,53 @@ ut *uth_set_thash(ut *var, const char *key, thash *val)
 ut *uth_set_ptr(ut *var, const char *key, void *ptr)
 {
 	return uth_set(var, key, ut_new_ptr(ptr, var));
+}
+
+ut *uth_path_get_(ut *node, const char *key, ...)
+{
+	va_list keys;
+
+	va_start(keys, key);
+	while (key && *key) {
+		if (!ut_is_thash(node)) {
+			key = va_arg(keys, const char *);
+
+			/* if there is still path to traverse, current node (of different type than a thash) was not the last path
+			 * element and thus we cannot go further - fail */
+			if (key && *key)
+				node = NULL;
+
+			break;
+		}
+
+		node = uth_get(node, key);
+		key = va_arg(keys, const char *);
+	}
+
+	va_end(keys);
+	return node;
+}
+
+ut *uth_path_create_(ut *parent, const char *key, ...)
+{
+	va_list keys;
+	ut *child;
+
+	asnsert(ut_is_thash(parent));
+
+	va_start(keys, key);
+	while (key && *key) {
+		child = uth_get(parent, key);
+
+		if (!ut_is_thash(child))
+			child = uth_set_thash(parent, key, NULL);
+
+		parent = child;
+		key = va_arg(keys, const char *);
+	}
+
+	va_end(keys);
+	return child;
 }
 
 /****************************************************************/

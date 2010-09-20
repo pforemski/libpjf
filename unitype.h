@@ -144,6 +144,41 @@ ut *uth_set_thash(ut *ut, const char *key, thash *val); /** @note see ut_new_tha
 #define uth_thash(var, key)  ut_thash(uth_get(var, key))
 #define uth_ptr(var, key)    ut_ptr(uth_get(var, key))
 
+/** Return a unitype object by path
+ * A tool for quick operation on deep unitype thash trees. Its useful when you have a thash of thashes of thashes and so
+ * forth. This function will return the last unitype object in given path.
+ * @param  ut           ut root
+ * @param  key          first path chunk; give next keys in following arguments
+ * @note                last function argument must be NULL
+ * @retval NULL         requested path does not exist or any of its chunks is not a thash
+ * @return              a unitype variable */
+ut *uth_path_get_(ut *var, const char *key, ...);
+
+/** Wrapper of uth_path_get_() which adds NULL as the last key */
+#define uth_path_get(ut, ...) uth_path_get_((ut), __VA_ARGS__, NULL)
+
+/** Return or create a thash by path
+ * This function will return the last thash in given path. If it doesnt exist, it will create it.
+ * @param  ut           ut root
+ * @param  key          first path chunk; give next keys in following arguments
+ * @note                last function argument must be NULL
+ * @return              a unitype variable holding a thash */
+ut *uth_path_create_(ut *var, const char *key, ...);
+
+/** Wrapper of uth_path_create_() which adds NULL as the last key */
+#define uth_path_create(ut, ...) uth_path_create_((ut), __VA_ARGS__, NULL)
+
+/* shortcuts */
+#define uthp_bool(var, ...)   ut_bool(uth_path_get_(var, __VA_ARGS__, NULL))
+#define uthp_int(var, ...)    ut_int(uth_path_get_(var, __VA_ARGS__, NULL))
+#define uthp_double(var, ...) ut_double(uth_path_get_(var, __VA_ARGS__, NULL))
+#define uthp_xstr(var, ...)   ut_xstr(uth_path_get_(var, __VA_ARGS__, NULL))
+#define uthp_char(var, ...)   ut_char(uth_path_get_(var, __VA_ARGS__, NULL))
+#define uthp_ptr(var, ...)    ut_ptr(uth_path_get_(var, __VA_ARGS__, NULL))
+#define uthp_tlist(var, ...)  ut_tlist(uth_path_get_(var, __VA_ARGS__, NULL))
+#define uthp_thash(var, ...)  ut_thash(uth_path_get_(var, __VA_ARGS__, NULL))
+#define uthp_ptr(var, ...)    ut_ptr(uth_path_get_(var, __VA_ARGS__, NULL))
+
 /***** linked list *****/
 
 /** Create a ut containing given list of ut objects

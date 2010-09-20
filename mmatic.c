@@ -199,6 +199,18 @@ void mmatic_freeptrs(void *ptr)
 /****************************** Utilities ************************************/
 /*****************************************************************************/
 
+char *mmatic_strdup_(const char *s, void *mgr, const char *cfile, unsigned int cline)
+{
+	char *newm;
+
+	if (!s) return NULL;
+
+	newm = mmatic_allocate(strlen(s) + 1, mgr, 0, 0, NULL, 0, cfile, cline);
+	strcpy(newm, s);
+
+	return newm;
+}
+
 void mmatic_summary(mmatic *mgr, int dbglevel)
 {
 	mmchunk *chunk;
