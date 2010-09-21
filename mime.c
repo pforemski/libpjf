@@ -87,7 +87,7 @@ const char *asn_ext2mime(const char *ext)
 		CHECK(cpt, application/mac-compactpro);
 		CHECK(crl, application/pkcs-crl);
 		CHECK(csh, application/x-csh);
-		CHECK(css, application/x-pointplus);
+		CHECK(css, text/css);
 		CHECK(cxx, text/plain);
 		break;
 	case 'd':
