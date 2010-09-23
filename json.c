@@ -96,10 +96,12 @@ static ut *parse_string(json *json)
 				case 'n': c = '\n'; break;
 				case 'r': c = '\r'; break;
 				case 't': c = '\t'; break;
-				case 'u':
-					UNGETC();    /* ignore \uHHHH, copy verbatim */
-					c = '\\';
-					break;
+				case 'u': /* FIXME: skip \uHHHH */
+					c = GETC();
+					c = GETC();
+					c = GETC();
+					c = GETC();
+					continue;
 				case '\\':
 				case '/':
 				case '"':
