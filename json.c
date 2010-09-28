@@ -64,7 +64,7 @@ static ut *err(json *json, int code, const char *msg)
 static ut *parse_string(json *json)
 {
 	bool loose = 0;
-	char c;
+	char c, l1, l2, l3, l4;
 	xstr *str = xstr_create("", json);
 
 	c = SKIPWS();
@@ -96,11 +96,12 @@ static ut *parse_string(json *json)
 				case 'n': c = '\n'; break;
 				case 'r': c = '\r'; break;
 				case 't': c = '\t'; break;
-				case 'u': /* FIXME: skip \uHHHH */
-					c = GETC();
-					c = GETC();
-					c = GETC();
-					c = GETC();
+				case 'u': /* \uHHHH */
+					l1 = GETC();
+					l2 = GETC();
+					l3 = GETC();
+					l4 = GETC();
+					utf8_parse_xcp(str, l1, l2, l3, l4);
 					continue;
 				case '\\':
 				case '/':

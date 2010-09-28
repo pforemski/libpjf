@@ -104,6 +104,7 @@ char *asn_malloc_printf(const char *fmt, ...);
 #include "encode.h"
 #include "blowfish.h"
 #include "mime.h"
+#include "utf8.h"
 
 /** Shortcut for programs using libasn */
 #define __USE_LIBASN int debug = 0; void (*debugcb)() = NULL;
