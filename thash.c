@@ -311,6 +311,20 @@ thash *thash_clone(thash *hash, void *mm)
 	return ret;
 }
 
+thash *thash_merge(thash *dst, thash *src)
+{
+	const char *k, *v;
+
+	if (!dst) return NULL;
+	if (!src) return dst;
+
+	THASH_ITER_LOOP(src, k, v) {
+		thash_set(dst, k, mmatic_copy(v, dst));
+	}
+
+	return dst;
+}
+
 unsigned int thash_str_hash(const void *vkey)
 {
 	unsigned int hash = 5381;

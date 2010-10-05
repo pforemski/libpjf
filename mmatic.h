@@ -93,6 +93,18 @@ void *mmatic_realloc_(void *mem, size_t size, void *mgr_or_mem, const char *cfil
  * @param newmgr new mgr */
 #define mmatic_move(mem, newmgr) mmatic_realloc_((mem), 0, ((void *) newmgr), __FILE__, __LINE__)
 
+/** Clone memory
+ * @param mem   memory to clone
+ * @param mm    optional new mmatic
+ * @return new memory */
+void *mmatic_clone_(const void *mem, void *mm, const char *cfile, unsigned int cline);
+
+/** Copy memory to new memory */
+#define mmatic_copy(mem, newmgr) mmatic_clone_((mem), ((void *) newmgr), __FILE__, __LINE__)
+
+/** Clone memory in same memory */
+#define mmatic_clone(mem) mmatic_clone_((mem), NULL, __FILE__, __LINE__)
+
 /*****************************************************************************/
 
 /** Frees all memory and destroys given manager

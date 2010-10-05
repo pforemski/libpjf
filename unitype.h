@@ -133,6 +133,9 @@ ut *uth_set_ptr(ut *ut, const char *key, void *ptr);
 ut *uth_set_tlist(ut *ut, const char *key, tlist *val); /** @note see ut_new_tlist */
 ut *uth_set_thash(ut *ut, const char *key, thash *val); /** @note see ut_new_thash */
 
+/** Merge two ut thashes */
+ut *uth_merge(ut *dst, ut *src);
+
 /* shortcuts */
 #define uth_bool(var, key)   ut_bool(uth_get(var, key))
 #define uth_int(var, key)    ut_int(uth_get(var, key))

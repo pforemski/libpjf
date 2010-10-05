@@ -183,6 +183,12 @@ void thash_dump(int lvl, thash *hash);
  * @note hash table needs to be a pure "string -> string" one */
 thash *thash_clone(thash *hash, void *mm);
 
+/** Copy one thash to another making new copies of values
+ * @param dst     destination thash
+ * @param src     source thash
+ * @return dst */
+thash *thash_merge(thash *dst, thash *src);
+
 /*
  * Hashing functions
  */

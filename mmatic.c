@@ -132,6 +132,20 @@ void *mmatic_realloc_(void *mem, size_t size, void *mgr_or_mem, const char *cfil
 	return (mem = newmem);
 }
 
+void *mmatic_clone_(const void *mem, void *mm, const char *cfile, unsigned int cline)
+{
+	mmchunk *chunk;
+	void *newmem;
+
+	chunk = PTR_TO_CHUNK(mem);
+	asnsert(IS_CHUNK(chunk));
+
+	newmem = mmatic_allocate(chunk->alloc, mm ? mm : chunk->mgr, 0, chunk->shared, NULL, 0, cfile, cline);
+	memcpy(newmem, mem, chunk->alloc);
+
+	return newmem;
+}
+
 /*****************************************************************************/
 /************************** Free functions ***********************************/
 /*****************************************************************************/

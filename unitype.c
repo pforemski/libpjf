@@ -365,6 +365,14 @@ ut *uth_set_ptr(ut *var, const char *key, void *ptr)
 	return uth_set(var, key, ut_new_ptr(ptr, var));
 }
 
+ut *uth_merge(ut *dst, ut *src)
+{
+	if (ut_is_thash(src) && ut_is_thash(dst))
+		thash_merge(dst->d.as_thash, src->d.as_thash);
+
+	return dst;
+}
+
 ut *uth_path_get_(ut *node, const char *key, ...)
 {
 	va_list keys;
