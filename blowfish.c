@@ -417,7 +417,7 @@ static void Blowfish_Init(BLOWFISH_CTX *ctx, unsigned char *key, int keyLen)
 	}
 }
 
-/******************************** libasn ********************************/
+/******************************** libpjf ********************************/
 static xstr *current_key = NULL;
 static BLOWFISH_CTX current_ctx;
 

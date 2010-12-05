@@ -1,5 +1,5 @@
 /*
- * This file is part of libasn
+ * This file is part of libpjf
  * Copyright (C) 2008 Ivo van Poorten
  * Copyright (C) 2009 ASN Sp. z o.o.
  *

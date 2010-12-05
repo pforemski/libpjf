@@ -1,5 +1,5 @@
 /*
- * This file is part of libasn
+ * This file is part of libpjf
  * Copyright (C) 2005-2009 ASN Sp. z o.o.
  * Authors: Dawid Ciężarkiewicz <dawid.ciezarkiewicz@gmail.com> (original idea)
  *          Łukasz Zemczak <sil2100@asn.pl>

@@ -1,7 +1,7 @@
 /*
- * Wide character version of the libasn xstr
+ * Wide character version of the libpjf xstr
  *
- * This file is part of libasn
+ * This file is part of libpjf
  * Copyright (C) 2005-2009 ASN Sp. z o.o.
  * Author: Łukasz Zemczak <sil2100@asn.pl>
  *

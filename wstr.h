@@ -1,7 +1,7 @@
 /*
- * Wide character version of the libasn xstr
+ * Wide character version of the libpjf xstr
  *
- * This file is part of libasn
+ * This file is part of libpjf
  * Copyright (C) 2005-2009 ASN Sp. z o.o.
  * Author: Łukasz Zemczak <sil2100@asn.pl>
  *
@@ -39,7 +39,7 @@ typedef struct wstr_t {
 
 /** 
  * @file wstr.h
- * All functions have their equivalents in xstr of the libasn library, only
+ * All functions have their equivalents in xstr of the libpjf library, only
  * handling wide strings and wide characters. Consult the xstr.h header
  * documentation for function description
  */

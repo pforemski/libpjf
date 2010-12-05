@@ -1,17 +1,17 @@
 /*
  * tlist - trivial list
  *
- * This file is part of libasn
+ * This file is part of libpjf
  * Copyright (C) 2005-2009 ASN Sp. z o.o.
  * Authors: Pawel Foremski <pjf@asn.pl>
  *          Łukasz Zemczak <sil2100@asn.pl>
  *
- * libasn is free software; you can redistribute it and/or modify it under
+ * libpjf is free software; you can redistribute it and/or modify it under
  * the terms of the GNU General Public License as published by the Free
  * Software Foundation; either version 3 of the License, or (at your option)
  * any later version.
  *
- * libasn is distributed in the hope that it will be useful, but WITHOUT ANY
+ * libpjf is distributed in the hope that it will be useful, but WITHOUT ANY
  * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
  * FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
  * details.
