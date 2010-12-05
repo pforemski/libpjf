@@ -3,7 +3,7 @@ LDFLAGS = -lm
 
 ME=libasn
 C_OBJECTS=lib.o sfork.o regex.o thash.o tlist.o xstr.o wstr.o mmatic.o tsort.o \
-	fc.o select.o fcml.o unitype.o json.o rfc822.o linux.o encode.o blowfish.o \
+	fc.o select.o unitype.o json.o rfc822.o linux.o encode.o blowfish.o \
 	mime.o utf8.o
 
 ifeq (,$(NOFIFOS))
@@ -14,16 +14,11 @@ TARGETS=libasn.so libasn.a
 
 include rules.mk
 
-pcre/.libs/libpcre.a:
-	./pcre-build.sh
-
-$(C_OBJECTS): pcre/.libs/libpcre.a
-
 libasn.so: $(C_OBJECTS)
-	$(CC) $(C_OBJECTS) -shared -o libasn.so pcre/.libs/libpcre.a $(LDFLAGS)
+	$(CC) $(C_OBJECTS) -shared -o libasn.so $(LDFLAGS)
 
 libasn.a: $(C_OBJECTS)
-	$(AR) rc libasn.a $(C_OBJECTS) pcre/.libs/libpcre.a
+	$(AR) rc libasn.a $(C_OBJECTS)
 
 install: install-std
 
@@ -31,4 +26,4 @@ utilities:
 	$(MAKE) -C utils
 
 distclean: clean
-	$(MAKE) -C pcre distclean
+	$(MAKE) -C distclean
