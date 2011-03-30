@@ -22,9 +22,9 @@
 
 #include <ctype.h>
 #include <string.h>
+#include <pcre.h>
 
 #include "lib.h"
-#include "pcre/pcre.h"
 
 #define CVS 90
 

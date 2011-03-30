@@ -27,3 +27,6 @@ utilities:
 
 distclean: clean
 	$(MAKE) -C distclean
+
+doc:
+	doxygen doxygen.conf

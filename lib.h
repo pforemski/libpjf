@@ -1,7 +1,8 @@
 /*
  * This file is part of libpjf
  * Copyright (C) 2005-2009 ASN Sp. z o.o.
- * Author: Pawel Foremski <pjf@asn.pl>
+ * Copyright (C) 2011 Paweł Foremski
+ * Author: Pawel Foremski <pawel@foremski.pl>
  *
  * libpjf is free software; you can redistribute it and/or modify it under
  * the terms of the GNU General Public License as published by the Free
@@ -17,8 +18,8 @@
  * this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef _LIBASN_H_
-#define _LIBASN_H_
+#ifndef _LIBPJF_H_
+#define _LIBPJF_H_
 
 #include <stdio.h>
 #include <stdbool.h>
@@ -104,11 +105,6 @@ char *asn_malloc_printf(const char *fmt, ...);
 #include "blowfish.h"
 #include "mime.h"
 #include "utf8.h"
-
-/** Shortcut for programs using libpjf */
-#define __USE_LIBASN int debug = 0; void (*debugcb)() = NULL;
-
-/*****************************************************************************/
 
 /** I could never understand why there is no such macro by default --pjf */
 #define streq(a, b) (strcmp((a), (b)) == 0)
