@@ -1,5 +1,5 @@
 CFLAGS =
-LDFLAGS = -lm
+LDFLAGS = -lm -lpcre
 
 ME=libpjf
 C_OBJECTS=lib.o sfork.o regex.o thash.o tlist.o xstr.o wstr.o mmatic.o tsort.o \
