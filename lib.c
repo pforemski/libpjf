@@ -44,8 +44,11 @@ void _dbg(const char *file, unsigned int line, const char *fn, int level, char *
 	int i;
 	va_list args;
 	static char buf[BUFSIZ];
+	struct timeval tv;
 
 	if (level > debug || level >= sizeof(buf)) return;
+
+	gettimeofday(&tv, NULL);
 
 	va_start(args, fmt);
 	if ((void (*)()) debugcb == (void (*)()) syslog ||
@@ -58,9 +61,11 @@ void _dbg(const char *file, unsigned int line, const char *fn, int level, char *
 	for (i = 0; i < level && i < sizeof(buf); i++) buf[i] = ' ';
 
 	if (debug >= 10)
-		snprintf(buf, sizeof(buf), "%s:%u %s(): ", file, line, fn);
+		snprintf(buf, sizeof(buf), "[%6u.%06u] %s:%u %s(): ",
+			(uint32_t) tv.tv_sec, (uint32_t) tv.tv_usec, file, line, fn);
 	else
-		snprintf(buf, sizeof(buf), "%s(): ", fn);
+		snprintf(buf, sizeof(buf), "[%6u.%06u] %s(): ",
+			(uint32_t) tv.tv_sec, (uint32_t) tv.tv_usec, fn);
 
 	i = strlen(buf);
 	vsnprintf(buf+i, sizeof(buf)-i-1, fmt, args);
