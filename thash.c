@@ -3,7 +3,7 @@
  *
  * This file is part of libpjf
  * Copyright (C) 2005-2009 ASN Sp. z o.o.
- * Author: Pawel Foremski <pjf@asn.pl>
+ * Author: Pawel Foremski <pawel@foremski.pl>
  *
  * libpjf is free software; you can redistribute it and/or modify it under
  * the terms of the GNU General Public License as published by the Free
@@ -35,7 +35,7 @@ static int _thash_compare(const void *key1, const void *key2)
 	return (((unsigned long) key1) != ((unsigned long) key2));
 }
 
-#define _thash_alloc(hash, size) (((hash)->mm) ? mmatic_alloc((size), (hash)->mm) : asn_malloc(size));
+#define _thash_alloc(hash, size) (((hash)->mm) ? mmatic_alloc((hash)->mm, (size)) : pjf_malloc(size));
 #define _thash_free(hash, ptr)   (((hash)->mm) ? mmfreeptr(ptr) : free(ptr));
 
 thash *thash_create(unsigned int (*hash_func)(const void *key),
@@ -47,7 +47,7 @@ thash *thash_create(unsigned int (*hash_func)(const void *key),
 	if (mm)
 		hash = mmalloc(sizeof(thash));
 	else
-		hash = asn_malloc(sizeof(thash));
+		hash = pjf_malloc(sizeof(thash));
 
 	hash->size = THASH_DEFAULT_SIZE;
 	hash->used = 0;
@@ -305,7 +305,7 @@ thash *thash_clone(thash *hash, void *mm)
 		hash->hash_func, hash->cmp_func, hash->free_func,
 		hash->strings_mode, mm);
 
-	THASH_ITER_LOOP(hash, k, v)
+	thash_iter_loop(hash, k, v)
 		thash_set(ret, k, mmstrdup(v));
 
 	return ret;
@@ -318,8 +318,8 @@ thash *thash_merge(thash *dst, thash *src)
 	if (!dst) return NULL;
 	if (!src) return dst;
 
-	THASH_ITER_LOOP(src, k, v) {
-		thash_set(dst, k, mmatic_copy(v, dst));
+	thash_iter_loop(src, k, v) {
+		thash_set(dst, k, mmatic_copyto(v, dst));
 	}
 
 	return dst;

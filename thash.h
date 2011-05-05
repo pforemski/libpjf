@@ -3,7 +3,7 @@
  *
  * This file is part of libpjf
  * Copyright (C) 2005-2009 ASN Sp. z o.o.
- * Author: Pawel Foremski <pjf@asn.pl>
+ * Author: Pawel Foremski <pawel@foremski.pl>
  *
  * libpjf is free software; you can redistribute it and/or modify it under
  * the terms of the GNU General Public License as published by the Free
@@ -111,11 +111,6 @@ thash *thash_create(unsigned int (*hash_func)(const void *key),
 /** Create a thash indexed by unsigned integers, holding pointers to arbitrary data */
 #define thash_create_intkey thash_create_ptrkey
 
-/* deprecated */
-#define MMTHASH_CREATE_STR(ffn) thash_create_strkey((ffn), mm)
-#define MMTHASH_CREATE_PTR(ffn) thash_create_ptrkey((ffn), mm)
-#define MMTHASH_CREATE_UINT MMTHASH_CREATE_PTR
-
 /** Frees a hash table.
  * @param hash the hash table
  */
@@ -149,10 +144,10 @@ void thash_reset(thash *hash);
 void *_thash_iter(thash *hash, void **key);
 #define thash_iter(a, b) (_thash_iter((a), ((void **) (b))))
 
-/** Safe iterator in case indices are of unsingned int type */
-#define THASH_ITER_UINT(a, b) (_thash_iter((a), ((void **) (unsigned long *) b)))
+/** Safe iterator in case indices are of unsigned int type */
+#define thash_iter_uint(a, b) (_thash_iter((a), ((void **) (unsigned long *) b)))
 
-#define THASH_ITER_LOOP(hash, k, v) thash_reset(hash); while (((v) = thash_iter((hash), &(k))))
+#define thash_iter_loop(hash, k, v) thash_reset(hash); while (((v) = thash_iter((hash), &(k))))
 
 /** Sets value of an element to given value.
  *
@@ -166,7 +161,7 @@ void *_thash_iter(thash *hash, void **key);
 void thash_set(thash *hash, const void *key, const void *val);
 
 /** A safe thash_set in case indices are of unsigned int type */
-#define THASH_SET_UINT(a, b, c) (thash_set((a), ((const void *) (unsigned long) b), (c)))
+#define thash_set_uint(a, b, c) (thash_set((a), ((const void *) (unsigned long) b), (c)))
 
 /** Returns number of entries in a hash table.
  *

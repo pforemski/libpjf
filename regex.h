@@ -1,8 +1,8 @@
 /*
  * This file is part of libpjf
  * Copyright (C) 2005-2009 ASN Sp. z o.o.
- * Authors: Dawid Ciężarkiewicz <dawid.ciezarkiewicz@gmail.com> (original asn_match)
- *          Pawel Foremski <pjf@asn.pl>
+ * Authors: Dawid Ciężarkiewicz <dawid.ciezarkiewicz@gmail.com> (original pjf_match)
+ *          Pawel Foremski <pawel@foremski.pl>
  *
  * libpjf is free software; you can redistribute it and/or modify it under
  * the terms of the GNU General Public License as published by the Free
@@ -31,14 +31,14 @@
  * @retval  1 matched
  * @retval  0 didn't match
  * @retval -1 pattern error */
-int asn_match(const char *regex, const char *str);
+int pjf_match(const char *regex, const char *str);
 
 /** Simple regex replace
  *
- * @param regex pattern (see asn_match())
+ * @param regex pattern (see pjf_match())
  * @param str   subject
  * @param rep   replacement (supports back-references)
  * @return      new char *, always succeeds */
-char *asn_replace(const char *regex, const char *rep, const char *str, void *mm);
+char *pjf_replace(const char *regex, const char *rep, const char *str, void *mm);
 
 #endif /* _REGEX_H_ */

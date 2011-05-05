@@ -80,14 +80,14 @@ xstr  *ut_xstr(ut *var)
 			return MMXSTR_CREATE(buf);
 		case T_LIST:
 			xs = MMXSTR_CREATE("");
-			TLIST_ITER_LOOP(var->d.as_tlist, el) {
+			tlist_iter_loop(var->d.as_tlist, el) {
 				xstr_append(xs, ut_char(el));
 				xstr_append_char(xs, ' ');
 			}
 			return xs;
 		case T_HASH:
 			xs = MMXSTR_CREATE("");
-			THASH_ITER_LOOP(var->d.as_thash, key, el) {
+			thash_iter_loop(var->d.as_thash, key, el) {
 				xstr_append(xs, key);
 				xstr_append(xs, ": ");
 				xstr_append(xs, ut_char(el));
@@ -128,12 +128,12 @@ tlist *ut_tlist(ut *var)
 		case T_LIST:
 			return var->d.as_tlist;
 		case T_HASH:
-			list = MMTLIST_CREATE(NULL);
-			THASH_ITER_LOOP(var->d.as_thash, key, el)
+			list = tlist_create(NULL, mm);
+			thash_iter_loop(var->d.as_thash, key, el)
 				tlist_push(list, el);
 			return list;
 		default:
-			return MMTLIST_CREATE(NULL);
+			return tlist_create(NULL, mm);
 	}
 }
 
@@ -145,7 +145,7 @@ thash *ut_thash(ut *var)
 		case T_HASH:
 			return var->d.as_thash;
 		default:
-			return MMTHASH_CREATE_STR(NULL);
+			return thash_create_strkey(NULL, mm);
 	}
 }
 
@@ -192,7 +192,7 @@ int ut_errcode(ut *var)
 
 ut *ut_new_bool(bool val, void *mm)
 {
-	ut *ret = mmatic_alloc(sizeof(struct ut), mm);
+	ut *ret = mmatic_alloc(mm, sizeof(struct ut));
 
 	ret->type = T_BOOL;
 	ret->d.as_bool= val;
@@ -202,7 +202,7 @@ ut *ut_new_bool(bool val, void *mm)
 
 ut *ut_new_int(int val, void *mm)
 {
-	ut *ret = mmatic_alloc(sizeof(struct ut), mm);
+	ut *ret = mmatic_alloc(mm, sizeof(struct ut));
 
 	ret->type = T_INT;
 	ret->d.as_int = val;
@@ -212,7 +212,7 @@ ut *ut_new_int(int val, void *mm)
 
 ut *ut_new_double(double val, void *mm)
 {
-	ut *ret = mmatic_alloc(sizeof(struct ut), mm);
+	ut *ret = mmatic_alloc(mm, sizeof(struct ut));
 
 	ret->type = T_DOUBLE;
 	ret->d.as_double = val;
@@ -227,7 +227,7 @@ ut *ut_new_char(const char *val, void *mm)
 
 ut *ut_new_xstr(xstr *val, void *mm)
 {
-	ut *ret = mmatic_alloc(sizeof(struct ut), mm);
+	ut *ret = mmatic_alloc(mm, sizeof(struct ut));
 
 	ret->type = T_STRING;
 	ret->d.as_xstr = val ? val : MMXSTR_CREATE("");
@@ -237,10 +237,10 @@ ut *ut_new_xstr(xstr *val, void *mm)
 
 ut *ut_new_uttlist(tlist *val, void *mm)
 {
-	ut *ret = mmatic_alloc(sizeof(struct ut), mm);
+	ut *ret = mmatic_alloc(mm, sizeof(struct ut));
 
 	ret->type = T_LIST;
-	ret->d.as_tlist = val ? val : MMTLIST_CREATE(NULL); /* TODO: make a freeing system */
+	ret->d.as_tlist = val ? val : tlist_create(NULL, mm); /* TODO: make a freeing system */
 
 	return ret;
 }
@@ -250,16 +250,16 @@ ut *ut_new_tlist(tlist *val, void *mm)
 	char *v;
 	ut *ret = ut_new_uttlist(NULL, mm);
 
-	if (val) { TLIST_ITER_LOOP(val, v) utl_add_char(ret, v); }
+	if (val) { tlist_iter_loop(val, v) utl_add_char(ret, v); }
 	return ret;
 }
 
 ut *ut_new_utthash(thash *val, void *mm)
 {
-	ut *ret = mmatic_alloc(sizeof(struct ut), mm);
+	ut *ret = mmatic_alloc(mm, sizeof(struct ut));
 
 	ret->type = T_HASH;
-	ret->d.as_thash = val ? val : MMTHASH_CREATE_STR(NULL); /* TODO: make a freeing system */
+	ret->d.as_thash = val ? val : thash_create_strkey(NULL, mm); /* TODO: make a freeing system */
 
 	return ret;
 }
@@ -269,13 +269,13 @@ ut *ut_new_thash(thash *val, void *mm)
 	char *k, *v;
 	ut *ret = ut_new_utthash(NULL, mm);
 
-	if (val) { THASH_ITER_LOOP(val, k, v) uth_set_char(ret, k, v); }
+	if (val) { thash_iter_loop(val, k, v) uth_set_char(ret, k, v); }
 	return ret;
 }
 
 ut *ut_new_ptr(void *val, void *mm)
 {
-	ut *ret = mmatic_alloc(sizeof(struct ut), mm);
+	ut *ret = mmatic_alloc(mm, sizeof(struct ut));
 
 	ret->type = T_PTR;
 	ret->d.as_ptr = val;
@@ -285,7 +285,7 @@ ut *ut_new_ptr(void *val, void *mm)
 
 ut *ut_new_null(void *mm)
 {
-	ut *ret = mmatic_alloc(sizeof(struct ut), mm);
+	ut *ret = mmatic_alloc(mm, sizeof(struct ut));
 
 	ret->type = T_NULL;
 
@@ -294,10 +294,10 @@ ut *ut_new_null(void *mm)
 
 ut *ut_new_err(int code, const char *msg, const char *data, void *mm)
 {
-	ut *ret = mmatic_alloc(sizeof(struct ut), mm);
+	ut *ret = mmatic_alloc(mm, sizeof(struct ut));
 
 	ret->type = T_ERR;
-	ret->d.as_err = mmatic_alloc(sizeof(struct ut_err), mm);
+	ret->d.as_err = mmatic_alloc(mm, sizeof(struct ut_err));
 
 	ret->d.as_err->code = code;
 	ret->d.as_err->msg  = msg ? msg : "";
@@ -403,7 +403,7 @@ ut *uth_path_create_(ut *parent, const char *key, ...)
 	va_list keys;
 	ut *child;
 
-	asnsert(ut_is_thash(parent));
+	pjf_assert(ut_is_thash(parent));
 
 	va_start(keys, key);
 	while (key && *key) {

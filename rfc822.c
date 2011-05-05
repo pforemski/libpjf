@@ -1,7 +1,7 @@
 /*
  * This file is part of libpjf
  * Copyright (C) 2009 ASN Sp. z o.o.
- * Author: Pawel Foremski <pjf@asn.pl>
+ * Author: Pawel Foremski <pawel@foremski.pl>
  *
  * libpjf is free software; you can redistribute it and/or modify it under
  * the terms of the GNU General Public License as published by the Free
@@ -23,9 +23,9 @@ thash *rfc822_parse(const char *str, void *mm)
 {
 	char *k, *v, *txt = mmstrdup(str);
 	int i, l;
-	thash *ret =  MMTHASH_CREATE_STR(NULL);
+	thash *ret =  thash_create_strkey(NULL, mm);
 
-	txt = asn_trim(txt);
+	txt = pjf_trim(txt);
 	l = strlen(txt);
 
 	for (i = 0; i < l; i++) {
@@ -66,7 +66,7 @@ const char *rfc822_print(ut *var)
 	if (var->type != T_HASH)
 		return ut_char(var);
 
-	THASH_ITER_LOOP(var->d.as_thash, key, el) {
+	thash_iter_loop(var->d.as_thash, key, el) {
 		xstr_append(xs, key);
 		xstr_append(xs, ": ");
 		xstr_append(xs, ut_char(el));

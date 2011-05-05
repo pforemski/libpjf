@@ -1,7 +1,7 @@
 /*
  * This file is part of libpjf
  * Copyright (C) 2005-2009 ASN Sp. z o.o.
- * Author: Pawel Foremski <pjf@asn.pl>
+ * Author: Pawel Foremski <pawel@foremski.pl>
  *
  * libpjf is free software; you can redistribute it and/or modify it under
  * the terms of the GNU General Public License as published by the Free
@@ -29,9 +29,6 @@
 
 /** Fork and run a command in shell (ie. parsing the arguments in command string)
  *
- * If cmd starts with #!/bin/sh, makes evil black magic and executes it as "inline"
- * shell scripts
- *
  * @param cmd          command to run, with optional arguments
  * @param args         additional optional arguments (may be null)
  * @param env          thash to export as process environment
@@ -42,49 +39,28 @@
  * @return child PID
  * @retval 0 error
  */
-pid_t asn_fork(const char *cmd, const char *args, thash* env,
+pid_t pjf_fork(const char *cmd, const char *args, thash* env,
 		int *fd_stdin, int *fd_stdout, int *fd_stderr);
 
-/** Waits for termination of child
+/** Sync wait for termination of given child
  *
  * @param child           PID of child
- * @return                exit code
- * @retval 128            child=0
- * @retval 130+termsignal child terminated
- * @retval 129            other error
+ * @return                program exit code
+ * @retval -1             child=0
+ * @retval -2             other error
+ * @retval 200 + SIGNUM   child terminated by signal SIGNUM
  */
-int asn_wait(pid_t child);
+int pjf_wait(pid_t child);
 
-/** Waits for termination of any child
+/** Async check for termination of any child
  *
- * @param code      store exit code here if not null
+ * @param code      store exit code here if not null (see retval of pjf_wait())
  * @return          child pid
  * @retval 0        no child exited so far
  */
-pid_t asn_waitany(int *code);
+pid_t pjf_waitany(int *code);
 
-/** Wrapper around asn_fork()
- *
- * @param cmd      command to execute (may be a shell script code)
- * @param args     optional arguments
- * @param envh     optional environmental variables to set
- * @param in       optional input for the command
- * @param inlen    length of in
- * @param out      optional buffer for output of the command
- * @param outlen   length of out
- * @param err      optional buffer for errors of the command
- * @param errlen   length of err
- *
- * @returns exit code of the command
- * @retval  -1      error in asn_cmd()
- */
-int asn_cmd(const char *cmd, const char *args,
-	thash *envh,
-	char *in, int inlen,
-	char *out, int outlen,
-	char *err, int errlen);
-
-/** Another flavour of wrapper around asn_fork()
+/** Wrapper around pjf_fork()
  *
  * @param cmd      command to execute (may be a shell script code)
  * @param args     optional arguments
@@ -94,8 +70,8 @@ int asn_cmd(const char *cmd, const char *args,
  * @param err      optional buffer for errors of the command
  *
  * @returns exit code of the command
- * @retval  -1      error in asn_cmd()
+ * @retval  -1      error in pjf_cmd()
  */
-int asn_cmd2(const char *cmd, const char *args, thash *env, xstr *in, xstr *out, xstr *err);
+int pjf_cmd(const char *cmd, const char *args, thash *env, xstr *in, xstr *out, xstr *err);
 
 #endif /* _SFORK_H_*/

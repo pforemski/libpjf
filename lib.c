@@ -1,7 +1,7 @@
 /*
  * This file is part of libpjf
  * Copyright (C) 2005-2009 ASN Sp. z o.o.
- * Author: Pawel Foremski <pjf@asn.pl>
+ * Author: Pawel Foremski <pawel@foremski.pl>
  *
  * libpjf is free software; you can redistribute it and/or modify it under
  * the terms of the GNU General Public License as published by the Free
@@ -97,7 +97,7 @@ void _die(const char *file, unsigned int line, const char *fn, char *msg, ...)
 	abort();
 }
 
-void *asn_malloc(size_t size)
+void *pjf_malloc(size_t size)
 {
 	void *mem;
 
@@ -105,20 +105,20 @@ void *asn_malloc(size_t size)
 
 	mem = malloc(size);
 	if (!mem)
-		die("asn_malloc(%u) failed, out of memory\n", (unsigned int) size);
+		die("pjf_malloc(%u) failed, out of memory\n", (unsigned int) size);
 
 	return mem;
 }
 
 /* it seems its easier to have code duplication than coping with va_lists */
-char *asn_malloc_printf(const char *fmt, ...)
+char *pjf_malloc_printf(const char *fmt, ...)
 {
 	va_list args; char *buf;
-	va_start(args, fmt); buf = asn_malloc(BUFSIZ); vsnprintf(buf, BUFSIZ, fmt, args); va_end(args);
+	va_start(args, fmt); buf = pjf_malloc(BUFSIZ); vsnprintf(buf, BUFSIZ, fmt, args); va_end(args);
 	return buf;
 }
 
-int asn_isfile(const char *path)
+int pjf_isfile(const char *path)
 {
 	struct stat stats;
 
@@ -128,7 +128,7 @@ int asn_isfile(const char *path)
 	return -2;
 }
 
-bool asn_isexecutable(const char *path)
+bool pjf_isexecutable(const char *path)
 {
 	struct stat stats;
 
@@ -140,7 +140,7 @@ bool asn_isexecutable(const char *path)
 		(stats.st_mode & (S_IXUSR | S_IXGRP | S_IXOTH)));
 }
 
-int asn_isfifo(const char *path)
+int pjf_isfifo(const char *path)
 {
 	struct stat stats;
 
@@ -149,7 +149,7 @@ int asn_isfifo(const char *path)
 	return -2;
 }
 
-void asn_cd(const char *path)
+void pjf_cd(const char *path)
 {
 	dbg(11, "changedir(%s)\n", path);
 
@@ -159,14 +159,14 @@ void asn_cd(const char *path)
 	}
 }
 
-char *asn_pwd(void *mm)
+char *pjf_pwd(void *mm)
 {
 	char *ret = mmalloc(PATH_MAX);
-	asnsert(getcwd(ret, PATH_MAX));
+	pjf_assert(getcwd(ret, PATH_MAX));
 	return ret;
 }
 
-void asn_parsepath(const char *path, tlist *lpath, void *mm)
+void pjf_parsepath(const char *path, tlist *lpath, void *mm)
 {
 	char *part, *ptr;
 
@@ -202,19 +202,19 @@ void asn_parsepath(const char *path, tlist *lpath, void *mm)
 	}
 }
 
-char *asn_parsedoubleslashes(const char *vcwd, const char *vpath, void *mm)
+char *pjf_parsedoubleslashes(const char *vcwd, const char *vpath, void *mm)
 {
 	tlist *list;
 
 	/* get new path in form of a list */
-	list = MMTLIST_CREATE(NULL);
-	if (vpath[0] != '/') asn_parsepath(vcwd, list, mm);
-	asn_parsepath(vpath, list, mm);
+	list = tlist_create(NULL, mm);
+	if (vpath[0] != '/') pjf_parsepath(vcwd, list, mm);
+	pjf_parsepath(vpath, list, mm);
 
-	return asn_makepath(list, mm);
+	return pjf_makepath(list, mm);
 }
 
-char *asn_makepath(tlist *pathparts, void *mm)
+char *pjf_makepath(tlist *pathparts, void *mm)
 {
 	char *part;
 	xstr *ret = xstr_create("", mm);
@@ -231,7 +231,7 @@ char *asn_makepath(tlist *pathparts, void *mm)
 	return ret->s;
 }
 
-int asn_isdir(const char *path)
+int pjf_isdir(const char *path)
 {
 	struct stat dirstat;
 
@@ -240,7 +240,7 @@ int asn_isdir(const char *path)
 	return 1;
 }
 
-char *asn_abspath(const char *path, void *mm)
+char *pjf_abspath(const char *path, void *mm)
 {
 	char cwd[PATH_MAX];
 
@@ -250,20 +250,20 @@ char *asn_abspath(const char *path, void *mm)
 		return mmprintf("%s/%s", getcwd(cwd, sizeof(cwd)), path);
 }
 
-const char *asn_basename(const char *path)
+const char *pjf_basename(const char *path)
 {
 	char *l;
 	l = strrchr(path, '/');
 	return l ? l+1 : path;
 }
 
-int asn_mkdir(const char *path, void *mm, int (*filter)(const char *part))
+int pjf_mkdir(const char *path, void *mm, int (*filter)(const char *part))
 {
-	tlist *list = MMTLIST_CREATE(NULL);
+	tlist *list = tlist_create(NULL, mm);
 	char *curdir, *part;
 
-	path = asn_abspath(path, mm);
-	asn_parsepath(path, list, mm);
+	path = pjf_abspath(path, mm);
+	pjf_parsepath(path, list, mm);
 
 	curdir = mmalloc(strlen(path) + 2);
 	curdir[0] = 0;
@@ -273,7 +273,7 @@ int asn_mkdir(const char *path, void *mm, int (*filter)(const char *part))
 		strcat(curdir, "/");
 		strcat(curdir, part);
 
-		switch (asn_isdir(curdir)) {
+		switch (pjf_isdir(curdir)) {
 			case  1: continue;  /* exists, is a directory */
 			case -2: return 0;  /* exists, is NOT a directory */
 		}
@@ -289,7 +289,7 @@ int asn_mkdir(const char *path, void *mm, int (*filter)(const char *part))
 	return 1;
 }
 
-int asn_rmdir(const char *path, const char *skip)
+int pjf_rmdir(const char *path, const char *skip)
 {
 	struct stat statbuf;
 	struct dirent *dirp;
@@ -308,11 +308,11 @@ int asn_rmdir(const char *path, const char *skip)
 			if (streq(dirp->d_name, "..")) continue;
 			if (skip && streq(dirp->d_name, skip)) continue;
 
-			newpath = asn_malloc(strlen(path) + strlen(dirp->d_name) + 2);
+			newpath = pjf_malloc(strlen(path) + strlen(dirp->d_name) + 2);
 			strcpy(newpath, path);
 			strcat(newpath, "/");
 			strcat(newpath, dirp->d_name);
-			upret = asn_rmdir(newpath, skip);
+			upret = pjf_rmdir(newpath, skip);
 			free(newpath);
 			if (!upret) return 0;
 		}
@@ -330,11 +330,11 @@ int asn_rmdir(const char *path, const char *skip)
 static int vsort(const struct dirent **a, const struct dirent **b) { return strverscmp((*a)->d_name, (*b)->d_name); }
 static int filterdots(const struct dirent *d)  { return (!streq(d->d_name, ".") && !streq(d->d_name, "..")); }
 
-tlist *asn_ls(const char *path, void *mm)
+tlist *pjf_ls(const char *path, void *mm)
 {
 	int i, n;
 	struct dirent **entries;
-	tlist *ret = MMTLIST_CREATE(NULL);
+	tlist *ret = tlist_create(NULL, mm);
 
 	n = scandir(path, &entries, filterdots, vsort);
 	for (i = 0; i < n; i++) {
@@ -357,7 +357,7 @@ int isnumber(const char *str)
 	return 1;
 }
 
-char *asn_sanepath(const char *path, void *mm)
+char *pjf_sanepath(const char *path, void *mm)
 {
 	int i, j;
 	char *ret, prev = 0;
@@ -377,7 +377,7 @@ char *asn_sanepath(const char *path, void *mm)
 	return ret;
 }
 
-char *asn_readfile(const char *path, void *mm)
+char *pjf_readfile(const char *path, void *mm)
 {
 	FILE *fp;
 	char *buf, *rbuf;
@@ -398,7 +398,7 @@ char *asn_readfile(const char *path, void *mm)
 		bufsiz = bigbufsiz;
 		bigbufsiz *= 2;
 
-		rbuf = mmatic_realloc(rbuf, bigbufsiz);
+		rbuf = mmatic_resize(rbuf, bigbufsiz);
 		buf = rbuf + bufsiz; /* start from half */
 	}
 
@@ -406,7 +406,7 @@ char *asn_readfile(const char *path, void *mm)
 	return rbuf;
 }
 
-int asn_writefile(const char *path, const char *s)
+int pjf_writefile(const char *path, const char *s)
 {
 	FILE *fp;
 	int r;
@@ -421,7 +421,7 @@ int asn_writefile(const char *path, const char *s)
 	return r;
 }
 
-void asn_timenow(struct timeval *tv)
+void pjf_timenow(struct timeval *tv)
 {
 	if (gettimeofday(tv, NULL) == 0)
 		return;
@@ -430,15 +430,15 @@ void asn_timenow(struct timeval *tv)
 	tv->tv_usec = 0;
 }
 
-uint32_t asn_timediff(struct timeval *tv)
+uint32_t pjf_timediff(struct timeval *tv)
 {
 	static struct timeval tvnow;
 
-	asnsert(tv);
+	pjf_assert(tv);
 
-	asn_timenow(&tvnow);
+	pjf_timenow(&tvnow);
 
-	dbg(14, "asn_timediff: comparing now=[%u.%06u] vs. then=[%u.%06u]\n",
+	dbg(14, "pjf_timediff: comparing now=[%u.%06u] vs. then=[%u.%06u]\n",
 		(unsigned int) tvnow.tv_sec, (unsigned int) tvnow.tv_usec,
 		(unsigned int) tv->tv_sec,   (unsigned int) tv->tv_usec);
 
@@ -451,7 +451,7 @@ uint32_t asn_timediff(struct timeval *tv)
 		return 0;
 }
 
-void asn_daemonize(const char *progname, const char *pidfile)
+void pjf_daemonize(const char *progname, const char *pidfile)
 {
 	int fd;
 	char pwd[PATH_MAX], pid[16];
@@ -479,15 +479,15 @@ void asn_daemonize(const char *progname, const char *pidfile)
 	openlog((progname) ? progname : "", LOG_PID, LOG_DAEMON);
 	debugcb = (void (*)()) syslog;
 
-	asn_cd(pwd); /* XXX: will die() if fails */
+	pjf_cd(pwd); /* XXX: will die() if fails */
 
 	if (pidfile && !streq(pidfile, "")) {
 		snprintf(pid, sizeof(pid), "%u\n", getpid());
-		asn_writefile(pidfile, pid);
+		pjf_writefile(pidfile, pid);
 	}
 }
 
-char *asn_trim(char *txt)
+char *pjf_trim(char *txt)
 {
 	int i;
 	char c;

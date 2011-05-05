@@ -4,7 +4,7 @@
  * Copyright (C) 2009 ASN Sp. z o.o.
  *
  * License: GNU Lesser General Public License version 2.1
- * Imported from zzjson library by: Pawel Foremski <pjf@asn.pl>
+ * Imported from zzjson library by: Pawel Foremski <pawel@foremski.pl>
  */
 
 #ifndef _JSON_H_

@@ -3,7 +3,7 @@
  *
  * This file is part of libpjf
  * Copyright (C) 2005-2009 ASN Sp. z o.o.
- * Authors: Pawel Foremski <pjf@asn.pl>
+ * Authors: Pawel Foremski <pawel@foremski.pl>
  *          Łukasz Zemczak <sil2100@asn.pl>
  *
  * libpjf is free software; you can redistribute it and/or modify it under
@@ -24,7 +24,7 @@
 
 #include "lib.h"
 
-#define tmmalloc(size) (mmatic_alloc((size), list))
+#define tmmalloc(size) (mmatic_alloc(list, (size)))
 
 tlist *tlist_create(void (*free_func)(void *val), void *mm)
 {
@@ -43,7 +43,7 @@ tlist *tlist_listify(void (*free_func)(void *val), void *mm, ...)
 	const void *arg;
 	tlist *ret;
 
-	ret = MMTLIST_CREATE(free_func);
+	ret = tlist_create(free_func, mm);
 	if (!ret) return NULL;
 
 	va_start(args, mm);

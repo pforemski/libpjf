@@ -3,7 +3,7 @@
  *
  * This file is part of libpjf
  * Copyright (C) 2005-2010 ASN Sp. z o.o.
- * Author: Pawel Foremski <pforemski@asn.pl>
+ * Author: Pawel Foremski <pawel@foremski.pl>
  *
  * libpjf is free software; you can redistribute it and/or modify it under
  * the terms of the GNU General Public License as published by the Free
@@ -45,12 +45,12 @@
 /** Verify manager tag if run in debug mode */
 #define IS_MGR(mgr)      ((mgr) && (mgr)->tag == TAG_MGR)
 
-#define ALLOC(ptr, size) if (!(ptr = malloc(size))) die("Out of memory");
 
 /*****************************************************************************/
 /***************************** Allocations ***********************************/
 /*****************************************************************************/
 
+#define ALLOC(ptr, size) if (!(ptr = malloc(size))) die("Out of memory");
 void *mmatic_create(void)
 {
 	mmatic *mgr;
@@ -67,12 +67,10 @@ void *mmatic_create(void)
 	return mgr;
 }
 
-void *mmatic_allocate(size_t size, void *mgr_or_mem, bool zero, bool shared, void *start, int flags,
-	const char *cfile, unsigned int cline)
+void *mmatic_allocate(void *mgr_or_mem, size_t size, const char *cfile, unsigned int cline)
 {
 	mmatic *mgr;
 	mmchunk *chunk;
-	void *ptr;
 
 	mgr = mgr_or_mem;
 	if (!IS_MGR(mgr)) {
@@ -84,19 +82,11 @@ void *mmatic_allocate(size_t size, void *mgr_or_mem, bool zero, bool shared, voi
 			die("Requested allocation in invalid space (called from %s:%u)", cfile, cline);
 	}
 
-	if (shared) {
-		chunk = mmap(start, (sizeof *chunk) + size,
-			PROT_READ | PROT_WRITE,
-			MAP_SHARED | MAP_ANONYMOUS | flags, 0, 0);
-	} else {
-		chunk = malloc((sizeof *chunk) + size);
-	}
-
+	chunk = malloc((sizeof *chunk) + size);
 	if (!chunk)
 		die("Out of memory (called from %s:%u)", cfile, cline);
 
 	chunk->tag      = TAG_CHUNK;
-	chunk->shared   = shared;
 	chunk->alloc    = size;
 	chunk->cfile    = cfile;
 	chunk->cline    = cline;
@@ -107,17 +97,23 @@ void *mmatic_allocate(size_t size, void *mgr_or_mem, bool zero, bool shared, voi
 	mgr->last       = chunk;
 	mgr->totalloc  += size;
 
-	ptr = CHUNK_TO_PTR(chunk);
-	return zero ? memset(ptr, 0, size) : ptr;
+	return CHUNK_TO_PTR(chunk);
 }
 
-void *mmatic_realloc_(void *mem, size_t size, void *mgr_or_mem, const char *cfile, unsigned int cline)
+void *mmatic_zallocate(void *mgr, size_t size, const char *cfile, unsigned int cline)
+{
+	void *ptr;
+	ptr = mmatic_allocate(mgr, size, cfile, cline);
+	return ptr ? memset(ptr, 0, size) : ptr;
+}
+
+void *mmatic_reallocate(void *mem, size_t size, void *mgr_or_mem, const char *cfile, unsigned int cline)
 {
 	mmchunk *chunk;
 	void *newmem;
 
 	chunk = PTR_TO_CHUNK(mem);
-	asnsert(IS_CHUNK(chunk));
+	pjf_assert(IS_CHUNK(chunk));
 
 	if (!mgr_or_mem)
 		mgr_or_mem = (void *) chunk->mgr;
@@ -125,7 +121,7 @@ void *mmatic_realloc_(void *mem, size_t size, void *mgr_or_mem, const char *cfil
 	if (!size)
 		size = chunk->alloc;
 
-	newmem = mmatic_allocate(size, mgr_or_mem, 0, chunk->shared, NULL, 0, cfile, cline);
+	newmem = mmatic_allocate(mgr_or_mem, size, cfile, cline);
 	memcpy(newmem, mem, chunk->alloc);
 	mmatic_freeptr(mem);
 
@@ -138,9 +134,9 @@ void *mmatic_clone_(const void *mem, void *mm, const char *cfile, unsigned int c
 	void *newmem;
 
 	chunk = PTR_TO_CHUNK(mem);
-	asnsert(IS_CHUNK(chunk));
+	pjf_assert(IS_CHUNK(chunk));
 
-	newmem = mmatic_allocate(chunk->alloc, mm ? mm : chunk->mgr, 0, chunk->shared, NULL, 0, cfile, cline);
+	newmem = mmatic_allocate(mm ? mm : chunk->mgr, chunk->alloc, cfile, cline);
 	memcpy(newmem, mem, chunk->alloc);
 
 	return newmem;
@@ -164,16 +160,13 @@ void mmatic_free_(void **mgr_or_mem, const char *cfile, unsigned int cline)
 			die("Requested deallocation of invalid space (called from %s:%u)", cfile, cline);
 	}
 
-	asnsert(IS_MGR(mgr));
+	pjf_assert(IS_MGR(mgr));
 	dbg(12, "%p: freeing\n", mgr);
 
 	chunk = mgr->first;
 	while (chunk) {
 		nchunk = chunk->next;
-		if (chunk->shared)
-			munmap(chunk, chunk->alloc + sizeof(mmchunk));
-		else
-			free(chunk);
+		free(chunk);
 		chunk = nchunk;
 	}
 
@@ -186,7 +179,7 @@ void mmatic_freeptr_(void **memptr)
 	void *mem = *memptr;
 	mmchunk *chunk = PTR_TO_CHUNK(mem);
 
-	asnsert(IS_CHUNK(chunk));
+	pjf_assert(IS_CHUNK(chunk));
 
 	chunk->prev->next = chunk->next;
 	if (chunk->next)
@@ -195,11 +188,7 @@ void mmatic_freeptr_(void **memptr)
 		chunk->mgr->last = chunk->prev;
 
 	chunk->mgr->totalloc -= chunk->alloc;
-
-	if (chunk->shared)
-		munmap(chunk, chunk->alloc + sizeof(mmchunk));
-	else
-		free(chunk);
+	free(chunk);
 
 	*memptr = 0;
 }
@@ -213,13 +202,13 @@ void mmatic_freeptrs(void *ptr)
 /****************************** Utilities ************************************/
 /*****************************************************************************/
 
-char *mmatic_strdup_(const char *s, void *mgr, const char *cfile, unsigned int cline)
+char *mmatic_strdup_(void *mgr, const char *s, const char *cfile, unsigned int cline)
 {
 	char *newm;
 
 	if (!s) return NULL;
 
-	newm = mmatic_allocate(strlen(s) + 1, mgr, 0, 0, NULL, 0, cfile, cline);
+	newm = mmatic_allocate(mgr, strlen(s) + 1, cfile, cline);
 	strcpy(newm, s);
 
 	return newm;

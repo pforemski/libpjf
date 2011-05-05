@@ -3,7 +3,7 @@
  * Copyright (C) 2005-2009 ASN Sp. z o.o.
  * Authors: Dawid Ciężarkiewicz <dawid.ciezarkiewicz@gmail.com> (original idea)
  *          Łukasz Zemczak <sil2100@asn.pl>
- *          Pawel Foremski <pjf@asn.pl>
+ *          Pawel Foremski <pawel@foremski.pl>
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -28,7 +28,7 @@
 
 #include "lib.h"
 
-#define xmmalloc(size) (mmatic_alloc((size), xs))
+#define xmmalloc(size) (mmatic_alloc(xs, (size)))
 
 /**
  * @file xstr.c

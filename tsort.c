@@ -6,7 +6,7 @@
  * Copyright (C) 2005-2009 ASN Sp. z o.o.
  *
  * Originally written by Mark Kettenis <kettenis@phys.uva.nl>.
- * Libified for libpjf by Pawel Foremski <pjf@asn.pl>
+ * Libified for libpjf by Pawel Foremski <pawel@foremski.pl>
  *
  * libpjf is free software; you can redistribute it and/or modify it under
  * the terms of the GNU General Public License as published by the Free
@@ -336,7 +336,7 @@ static void walk_tree (struct item *root, int (*action) (struct item *))
 		recurse_tree(root->right, action);
 }
 
-int asn_tsort(tlist *input, tlist *output, void *mm)
+int pjf_tsort(tlist *input, tlist *output, void *mm)
 {
 	int ok = 1;
 	struct item *root;

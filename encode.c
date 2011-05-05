@@ -1,7 +1,7 @@
 /*
  * This file is part of libpjf
  * Copyright (C) 2010 ASN Sp. z o.o.
- * Author: Pawel Foremski <pjf@asn.pl>
+ * Author: Pawel Foremski <pawel@foremski.pl>
  *
  * libpjf is free software; you can redistribute it and/or modify it under
  * the terms of the GNU General Public License as published by the Free
@@ -19,7 +19,7 @@
 
 #include "lib.h"
 
-xstr *asn_b64_dec(const char *text, void *mm)
+xstr *pjf_b64_dec(const char *text, void *mm)
 {
 	static const char d[] = {
 		62, -1, -1, -1, 63, 52, 53, 54,
@@ -64,7 +64,7 @@ xstr *asn_b64_dec(const char *text, void *mm)
 	return xs;
 }
 
-const char *asn_b64_enc(xstr *text, void *mm)
+const char *pjf_b64_enc(xstr *text, void *mm)
 {
 	static const char d[] = {
 		'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H',
@@ -110,7 +110,7 @@ const char *asn_b64_enc(xstr *text, void *mm)
 	return xstr_string(xs);
 }
 
-xstr *asn_b32_dec(const char *text, void *mm)
+xstr *pjf_b32_dec(const char *text, void *mm)
 {
 	static const unsigned char d[] = {
 		  0,   1,   2,   3,   4,   5,   6,   7,   8,   9, // 9
@@ -171,7 +171,7 @@ xstr *asn_b32_dec(const char *text, void *mm)
 	return xs;
 }
 
-const char *asn_b32_enc(xstr *text, void *mm)
+const char *pjf_b32_enc(xstr *text, void *mm)
 {
 	static const char d[] = {
 		'0', '1', '2', '3', '4', '5', '6', '7',

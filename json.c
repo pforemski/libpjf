@@ -4,7 +4,7 @@
  * Copyright (C) 2009 ASN Sp. z o.o.
  *
  * License: GNU Lesser General Public License version 2.1
- * Imported from zzjson library by: Pawel Foremski <pjf@asn.pl>
+ * Imported from zzjson library by: Pawel Foremski <pawel@foremski.pl>
  */
 
 #include <ctype.h>
@@ -410,7 +410,7 @@ char *json_print(json *json, ut *var)
 		case T_LIST:
 			xs = MMXSTR_CREATE("[ ");
 
-			TLIST_ITER_LOOP(var->d.as_tlist, el) {
+			tlist_iter_loop(var->d.as_tlist, el) {
 				xstr_append(xs, json_print(json, el));
 				xstr_append(xs, ", ");
 			}
@@ -423,7 +423,7 @@ char *json_print(json *json, ut *var)
 		case T_HASH:
 			xs = MMXSTR_CREATE("{ ");
 
-			THASH_ITER_LOOP(var->d.as_thash, k, el) {
+			thash_iter_loop(var->d.as_thash, k, el) {
 				xstr_append_char(xs, '"');
 				xstr_append(xs, k);
 				xstr_append(xs, "\": ");

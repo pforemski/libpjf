@@ -3,7 +3,7 @@
  *
  * This file is part of libpjf
  * Copyright (C) 2005-2009 ASN Sp. z o.o.
- * Authors: Pawel Foremski <pjf@asn.pl>
+ * Authors: Pawel Foremski <pawel@foremski.pl>
  *          Łukasz Zemczak <sil2100@asn.pl>
  *
  * libpjf is free software; you can redistribute it and/or modify it under
@@ -112,7 +112,7 @@ void *tlist_iter_dec(tlist *list, int i);
 #define tlist_iter(list)      (tlist_iter_inc((list), 1))
 #define tlist_iterback(list)  (tlist_iter_dec((list), 1))
 
-#define TLIST_ITER_LOOP(list, v) tlist_reset(list); while (((v) = tlist_iter(list)))
+#define tlist_iter_loop(list, v) tlist_reset(list); while (((v) = tlist_iter(list)))
 
 /** Pushes a value at the end of a list */
 void tlist_push(tlist *list, const void *val);
@@ -161,9 +161,6 @@ int tlist_size(tlist *list);
  * @param  sep     separator (cant be null!)
  * @return char *  (always, even just an mm-ed "") */
 char *tlist_stringify(tlist *list, const char *sep, void *mm);
-
-/***/
-#define MMTLIST_CREATE(fn) (tlist_create((fn), mm))
 
 #endif
 

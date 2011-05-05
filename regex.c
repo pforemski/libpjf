@@ -1,8 +1,8 @@
 /*
  * This file is part of libpjf
  * Copyright (C) 2005-2009 ASN Sp. z o.o.
- * Authors: Dawid Ciężarkiewicz <dawid.ciezarkiewicz@gmail.com> (original asn_match)
- *          Pawel Foremski <pjf@asn.pl>
+ * Authors: Dawid Ciężarkiewicz <dawid.ciezarkiewicz@gmail.com> (original pjf_match)
+ *          Pawel Foremski <pawel@foremski.pl>
  *
  * libpjf is free software; you can redistribute it and/or modify it under
  * the terms of the GNU General Public License as published by the Free
@@ -96,7 +96,7 @@ static int _regex_match(const char *regex, const char *str, int len, int offset,
 	return rc;
 }
 
-int asn_match(const char *regex, const char *str)
+int pjf_match(const char *regex, const char *str)
 {
 	int cv[CVS];
 
@@ -105,7 +105,7 @@ int asn_match(const char *regex, const char *str)
 	return _regex_match(regex, str, strlen(str), 0, cv, NULL);
 }
 
-char *asn_replace(const char *regex, const char *rep, const char *str, void *mm)
+char *pjf_replace(const char *regex, const char *rep, const char *str, void *mm)
 {
 	int cv[CVS], cvn, rc, br, offset = 0, len = strlen(str);
 	xstr *xs = MMXSTR_CREATE("");

@@ -1,14 +1,9 @@
 CFLAGS =
-LDFLAGS = -lm -lpcre
+LDFLAGS = -lm
 
 ME=libpjf
-C_OBJECTS=lib.o sfork.o regex.o thash.o tlist.o xstr.o wstr.o mmatic.o tsort.o \
-	fc.o select.o unitype.o json.o rfc822.o linux.o encode.o blowfish.o \
-	mime.o utf8.o
-
-ifeq (,$(NOFIFOS))
-C_OBJECTS+=fifos.o
-endif
+C_OBJECTS=lib.o regex.o thash.o tlist.o xstr.o mmatic.o tsort.o \
+	unitype.o json.o rfc822.o encode.o utf8.o sfork.o
 
 TARGETS=libpjf.so libpjf.a
 
@@ -27,6 +22,3 @@ utilities:
 
 distclean: clean
 	$(MAKE) -C distclean
-
-doc:
-	doxygen doxygen.conf
