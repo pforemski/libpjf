@@ -100,7 +100,7 @@ typedef struct thash {
  */
 thash *thash_create(unsigned int (*hash_func)(const void *key),
                     int (*cmp_func)(const void *key1, const void *key2),
-                    void (*free_func)(void *val), bool strings, void *mm);
+                    void (*free_func)(), bool strings, void *mm);
 
 /** Create a thash indexed by string, holding pointers to arbitrary data */
 #define thash_create_strkey(ffn, mm) thash_create(NULL, NULL, (ffn), 1, (mm))

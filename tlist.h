@@ -64,14 +64,14 @@ struct tlist_el {
  * @param  free_func function to use to free an element; if NULL, then memory won't be freed
  * @note   always succeeds
  */
-tlist *tlist_create(void (*free_func)(void *val), void *mm);
+tlist *tlist_create(void (*free_func)(), void *mm);
 
 /** Wrapper around tlist_create() which tlist_push()es given arguments
  * @param  free_func function to use to free an element; if NULL, then memory won't be freed
  * @param  ...       arguments to tlist_push(); REMEMBER to end the list with \0
  * @remark the last argument should be \0
  */
-tlist *tlist_listify(void (*free_func)(void *val), void *mm, ...);
+tlist *tlist_listify(void (*free_func)(), void *mm, ...);
 
 /** Flushes a list
  * @param list the list to flush

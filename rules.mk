@@ -7,8 +7,7 @@ AR ?= ar
 ME ?= $(shell basename `pwd`)
 PWD ?= $(shell pwd)
 
-#CFLAGS += -std=gnu99 -g -Wall -pedantic -fPIC -Dinline='inline __attribute__ ((gnu_inline))' $(CFLAGS_ADD)
-CFLAGS += -std=gnu99 -g -Wall -pedantic $(CFLAGS_ADD)
+CFLAGS += -std=gnu99 -g -Wall -pedantic -fPIC -Dinline='inline __attribute__ ((gnu_inline))' $(CFLAGS_ADD)
 LDFLAGS += -Wall -pedantic $(LDFLAGS_ADD)
 
 ifneq (,$(shell ls ~/local 2>/dev/null))
