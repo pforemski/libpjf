@@ -29,6 +29,7 @@ bool   ut_bool(ut *var)
 	switch (var->type) {
 		case T_BOOL:   return var->d.as_bool;
 		case T_INT:    return (bool) var->d.as_int;
+		case T_UINT:   return (bool) var->d.as_uint;
 		case T_DOUBLE: return (bool) var->d.as_double;
 		case T_STRING: return (bool) ut_int(var);
 		case T_LIST:   return (tlist_count(var->d.as_tlist) > 0);
@@ -43,8 +44,22 @@ int    ut_int(ut *var)
 
 	switch (var->type) {
 		case T_INT:    return var->d.as_int;
+		case T_UINT:   return (int) var->d.as_uint;
 		case T_DOUBLE: return (int) var->d.as_double;
 		case T_STRING: return atoi(xstr_string(var->d.as_xstr));
+		default: return 0;
+	}
+}
+
+uint32_t ut_uint(ut *var)
+{
+	if (!var) return 0;
+
+	switch (var->type) {
+		case T_UINT:   return var->d.as_uint;
+		case T_INT:    return (uint32_t) var->d.as_int;
+		case T_DOUBLE: return (uint32_t) var->d.as_double;
+		case T_STRING: return strtoul(xstr_string(var->d.as_xstr), NULL, 10);
 		default: return 0;
 	}
 }
@@ -56,6 +71,7 @@ double ut_double(ut *var)
 	switch (var->type) {
 		case T_DOUBLE: return var->d.as_double;
 		case T_INT:    return (double) var->d.as_int;
+		case T_UINT:   return (double) var->d.as_uint;
 		case T_STRING: return strtod(xstr_string(var->d.as_xstr), NULL);
 		default: return 0.0;
 	}
@@ -73,10 +89,13 @@ xstr  *ut_xstr(ut *var)
 		case T_STRING:
 			return var->d.as_xstr;
 		case T_INT:
-			snprintf(buf, sizeof(buf), "%d", var->d.as_int);
+			snprintf(buf, sizeof buf, "%d", var->d.as_int);
+			return MMXSTR_CREATE(buf);
+		case T_UINT:
+			snprintf(buf, sizeof buf, "%u", var->d.as_uint);
 			return MMXSTR_CREATE(buf);
 		case T_DOUBLE:
-			snprintf(buf, sizeof(buf), "%g", var->d.as_double);
+			snprintf(buf, sizeof buf, "%g", var->d.as_double);
 			return MMXSTR_CREATE(buf);
 		case T_LIST:
 			xs = MMXSTR_CREATE("");
@@ -100,7 +119,7 @@ xstr  *ut_xstr(ut *var)
 			else
 				return MMXSTR_CREATE("false");
 		case T_PTR:
-			snprintf(buf, sizeof(buf), "%p", var->d.as_ptr);
+			snprintf(buf, sizeof buf, "%p", var->d.as_ptr);
 			return MMXSTR_CREATE(buf);
 		case T_ERR:
 			return MMXSTR_CREATE(ut_err(var));
@@ -206,6 +225,16 @@ ut *ut_new_int(int val, void *mm)
 
 	ret->type = T_INT;
 	ret->d.as_int = val;
+
+	return ret;
+}
+
+ut *ut_new_uint(uint32_t val, void *mm)
+{
+	ut *ret = mmatic_alloc(mm, sizeof(struct ut));
+
+	ret->type = T_UINT;
+	ret->d.as_uint = val;
 
 	return ret;
 }
@@ -335,6 +364,11 @@ ut *uth_set_int(ut *var, const char *key, int val)
 	return uth_set(var, key, ut_new_int(val, var));
 }
 
+ut *uth_set_uint(ut *var, const char *key, uint32_t val)
+{
+	return uth_set(var, key, ut_new_uint(val, var));
+}
+
 ut *uth_set_double(ut *var, const char *key, double val)
 {
 	return uth_set(var, key, ut_new_double(val, var));
@@ -442,6 +476,11 @@ ut *utl_add_bool(ut *var, bool val)
 ut *utl_add_int(ut *var, int val)
 {
 	return utl_add(var, ut_new_int(val, var));
+}
+
+ut *utl_add_uint(ut *var, uint32_t val)
+{
+	return utl_add(var, ut_new_uint(val, var));
 }
 
 ut *utl_add_double(ut *var, double val)

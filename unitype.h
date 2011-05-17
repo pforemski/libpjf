@@ -27,6 +27,7 @@ typedef struct ut {
 		T_PTR,       /* void*  */
 		T_BOOL,      /* bool   */
 		T_INT,       /* int    */
+		T_UINT,      /* unsigned int */
 		T_DOUBLE,    /* double */
 		T_STRING,    /* xstr   */
 		T_LIST,      /* tlist  */
@@ -40,6 +41,7 @@ typedef struct ut {
 	union ut_as {
 		bool        as_bool;
 		int         as_int;
+		uint32_t    as_uint;
 		double      as_double;
 		xstr       *as_xstr;
 		tlist      *as_tlist;
@@ -59,6 +61,7 @@ typedef struct ut {
 #define ut_is_ptr(ut)    (ut && ut->type == T_PTR)
 #define ut_is_bool(ut)   (ut && ut->type == T_BOOL)
 #define ut_is_int(ut)    (ut && ut->type == T_INT)
+#define ut_is_uint(ut)   (ut && ut->type == T_UINT)
 #define ut_is_double(ut) (ut && ut->type == T_DOUBLE)
 #define ut_is_string(ut) (ut && ut->type == T_STRING)
 #define ut_is_tlist(ut)  (ut && ut->type == T_LIST)
@@ -89,6 +92,7 @@ int ut_errcode(ut *ut);
 
 bool        ut_bool(ut *ut);
 int         ut_int(ut *ut);
+uint32_t    ut_uint(ut *ut);
 double      ut_double(ut *ut);
 xstr       *ut_xstr(ut *ut);
 const char *ut_char(ut *ut);
@@ -100,6 +104,7 @@ void       *ut_ptr(ut *ut);
 
 ut *ut_new_bool(bool val, void *mm);
 ut *ut_new_int(int val, void *mm);
+ut *ut_new_uint(uint32_t val, void *mm);
 ut *ut_new_double(double val, void *mm);
 ut *ut_new_char(const char *val, void *mm);
 ut *ut_new_xstr(xstr *val, void *mm);
@@ -126,6 +131,7 @@ ut *uth_set(ut *var, const char *key, ut *val);
 ut *uth_set_null(ut *ut, const char *key);
 ut *uth_set_bool(ut *ut, const char *key, bool val);
 ut *uth_set_int(ut *ut, const char *key, int val);
+ut *uth_set_uint(ut *ut, const char *key, uint32_t val);
 ut *uth_set_double(ut *ut, const char *key, double val);
 ut *uth_set_char(ut *ut, const char *key, const char *val);
 ut *uth_set_xstr(ut *ut, const char *key, xstr *val);
@@ -139,6 +145,7 @@ ut *uth_merge(ut *dst, ut *src);
 /* shortcuts */
 #define uth_bool(var, key)   ut_bool(uth_get(var, key))
 #define uth_int(var, key)    ut_int(uth_get(var, key))
+#define uth_uint(var, key)   ut_uint(uth_get(var, key))
 #define uth_double(var, key) ut_double(uth_get(var, key))
 #define uth_xstr(var, key)   ut_xstr(uth_get(var, key))
 #define uth_char(var, key)   ut_char(uth_get(var, key))
@@ -174,6 +181,7 @@ ut *uth_path_create_(ut *var, const char *key, ...);
 /* shortcuts */
 #define uthp_bool(var, ...)   ut_bool(uth_path_get_(var, __VA_ARGS__, NULL))
 #define uthp_int(var, ...)    ut_int(uth_path_get_(var, __VA_ARGS__, NULL))
+#define uthp_uint(var, ...)   ut_uint(uth_path_get_(var, __VA_ARGS__, NULL))
 #define uthp_double(var, ...) ut_double(uth_path_get_(var, __VA_ARGS__, NULL))
 #define uthp_xstr(var, ...)   ut_xstr(uth_path_get_(var, __VA_ARGS__, NULL))
 #define uthp_char(var, ...)   ut_char(uth_path_get_(var, __VA_ARGS__, NULL))
@@ -197,6 +205,7 @@ ut *utl_add(ut *var, ut *val);
 ut *utl_add_null(ut *ut);
 ut *utl_add_bool(ut *ut, bool val);
 ut *utl_add_int(ut *ut, int val);
+ut *utl_add_uint(ut *ut, uint32_t val);
 ut *utl_add_double(ut *ut, double val);
 ut *utl_add_char(ut *ut, const char *val);
 ut *utl_add_xstr(ut *ut, xstr *val);

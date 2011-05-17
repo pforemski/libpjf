@@ -163,6 +163,7 @@ char *pjf_abspath(const char *path, void *mm);
 const char *pjf_basename(const char *path);
 
 /** Check if path is a directory
+ * See errno for more details on negative return values
  * @param   path   path to check
  * @retval  1      is a dir
  * @retval -1      does not exist
@@ -171,11 +172,10 @@ int pjf_isdir(const char *path);
 
 /** mkdir(1) -p
  * @param  path    path to create
- * @param  filter  if !NULL, a function to call on each iteration and exit from pjf_mkdir() with retval 1 if this
- *                 callback function returns 1, "part" in cb args is the path part were just about to create
- * @retval 0       error
- * @retval 1       success */
-int pjf_mkdir(const char *path, void *mm, int (*filter)(const char *part));
+ * @retval -1      error: part of path already exists and is not a directory
+ * @retval -2      error: mkdir() see errno
+ * @retval 0       success */
+int pjf_mkdir(const char *path);
 
 /** rm -fr
  * @param path  path to remove

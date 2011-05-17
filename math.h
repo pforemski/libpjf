@@ -30,6 +30,6 @@
 #define MA(avg, new, i) (avg += ((new) - (avg)) / (i))
 
 #define EWMA_ALPHA(N) (2.0 / (MAX(1.0, (N)) + 1.0))
-#define EWMA(ewma, val, N) (ewma = (EWMA_ALPHA(N) * (val) + (1.0-EWMA_ALPHA(N)) * (ewma)))
+#define EWMA(ewma, val, N) (EWMA_ALPHA(N) * (val) + (1.0-EWMA_ALPHA(N)) * (ewma))
 
 #endif /* _MATH_H_ */

@@ -257,10 +257,12 @@ const char *pjf_basename(const char *path)
 	return l ? l+1 : path;
 }
 
-int pjf_mkdir(const char *path, void *mm, int (*filter)(const char *part))
+int pjf_mkdir(const char *path)
 {
+	mmatic *mm = mmatic_create();
 	tlist *list = tlist_create(NULL, mm);
 	char *curdir, *part;
+	int rc = 0;
 
 	path = pjf_abspath(path, mm);
 	pjf_parsepath(path, list, mm);
@@ -274,19 +276,19 @@ int pjf_mkdir(const char *path, void *mm, int (*filter)(const char *part))
 		strcat(curdir, part);
 
 		switch (pjf_isdir(curdir)) {
-			case  1: continue;  /* exists, is a directory */
-			case -2: return 0;  /* exists, is NOT a directory */
+			case  1: continue;           /* exists, is a directory */
+			case -2: rc = -1; goto ret;  /* exists, is NOT a directory */
 		}
 
-		/* does not exist */
-		if (filter && (*filter)(part) == 1) return 1;
-
-		/* stat() error - try to mkdir() */
-		if (errno != ENOENT) return 0; /* unknown error */
-		if (mkdir(curdir, 0755) != 0) return 0; /* mkdir() failed */
+		if (mkdir(curdir, 0755) != 0) {
+			rc = -2;
+			goto ret;
+		}
 	}
 
-	return 1;
+ret:
+	mmatic_free(mm);
+	return rc;
 }
 
 int pjf_rmdir(const char *path, const char *skip)
