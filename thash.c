@@ -186,8 +186,9 @@ static void thash_resize(thash *hash)
 
 void thash_set(thash *hash, const void *key, const void *val)
 {
+	int i;
 	unsigned int index;
-	thash_el *root_el, *el = NULL, *parent_el = NULL;
+	thash_el *root_el, *el = NULL, *parent_el = NULL, *itel;
 
 	if (!hash) return;
 
@@ -243,10 +244,24 @@ void thash_set(thash *hash, const void *key, const void *val)
 		if (hash->free_func)
 			(hash->free_func)(el->val);
 
-		if (parent_el)
+		/* handle iterator */
+		if (index == hash->counter_x && hash->counter_y > 0) {
+			/* find last element returned by thash_iter() */
+			itel = root_el;
+			for (i = 0; i < hash->counter_y - 1 && itel->next; i++)
+				itel = itel->next;
+
+			/* if this is the element being deleted, decrease the y counter so that the element just
+			 * after it is not skipped in next call to thash_iter() */
+			if (el == itel)
+				hash->counter_y--;
+		}
+
+		if (parent_el) {
 			parent_el->next = el->next;
-		else
+		} else {
 			hash->tbl[index] = el->next;
+		}
 
 		_thash_free(hash, el);
 		hash->used--;
