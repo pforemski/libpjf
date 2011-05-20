@@ -104,21 +104,15 @@ void *mmatic_clone_(const void *mem, void *mm, const char *cfile, unsigned int c
 /*****************************************************************************/
 
 /** Frees all memory and destroys given manager
- * @param mgr_or_mem    memory manager or memory (see mmatic_allocate())
- * @note sets *mgr = 0 */
-void mmatic_free_(void **mgr_or_mem, const char *cfile, unsigned int cline);
-#define mmatic_free(a) mmatic_free_((void **) &(a), __FILE__, __LINE__)
+ * @param mgr_or_mem    memory manager or memory (see mmatic_allocate()) */
+void mmatic_free_(void *mgr_or_mem, const char *cfile, unsigned int cline);
+#define mmatic_free(a) mmatic_free_((a), __FILE__, __LINE__)
 #define mmfree() mmatic_free(mm)
 
 /** Frees one specific pointer
- * @param mem       memory from mmatic_alloc()
- * @note set *mem = 0 */
-void mmatic_freeptr_(void **mem);
-#define mmatic_freeptr(a) mmatic_freeptr_((void **) &(a))
-
-/** A counterpart to mmatic_freeptr which doesnt do mem=0 */
-void mmatic_freeptrs(void *ptr);
-#define mmfreeptr mmatic_freeptrs
+ * @param mem       memory from mmatic_alloc() */
+void mmatic_freeptr(void *mem);
+#define mmfreeptr mmatic_freeptr
 
 /*****************************************************************************/
 

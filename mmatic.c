@@ -146,13 +146,13 @@ void *mmatic_clone_(const void *mem, void *mm, const char *cfile, unsigned int c
 /************************** Free functions ***********************************/
 /*****************************************************************************/
 
-void mmatic_free_(void **mgr_or_mem, const char *cfile, unsigned int cline)
+void mmatic_free_(void *mgr_or_mem, const char *cfile, unsigned int cline)
 {
-	mmatic *mgr = *mgr_or_mem;
+	mmatic *mgr = mgr_or_mem;
 	mmchunk *chunk, *nchunk;
 
 	if (!IS_MGR(mgr)) {
-		chunk = PTR_TO_CHUNK(*mgr_or_mem);
+		chunk = PTR_TO_CHUNK(mgr_or_mem);
 
 		if (IS_CHUNK(chunk))
 			mgr = chunk->mgr;
@@ -171,12 +171,11 @@ void mmatic_free_(void **mgr_or_mem, const char *cfile, unsigned int cline)
 	}
 
 	free(mgr);
-	*mgr_or_mem = 0;
 }
 
-void mmatic_freeptr_(void **memptr)
+void mmatic_freeptr(void *memptr)
 {
-	void *mem = *memptr;
+	void *mem = memptr;
 	mmchunk *chunk = PTR_TO_CHUNK(mem);
 
 	pjf_assert(IS_CHUNK(chunk));
@@ -189,13 +188,6 @@ void mmatic_freeptr_(void **memptr)
 
 	chunk->mgr->totalloc -= chunk->alloc;
 	free(chunk);
-
-	*memptr = 0;
-}
-
-void mmatic_freeptrs(void *ptr)
-{
-	mmatic_freeptr_((void **) &ptr);
 }
 
 /*****************************************************************************/
