@@ -128,6 +128,12 @@ void thash_flush(thash *hash);
  * @retval NULL entry does not exist */
 void *thash_get(const thash *hash, const void *key);
 
+/** A thash_get in case values are of unsigned int type */
+#define thash_get_uint(a, b) ((unsigned long) thash_get((a), (b)))
+
+/** A safe thash_get in case indices are of unsigned int type */
+#define thash_uint_get(a, b) (thash_get((a), ((const void *) (unsigned long) b)))
+
 /** Resets internal iteration counters.
  *
  * @param hash the hash table
@@ -160,8 +166,11 @@ void *_thash_iter(thash *hash, void **key);
  */
 void thash_set(thash *hash, const void *key, const void *val);
 
+/** A thash_set in case value is of unsigned int type */
+#define thash_set_uint(a, b, c) (thash_set((a), (b), ((const void *) (unsigned long) c)))
+
 /** A safe thash_set in case indices are of unsigned int type */
-#define thash_set_uint(a, b, c) (thash_set((a), ((const void *) (unsigned long) b), (c)))
+#define thash_uint_set(a, b, c) (thash_set((a), ((const void *) (unsigned long) b), (c)))
 
 /** Returns number of entries in a hash table.
  *
