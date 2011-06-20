@@ -380,53 +380,179 @@ ut *uth_set(ut *var, const char *key, ut *val)
 
 ut *uth_set_null(ut *var, const char *key)
 {
-	return uth_set(var, key, ut_new_null(var));
+	ut *kvar;
+
+	if (!ut_is_thash(var))
+		return NULL;
+
+	kvar = uth_get(var, key);
+	if (!ut_is_null(kvar)) {
+		return uth_set(var, key, ut_new_null(var));
+	} else {
+		return kvar;
+	}
 }
 
 ut *uth_set_bool(ut *var, const char *key, bool val)
 {
-	return uth_set(var, key, ut_new_bool(val, var));
+	ut *kvar;
+
+	if (!ut_is_thash(var))
+		return NULL;
+
+	kvar = uth_get(var, key);
+	if (!ut_is_bool(kvar)) {
+		return uth_set(var, key, ut_new_bool(val, var));
+	} else {
+		kvar->d.as_bool = val;
+		return kvar;
+	}
 }
 
 ut *uth_set_int(ut *var, const char *key, int val)
 {
-	return uth_set(var, key, ut_new_int(val, var));
+	ut *kvar;
+
+	if (!ut_is_thash(var))
+		return NULL;
+
+	kvar = uth_get(var, key);
+	if (!ut_is_int(kvar)) {
+		return uth_set(var, key, ut_new_int(val, var));
+	} else {
+		kvar->d.as_int = val;
+		return kvar;
+	}
 }
 
 ut *uth_set_uint(ut *var, const char *key, uint32_t val)
 {
-	return uth_set(var, key, ut_new_uint(val, var));
+	ut *kvar;
+
+	if (!ut_is_thash(var))
+		return NULL;
+
+	kvar = uth_get(var, key);
+	if (!ut_is_uint(kvar)) {
+		return uth_set(var, key, ut_new_uint(val, var));
+	} else {
+		kvar->d.as_uint = val;
+		return kvar;
+	}
 }
 
 ut *uth_set_double(ut *var, const char *key, double val)
 {
-	return uth_set(var, key, ut_new_double(val, var));
+	ut *kvar;
+
+	if (!ut_is_thash(var))
+		return NULL;
+
+	kvar = uth_get(var, key);
+	if (!ut_is_double(kvar)) {
+		return uth_set(var, key, ut_new_double(val, var));
+	} else {
+		kvar->d.as_double = val;
+		return kvar;
+	}
 }
 
 ut *uth_set_char(ut *var, const char *key, const char *val)
 {
-	return uth_set(var, key, ut_new_char(val, var));
+	ut *kvar;
+
+	if (!ut_is_thash(var))
+		return NULL;
+
+	kvar = uth_get(var, key);
+	if (!ut_is_string(kvar)) {
+		return uth_set(var, key, ut_new_char(val, var));
+	} else {
+		xstr_set(kvar->d.as_xstr, val ? val : "");
+		return kvar;
+	}
 }
 
 ut *uth_set_xstr(ut *var, const char *key, xstr *val)
 {
-	return uth_set(var, key, ut_new_xstr(val, var));
+	ut *kvar;
+
+	if (!ut_is_thash(var))
+		return NULL;
+
+	kvar = uth_get(var, key);
+	if (!ut_is_string(kvar)) {
+		return uth_set(var, key, ut_new_xstr(val, var));
+	} else {
+		if (val) {
+			xstr_free(kvar->d.as_xstr);
+			kvar->d.as_xstr = val;
+		} else {
+			xstr_set(kvar->d.as_xstr, "");
+		}
+		return kvar;
+	}
 }
 
 ut *uth_set_tlist(ut *var, const char *key, tlist *val)
 {
-	return uth_set(var, key, ut_new_tlist(val, var));
+	ut *kvar;
+
+	if (!ut_is_thash(var))
+		return NULL;
+
+	kvar = uth_get(var, key);
+	if (!ut_is_tlist(kvar)) {
+		return uth_set(var, key, ut_new_tlist(val, var));
+	} else {
+		if (val) {
+			tlist_free(kvar->d.as_tlist);
+			kvar->d.as_tlist = val;
+		} else {
+			tlist_flush(kvar->d.as_tlist);
+		}
+		return kvar;
+	}
 }
 
 ut *uth_set_thash(ut *var, const char *key, thash *val)
 {
-	return uth_set(var, key, ut_new_thash(val, var));
+	ut *kvar;
+
+	if (!ut_is_thash(var))
+		return NULL;
+
+	kvar = uth_get(var, key);
+	if (!ut_is_thash(kvar)) {
+		return uth_set(var, key, ut_new_thash(val, var));
+	} else {
+		if (val) {
+			thash_free(kvar->d.as_thash);
+			kvar->d.as_thash = val;
+		} else {
+			thash_flush(kvar->d.as_thash);
+		}
+		return kvar;
+	}
 }
 
 ut *uth_set_ptr(ut *var, const char *key, void *ptr)
 {
-	return uth_set(var, key, ut_new_ptr(ptr, var));
+	ut *kvar;
+
+	if (!ut_is_thash(var))
+		return NULL;
+
+	kvar = uth_get(var, key);
+	if (!ut_is_ptr(kvar)) {
+		return uth_set(var, key, ut_new_ptr(ptr, var));
+	} else {
+		kvar->d.as_ptr = ptr;
+		return kvar;
+	}
 }
+
+/****************************************************************/
 
 ut *uth_merge(ut *dst, ut *src)
 {

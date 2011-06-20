@@ -58,6 +58,7 @@ typedef struct ut {
 
 /***** check type wrappers *****/
 
+#define ut_is_null(ut)   (ut && ut->type == T_NULL)
 #define ut_is_ptr(ut)    (ut && ut->type == T_PTR)
 #define ut_is_bool(ut)   (ut && ut->type == T_BOOL)
 #define ut_is_int(ut)    (ut && ut->type == T_INT)
