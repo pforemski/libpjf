@@ -111,7 +111,7 @@ void mmatic_free_(void *mgr_or_mem, const char *cfile, unsigned int cline);
 
 /** Frees one specific pointer
  * @param mem       memory from mmatic_alloc() */
-void mmatic_freeptr(void *mem);
+void mmatic_freeptr(const void *memptr);
 #define mmfreeptr mmatic_freeptr
 
 /*****************************************************************************/

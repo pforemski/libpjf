@@ -173,9 +173,9 @@ void mmatic_free_(void *mgr_or_mem, const char *cfile, unsigned int cline)
 	free(mgr);
 }
 
-void mmatic_freeptr(void *memptr)
+void mmatic_freeptr(const void *memptr)
 {
-	void *mem = memptr;
+	void *mem = (void *) memptr;
 	mmchunk *chunk = PTR_TO_CHUNK(mem);
 
 	pjf_assert(IS_CHUNK(chunk));
