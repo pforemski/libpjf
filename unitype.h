@@ -100,6 +100,9 @@ tlist      *ut_tlist(ut *ut);
 thash      *ut_thash(ut *ut);
 void       *ut_ptr(ut *ut);
 
+/** Free given unitype variable */
+void ut_free(void *utarg);
+
 /***** create new unitype object - never fail ******/
 
 ut *ut_new_bool(bool val, void *mm);

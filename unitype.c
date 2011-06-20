@@ -269,7 +269,7 @@ ut *ut_new_uttlist(tlist *val, void *mm)
 	ut *ret = mmatic_alloc(mm, sizeof(struct ut));
 
 	ret->type = T_LIST;
-	ret->d.as_tlist = val ? val : tlist_create(NULL, mm); /* TODO: make a freeing system */
+	ret->d.as_tlist = val ? val : tlist_create(ut_free, mm);
 
 	return ret;
 }
@@ -288,7 +288,7 @@ ut *ut_new_utthash(thash *val, void *mm)
 	ut *ret = mmatic_alloc(mm, sizeof(struct ut));
 
 	ret->type = T_HASH;
-	ret->d.as_thash = val ? val : thash_create_strkey(NULL, mm); /* TODO: make a freeing system */
+	ret->d.as_thash = val ? val : thash_create_strkey(ut_free, mm);
 
 	return ret;
 }
@@ -333,6 +333,35 @@ ut *ut_new_err(int code, const char *msg, const char *data, void *mm)
 	ret->d.as_err->data = data;
 
 	return ret;
+}
+
+void ut_free(void *utarg)
+{
+	ut *ut = utarg;
+
+	switch (ut->type) {
+		case T_PTR:
+		case T_BOOL:
+		case T_INT:
+		case T_UINT:
+		case T_DOUBLE:
+		case T_NULL:
+			break;
+		case T_STRING:
+			xstr_free(ut->d.as_xstr);
+			break;
+		case T_LIST:
+			tlist_free(ut->d.as_tlist);
+			break;
+		case T_HASH:
+			thash_free(ut->d.as_thash);
+			break;
+		case T_ERR:
+			mmatic_freeptr(ut->d.as_err);
+			break;
+	}
+
+	mmatic_freeptr(ut);
 }
 
 /****************************************************************/
