@@ -202,7 +202,6 @@ void thash_set(thash *hash, const void *key, const void *val)
 	/* check if entry already exists */
 	el = root_el;
 	while (el && (hash->cmp_func)(el->key, key)) {
-		dbg(12, "thash_set(): collision for key %p (index %d) with %p\n", key, index, el->key);
 		parent_el = el;
 		el = el->next;
 	}
@@ -232,12 +231,16 @@ void thash_set(thash *hash, const void *key, const void *val)
 
 		/* increase usage counter */
 		hash->used++;
-	}
-	else if (val) { /* update */
-		/* XXX: old value not freed */
+	} else if (el->val == val) {
+		/* no change */
+		return;
+	} else if (val) { /* update */
+		/* XXX: old value freed */
+		if (hash->free_func)
+			(hash->free_func)(el->val);
+
 		el->val = (void *) val;
-	}
-	else { /* val = null, delete */
+	} else { /* val = null, delete */
 		if (hash->strings_mode)
 			_thash_free(hash, el->key);
 
