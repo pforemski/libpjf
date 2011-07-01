@@ -63,9 +63,11 @@ void _dbg(const char *file, unsigned int line, const char *fn, int level, char *
 	if (debug >= 10)
 		snprintf(buf, sizeof(buf), "[%6u.%06u] %s:%u %s(): ",
 			(uint32_t) tv.tv_sec, (uint32_t) tv.tv_usec, file, line, fn);
-	else
+	else if (debug > 5)
 		snprintf(buf, sizeof(buf), "[%6u.%06u] %s(): ",
 			(uint32_t) tv.tv_sec, (uint32_t) tv.tv_usec, fn);
+	else
+		snprintf(buf, sizeof(buf), "%s(): ", fn);
 
 	i = strlen(buf);
 	vsnprintf(buf+i, sizeof(buf)-i-1, fmt, args);
