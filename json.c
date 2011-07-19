@@ -29,6 +29,8 @@
 		return err(json, 21, "internal error"); \
 } while (0);
 
+#define IS_LOOSE_KEYCHAR(c) (isalnum(c) || c == '-' || c == '_')
+
 static ut *parse_array(json *json);
 static ut *parse_object(json *json);
 

@@ -19,10 +19,9 @@ typedef struct json {
 } json;
 
 enum json_option {
+	/** Accept a bit invalid syntax, which is easier to write by hand */
 	JSON_LOOSE = 1
 };
-
-#define IS_LOOSE_KEYCHAR(c) (isalnum(c) || c == '-' || c == '_')
 
 /** Create json parser */
 json *json_create(void *mm);
