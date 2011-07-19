@@ -425,6 +425,42 @@ int pjf_writefile(const char *path, const char *s)
 	return r;
 }
 
+int pjf_copyfile(const char *src, const char *dst)
+{
+	struct stat stat_src;
+	int fd_src, fd_dst, rc;
+	char buf[8192];
+
+	/* open source */
+	if (stat(src, &stat_src) != 0)
+		return -1;
+
+	fd_src = open(src, O_RDONLY);
+	if (fd_src < 0)
+		return -2;
+
+	/* open destination
+	 * copy access mode of source if needed */
+	fd_dst = open(dst, O_WRONLY | O_CREAT | O_TRUNC, stat_src.st_mode);
+	if (fd_dst < 0)
+		return -3;
+
+	/* copy */
+	while ((rc = read(fd_src, buf, sizeof buf)) > 0) {
+		if (write(fd_dst, buf, rc) != rc)
+			return -5;
+	}
+
+	if (rc < 0)
+		return -4;
+
+	/* close */
+	close(fd_dst);
+	close(fd_src);
+
+	return 0;
+}
+
 void pjf_timenow(struct timeval *tv)
 {
 	if (gettimeofday(tv, NULL) == 0)

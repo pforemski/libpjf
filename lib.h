@@ -205,6 +205,19 @@ char *pjf_readfile(const char *path, void *mm);
  * @return       fopen()s return value (number of bytes written or EOF) */
 int pjf_writefile(const char *path, const char *s);
 
+/** Copy a file
+ * @param src     path to source
+ * @param dst     path to destination
+ * @retval 0      success
+ * @retval -1     stat(src) failed
+ * @retval -2     open(src) failed
+ * @retval -3     open(dst) failed
+ * @retval -4     read(src) failed
+ * @retval -5     write(dst) failed
+ * @retval <0     error
+ */
+int pjf_copyfile(const char *src, const char *dst);
+
 /*****************************************************************************/
 
 /** Wrapper around gettimeofday() */
