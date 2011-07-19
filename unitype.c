@@ -24,6 +24,8 @@
 
 bool   ut_bool(ut *var)
 {
+	const char *s;
+
 	if (!var) return false;
 
 	switch (var->type) {
@@ -31,7 +33,12 @@ bool   ut_bool(ut *var)
 		case T_INT:    return (bool) var->d.as_int;
 		case T_UINT:   return (bool) var->d.as_uint;
 		case T_DOUBLE: return (bool) var->d.as_double;
-		case T_STRING: return (bool) ut_int(var);
+		case T_STRING:
+			s = ut_char(var);
+			if (streq(s, "yes") || streq(s, "true"))
+				return true;
+			else
+				return (bool) ut_int(var);
 		case T_LIST:   return (tlist_count(var->d.as_tlist) > 0);
 		case T_HASH:   return (thash_count(var->d.as_thash) > 0);
 		default:       return false;
