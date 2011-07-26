@@ -172,10 +172,14 @@ int pjf_isdir(const char *path);
 
 /** mkdir(1) -p
  * @param  path    path to create
+ * @param  mode    access mode for new directories
  * @retval -1      error: part of path already exists and is not a directory
  * @retval -2      error: mkdir() see errno
  * @retval 0       success */
-int pjf_mkdir(const char *path);
+int pjf_mkdir_mode(const char *path, int mode);
+
+/** pjf_mkdir_mode() with mode 0755 */
+#define pjf_mkdir(path) pjf_mkdir_mode((path), 0755)
 
 /** rm -fr
  * @param path  path to remove

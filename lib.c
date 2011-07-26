@@ -259,7 +259,7 @@ const char *pjf_basename(const char *path)
 	return l ? l+1 : path;
 }
 
-int pjf_mkdir(const char *path)
+int pjf_mkdir_mode(const char *path, int mode)
 {
 	mmatic *mm = mmatic_create();
 	tlist *list = tlist_create(NULL, mm);
@@ -282,10 +282,12 @@ int pjf_mkdir(const char *path)
 			case -2: rc = -1; goto ret;  /* exists, is NOT a directory */
 		}
 
-		if (mkdir(curdir, 0755) != 0) {
+		if (mkdir(curdir, mode) != 0) {
 			rc = -2;
 			goto ret;
 		}
+
+		chmod(curdir, mode);
 	}
 
 ret:
