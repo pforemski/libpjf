@@ -1,5 +1,6 @@
 /*
  * This file is part of libpjf
+ * Copyright (C) 2011 Paweł Foremski <pawel@foremski.pl>
  * Copyright (C) 2009-2010 ASN Sp. z o.o.
  * Author: Pawel Foremski <pf:remski@asn.pl>
  *

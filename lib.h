@@ -1,7 +1,7 @@
 /*
  * This file is part of libpjf
+ * Copyright (C) 2011 Paweł Foremski <pawel@foremski.pl>
  * Copyright (C) 2005-2009 ASN Sp. z o.o.
- * Copyright (C) 2011 Paweł Foremski
  * Author: Pawel Foremski <pawel@foremski.pl>
  *
  * libpjf is free software; you can redistribute it and/or modify it under

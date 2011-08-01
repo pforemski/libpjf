@@ -2,6 +2,7 @@
  * tlist - trivial list
  *
  * This file is part of libpjf
+ * Copyright (C) 2011 Paweł Foremski <pawel@foremski.pl>
  * Copyright (C) 2005-2009 ASN Sp. z o.o.
  * Authors: Pawel Foremski <pawel@foremski.pl>
  *          Łukasz Zemczak <sil2100@asn.pl>

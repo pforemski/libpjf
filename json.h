@@ -1,7 +1,8 @@
 /*
  * This file is part of libpjf
- * Copyright (C) 2008 Ivo van Poorten
+ * Copyright (C) 2011 Paweł Foremski <pawel@foremski.pl>
  * Copyright (C) 2009 ASN Sp. z o.o.
+ * Copyright (C) 2008 Ivo van Poorten
  *
  * License: GNU Lesser General Public License version 2.1
  * Imported from zzjson library by: Pawel Foremski <pawel@foremski.pl>
