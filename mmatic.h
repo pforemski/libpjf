@@ -102,6 +102,9 @@ void *mmatic_clone_(const void *mem, void *mm, const char *cfile, unsigned int c
  * @return   copy of mem */
 #define mmatic_clone(mem) mmatic_clone_((mem), NULL, __FILE__, __LINE__)
 
+/** Return number of allocated bytes in given manager */
+#define mmatic_size(mgr) ((mgr)->totalloc)
+
 /*****************************************************************************/
 
 /** Frees all memory and destroys given manager
