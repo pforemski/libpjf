@@ -2,6 +2,7 @@
  * mmatic - memory allocation manager, or a manual garbage collector
  *
  * This file is part of libpjf
+ * Copyright (C) 2011 Paweł Foremski <pawel@foremski.pl>
  * Copyright (C) 2005-2010 ASN Sp. z o.o.
  * Author: Pawel Foremski <pawel@foremski.pl>
  *
@@ -100,6 +101,9 @@ void *mmatic_clone_(const void *mem, void *mm, const char *cfile, unsigned int c
 /** Clone memory in same memory
  * @return   copy of mem */
 #define mmatic_clone(mem) mmatic_clone_((mem), NULL, __FILE__, __LINE__)
+
+/** Return number of allocated bytes in given manager */
+#define mmatic_size(mgr) ((mgr)->totalloc)
 
 /*****************************************************************************/
 

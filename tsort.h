@@ -2,8 +2,9 @@
  * tsort - topological sort
  *
  * This file is part of libpjf
- * Copyright (C) 1998-2007 Free Software Foundation, Inc.
+ * Copyright (C) 2011 Paweł Foremski <pawel@foremski.pl>
  * Copyright (C) 2005-2009 ASN Sp. z o.o.
+ * Copyright (C) 1998-2007 Free Software Foundation, Inc.
  *
  * Originally written by Mark Kettenis <kettenis@phys.uva.nl>.
  * Libified for libpjf by Pawel Foremski <pawel@foremski.pl>
