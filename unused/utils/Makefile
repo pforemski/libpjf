@@ -1,11 +1,11 @@
-CFLAGS = -I../
-LDFLAGS = -lm -L../
+CFLAGS = -I../../
+LDFLAGS = -lm -L../../
 
 ME=libasn
 TARGETS=libasn_example fcmldump fcmldump_static udpsend udprecv 822tojson jsonto822 \
 	list-linux-interfaces
 
-include ../rules.mk
+include ../../rules.mk
 
 libasn_example: libasn_example.o
 	$(CC) libasn_example.o -o libasn_example ../libasn.a ../pcre/.libs/libpcre.a $(LDFLAGS)

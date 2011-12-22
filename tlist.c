@@ -25,11 +25,11 @@
 
 #include "lib.h"
 
-#define tmmalloc(size) (mmatic_alloc(list, (size)))
+#define tmmatic_alloc(mm, size) (mmatic_alloc(list, (size)))
 
 tlist *tlist_create(void (*free_func)(void *val), void *mm)
 {
-	tlist *ret = mmalloc(sizeof(tlist));
+	tlist *ret = mmatic_alloc(mm, sizeof(tlist));
 
 	ret->head = ret->tail = ret->current = NULL;
 	ret->free_func = free_func;
@@ -75,7 +75,7 @@ void tlist_free(tlist *list)
 		while ((val = tlist_pop(list)))
 			(list->free_func)(val);
 
-	mmfreeptr(list);
+	mmatic_free(list);
 }
 
 void tlist_reset(tlist *list) { if (list) list->current = list->head; }
@@ -117,7 +117,7 @@ void tlist_push(tlist *list, const void *val)
 	tlist_el *el;
 
 	if (!list) return;
-	el = tmmalloc(sizeof(tlist_el));
+	el = tmmatic_alloc(mm, sizeof(tlist_el));
 	el->val = (void *) val;
 	el->list = list;
 	el->next = el->prev = NULL;
@@ -139,7 +139,7 @@ void tlist_prepend(tlist *list, const void *val)
 	tlist_el *el;
 
 	if (!list) return;
-	el = tmmalloc(sizeof(tlist_el));
+	el = tmmatic_alloc(mm, sizeof(tlist_el));
 	el->val = (void *) val;
 	el->list = list;
 	el->next = el->prev = NULL;
@@ -173,7 +173,7 @@ void *tlist_pop(tlist *list)
 		list->head = list->tail = list->current = NULL;
 	}
 
-	mmfreeptr(el);
+	mmatic_free(el);
 	list->size--;
 
 	return val;
@@ -200,7 +200,7 @@ void *tlist_shift(tlist *list)
 		list->head = list->tail = list->current = NULL;
 	}
 
-	mmfreeptr(el);
+	mmatic_free(el);
 	list->size--;
 
 	return val;
@@ -233,7 +233,7 @@ void *tlist_remove(tlist *list)
 	if (el == list->current)
 		list->current = el->next;
 
-	mmfreeptr(el);
+	mmatic_free(el);
 	list->size--;
 
 	return val;
@@ -245,7 +245,7 @@ void *tlist_remove(tlist *list)
 		tlist_push(list, val); \
 		return; \
 	} \
-	el = tmmalloc(sizeof(tlist_el)); \
+	el = tmmatic_alloc(mm, sizeof(tlist_el)); \
 	el->val = (void *) val; \
 	el->list = list; \
 	el->next = el_next; \
@@ -280,8 +280,8 @@ char *tlist_stringify(tlist *list, const char *sep, void *mm)
 	while ((s = tlist_iter(list)))
 		l += strlen(s) + sl;
 
-	if (l <= 0) return mmstrdup("");
-	p = ret = mmalloc(l);
+	if (l <= 0) return mmatic_strdup(mm, "");
+	p = ret = mmatic_alloc(mm, l);
 
 	tlist_reset(list);
 	while ((s = tlist_iter(list))) {

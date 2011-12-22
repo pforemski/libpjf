@@ -67,9 +67,9 @@ static size_t n_strings = 0;
 /* Create a new item/node for STR.  */
 static struct item *new_item(const char *str, void *mm)
 {
-	struct item *k = mmalloc(sizeof *k);
+	struct item *k = mmatic_alloc(mm, sizeof *k);
 
-	k->str = (str ? mmstrdup(str) : NULL);
+	k->str = (str ? mmatic_strdup(mm, str) : NULL);
 	k->left = k->right = NULL;
 	k->balance = 0;
 
@@ -209,7 +209,7 @@ static void record_relation(struct item *j, struct item *k, void *mm)
 
 	if (!streq(j->str, k->str)) {
 		k->count++;
-		p = mmalloc(sizeof *p);
+		p = mmatic_alloc(mm, sizeof *p);
 		p->suc = k;
 		p->next = j->top;
 		j->top = p;
@@ -369,7 +369,7 @@ int pjf_tsort(tlist *input, tlist *output, void *mm)
 			struct successor *p = head->top;
 
 			/* T5. Output front of queue. */
-			tlist_push(output, mmstrdup(head->str));
+			tlist_push(output, mmatic_strdup(mm, head->str));
 			dbg(8, "tsort(): out: %s\n", head->str);
 			head->str = NULL;    /* Avoid printing the same string twice.  */
 			n_strings--;

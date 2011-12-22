@@ -22,7 +22,7 @@
 
 thash *rfc822_parse(const char *str, void *mm)
 {
-	char *k, *v, *txt = mmstrdup(str);
+	char *k, *v, *txt = mmatic_strdup(mm, str);
 	int i, l;
 	thash *ret =  thash_create_strkey(NULL, mm);
 

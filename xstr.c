@@ -29,7 +29,7 @@
 
 #include "lib.h"
 
-#define xmmalloc(size) (mmatic_alloc(xs, (size)))
+#define xmmatic_alloc(mm, size) (mmatic_alloc(xs, (size)))
 
 /**
  * @file xstr.c
@@ -39,7 +39,7 @@
 
 xstr *xstr_create(const char *str, void *mm)
 {
-	xstr *new = mmalloc(sizeof(xstr));
+	xstr *new = mmatic_alloc(mm, sizeof(xstr));
 	xstr_init_val(new, (str) ? str : "", mm);
 	return new;
 }
@@ -66,7 +66,7 @@ char *xstr_dup(xstr *sx, void *mm)
 {
 	char *ret;
 
-	ret = mmalloc(sx->len + 1);
+	ret = mmatic_alloc(mm, sx->len + 1);
 	strcpy(ret, sx->s);
 
 	return ret;
@@ -82,11 +82,11 @@ void xstr_reserve(xstr *xs, size_t l)
 	if (xs->a > l)
 		return;
 
-	new_str = xmmalloc(l + 1);
+	new_str = xmmatic_alloc(mm, l + 1);
 
 	if (xs->s) {
 		memcpy(new_str, xs->s, xs->len + 1);
-		mmfreeptr(xs->s);
+		mmatic_free(xs->s);
 		xs->s = new_str;
 	} else {
 		xs->s = new_str;
@@ -159,7 +159,7 @@ void xstr_set_size(xstr *xs, const char *s, int size)
 void xstr_free(xstr *xs)
 {
 	if (xs->s) {
-		mmfreeptr(xs->s);
+		mmatic_free(xs->s);
 		xs->s = 0;
 		xs->len = 0;
 		xs->a = 0;
@@ -175,7 +175,7 @@ char *xstr_strip(xstr *xs)
 	for (i = 0; i < xs->len; ++i) if (isgraph(xs->s[i])) break;
 	for (j = xs->len; j >= i; --j) if (isgraph(xs->s[j])) break;
 
-	ret = xmmalloc(sizeof(char) * (j-i + 2));
+	ret = xmmatic_alloc(mm, sizeof(char) * (j-i + 2));
 	for (b = 0; i < j+1; i++, b++) ret[b] = xs->s[i];
 	ret[b] = 0;
 

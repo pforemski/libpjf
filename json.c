@@ -60,7 +60,7 @@ static ut *err(json *json, int code, const char *msg)
 	return ut_new_err(
 		code,
 		msg,
-		mmatic_printf(json, "i=%d", json->i), // TODO
+		mmatic_sprintf(json, "i=%d", json->i), // TODO
 		json);
 }
 
@@ -336,7 +336,7 @@ ut *json_parse(json *json, const char *txt)
 
 json *json_create(void *mm)
 {
-	json *j = mmalloc(sizeof(json));
+	json *j = mmatic_alloc(mm, sizeof(json));
 
 	j->txt = NULL;
 	j->i = 0;
@@ -398,16 +398,16 @@ char *json_print(json *json, ut *var)
 
 	switch (var->type) {
 		case T_STRING:
-			str = mmprintf("\"%s\"",
+			str = mmatic_sprintf(mm, "\"%s\"",
 				json_escape(json, xstr_string(var->d.as_xstr)));
 			break;
 
 		case T_INT:
-			str = mmprintf("%d", var->d.as_int);
+			str = mmatic_sprintf(mm, "%d", var->d.as_int);
 			break;
 
 		case T_DOUBLE:
-			str = mmprintf("%g", var->d.as_double);
+			str = mmatic_sprintf(mm, "%g", var->d.as_double);
 			break;
 
 		case T_LIST:
@@ -450,12 +450,12 @@ char *json_print(json *json, ut *var)
 
 		case T_ERR:
 			if (var->d.as_err->data)
-				str = mmprintf("{ \"code\": %d, \"message\": \"%s\", \"data\": \"%s\" }",
+				str = mmatic_sprintf(mm, "{ \"code\": %d, \"message\": \"%s\", \"data\": \"%s\" }",
 					var->d.as_err->code,
 					json_escape(json, var->d.as_err->msg),
 					json_escape(json, var->d.as_err->data));
 			else
-				str = mmprintf("{ \"code\": %d, \"message\": \"%s\" }",
+				str = mmatic_sprintf(mm, "{ \"code\": %d, \"message\": \"%s\" }",
 					var->d.as_err->code,
 					json_escape(json, var->d.as_err->msg));
 			break;

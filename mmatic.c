@@ -68,7 +68,7 @@ void *mmatic_create(void)
 	return mgr;
 }
 
-void *mmatic_allocate(void *mgr_or_mem, size_t size, const char *cfile, unsigned int cline)
+void *_mmatic_alloc(void *mgr_or_mem, size_t size, const char *cfile, unsigned int cline)
 {
 	mmatic *mgr;
 	mmchunk *chunk;
@@ -101,14 +101,14 @@ void *mmatic_allocate(void *mgr_or_mem, size_t size, const char *cfile, unsigned
 	return CHUNK_TO_PTR(chunk);
 }
 
-void *mmatic_zallocate(void *mgr, size_t size, const char *cfile, unsigned int cline)
+void *_mmatic_zalloc(void *mgr, size_t size, const char *cfile, unsigned int cline)
 {
 	void *ptr;
-	ptr = mmatic_allocate(mgr, size, cfile, cline);
+	ptr = _mmatic_alloc(mgr, size, cfile, cline);
 	return ptr ? memset(ptr, 0, size) : ptr;
 }
 
-void *mmatic_reallocate(void *mem, size_t size, void *mgr_or_mem, const char *cfile, unsigned int cline)
+void *_mmatic_realloc(void *mem, size_t size, void *mgr_or_mem, const char *cfile, unsigned int cline)
 {
 	mmchunk *chunk;
 	void *newmem;
@@ -122,14 +122,14 @@ void *mmatic_reallocate(void *mem, size_t size, void *mgr_or_mem, const char *cf
 	if (!size)
 		size = chunk->alloc;
 
-	newmem = mmatic_allocate(mgr_or_mem, size, cfile, cline);
+	newmem = _mmatic_alloc(mgr_or_mem, size, cfile, cline);
 	memcpy(newmem, mem, chunk->alloc);
-	mmatic_freeptr(mem);
+	mmatic_free(mem);
 
 	return (mem = newmem);
 }
 
-void *mmatic_clone_(const void *mem, void *mm, const char *cfile, unsigned int cline)
+void *_mmatic_copy(const void *mem, void *mm, const char *cfile, unsigned int cline)
 {
 	mmchunk *chunk;
 	void *newmem;
@@ -137,7 +137,7 @@ void *mmatic_clone_(const void *mem, void *mm, const char *cfile, unsigned int c
 	chunk = PTR_TO_CHUNK(mem);
 	pjf_assert(IS_CHUNK(chunk));
 
-	newmem = mmatic_allocate(mm ? mm : chunk->mgr, chunk->alloc, cfile, cline);
+	newmem = _mmatic_alloc(mm ? mm : chunk->mgr, chunk->alloc, cfile, cline);
 	memcpy(newmem, mem, chunk->alloc);
 
 	return newmem;
@@ -147,7 +147,7 @@ void *mmatic_clone_(const void *mem, void *mm, const char *cfile, unsigned int c
 /************************** Free functions ***********************************/
 /*****************************************************************************/
 
-void mmatic_free_(void *mgr_or_mem, const char *cfile, unsigned int cline)
+void mmatic_destroy_(void *mgr_or_mem, const char *cfile, unsigned int cline)
 {
 	mmatic *mgr = mgr_or_mem;
 	mmchunk *chunk, *nchunk;
@@ -174,7 +174,7 @@ void mmatic_free_(void *mgr_or_mem, const char *cfile, unsigned int cline)
 	free(mgr);
 }
 
-void mmatic_freeptr(const void *memptr)
+void mmatic_free(const void *memptr)
 {
 	void *mem = (void *) memptr;
 	mmchunk *chunk = PTR_TO_CHUNK(mem);
@@ -195,13 +195,13 @@ void mmatic_freeptr(const void *memptr)
 /****************************** Utilities ************************************/
 /*****************************************************************************/
 
-char *mmatic_strdup_(void *mgr, const char *s, const char *cfile, unsigned int cline)
+char *_mmatic_strdup(void *mgr, const char *s, const char *cfile, unsigned int cline)
 {
 	char *newm;
 
 	if (!s) return NULL;
 
-	newm = mmatic_allocate(mgr, strlen(s) + 1, cfile, cline);
+	newm = _mmatic_alloc(mgr, strlen(s) + 1, cfile, cline);
 	strcpy(newm, s);
 
 	return newm;
@@ -226,12 +226,12 @@ void mmatic_summary(mmatic *mgr, int dbglevel)
 }
 
 /* now then, that's a handy tool! */
-char *mmatic_printf_(void *mm, const char *fmt, ...)
+char *mmatic_sprintf(void *mm, const char *fmt, ...)
 {
 	va_list args; char *buf;
 
 	va_start(args, fmt);
-	buf = mmalloc(BUFSIZ);
+	buf = mmatic_alloc(mm, BUFSIZ);
 	vsnprintf(buf, BUFSIZ, fmt, args);
 	va_end(args);
 

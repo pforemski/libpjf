@@ -113,14 +113,6 @@ void *pjf_malloc(size_t size)
 	return mem;
 }
 
-/* it seems its easier to have code duplication than coping with va_lists */
-char *pjf_malloc_printf(const char *fmt, ...)
-{
-	va_list args; char *buf;
-	va_start(args, fmt); buf = pjf_malloc(BUFSIZ); vsnprintf(buf, BUFSIZ, fmt, args); va_end(args);
-	return buf;
-}
-
 int pjf_isfile(const char *path)
 {
 	struct stat stats;
@@ -152,28 +144,20 @@ int pjf_isfifo(const char *path)
 	return -2;
 }
 
-void pjf_cd(const char *path)
+int pjf_isdir(const char *path)
 {
-	dbg(11, "changedir(%s)\n", path);
+	struct stat dirstat;
 
-	if (chdir(path)) {
-		dbg(3, "chdir(%s): %s\n", path, strerror(errno));
-		die("Could not chdir() into %s\n", path);
-	}
-}
-
-char *pjf_pwd(void *mm)
-{
-	char *ret = mmalloc(PATH_MAX);
-	pjf_assert(getcwd(ret, PATH_MAX));
-	return ret;
+	if (stat(path, &dirstat)) return -1;
+	if (!S_ISDIR(dirstat.st_mode)) return -2;
+	return 1;
 }
 
 void pjf_parsepath(const char *path, tlist *lpath, void *mm)
 {
 	char *part, *ptr;
 
-	path = mmstrdup(path);
+	path = mmatic_strdup(mm, path);
 
 	/* parse path into tlist */
 	while ((part = strtok_r((char *) path, "/", &ptr))) {
@@ -205,52 +189,15 @@ void pjf_parsepath(const char *path, tlist *lpath, void *mm)
 	}
 }
 
-char *pjf_parsedoubleslashes(const char *vcwd, const char *vpath, void *mm)
-{
-	tlist *list;
-
-	/* get new path in form of a list */
-	list = tlist_create(NULL, mm);
-	if (vpath[0] != '/') pjf_parsepath(vcwd, list, mm);
-	pjf_parsepath(vpath, list, mm);
-
-	return pjf_makepath(list, mm);
-}
-
-char *pjf_makepath(tlist *pathparts, void *mm)
-{
-	char *part;
-	xstr *ret = xstr_create("", mm);
-
-	tlist_reset(pathparts);
-	while ((part = tlist_iter(pathparts))) {
-		xstr_append_char(ret, '/');
-		xstr_append(ret, part);
-	}
-
-	/* handle "/" border case */
-	if (ret->s[0] == 0) xstr_set(ret, "/");
-
-	return ret->s;
-}
-
-int pjf_isdir(const char *path)
-{
-	struct stat dirstat;
-
-	if (stat(path, &dirstat)) return -1;
-	if (!S_ISDIR(dirstat.st_mode)) return -2;
-	return 1;
-}
-
 char *pjf_abspath(const char *path, void *mm)
 {
 	char cwd[PATH_MAX];
 
 	if (path[0] == '/')
-		return mmstrdup(path);
+		return mmatic_strdup(mm, path);
 	else
-		return mmprintf("%s/%s", getcwd(cwd, sizeof(cwd)), path);
+		return mmatic_sprintf(mm,
+			"%s/%s", getcwd(cwd, sizeof(cwd)), path);
 }
 
 const char *pjf_basename(const char *path)
@@ -270,7 +217,7 @@ int pjf_mkdir_mode(const char *path, int mode)
 	path = pjf_abspath(path, mm);
 	pjf_parsepath(path, list, mm);
 
-	curdir = mmalloc(strlen(path) + 2);
+	curdir = mmatic_alloc(mm, strlen(path) + 2);
 	curdir[0] = 0;
 
 	tlist_reset(list);
@@ -292,7 +239,7 @@ int pjf_mkdir_mode(const char *path, int mode)
 	}
 
 ret:
-	mmatic_free(mm);
+	mmatic_destroy(mm);
 	return rc;
 }
 
@@ -304,7 +251,8 @@ int pjf_rmdir(const char *path, const char *skip)
 	char *newpath;
 	int upret;
 
-	if (lstat(path, &statbuf) < 0) return 0;
+	if (lstat(path, &statbuf) < 0)
+		return 0;
 
 	if (S_ISDIR(statbuf.st_mode)) {
 		subd = opendir(path);
@@ -334,8 +282,11 @@ int pjf_rmdir(const char *path, const char *skip)
 	return 1;
 }
 
-static int vsort(const struct dirent **a, const struct dirent **b) { return strverscmp((*a)->d_name, (*b)->d_name); }
-static int filterdots(const struct dirent *d)  { return (!streq(d->d_name, ".") && !streq(d->d_name, "..")); }
+static int vsort(const struct dirent **a, const struct dirent **b)
+	{ return strverscmp((*a)->d_name, (*b)->d_name); }
+
+static int filterdots(const struct dirent *d)
+	{ return (!streq(d->d_name, ".") && !streq(d->d_name, "..")); }
 
 tlist *pjf_ls(const char *path, void *mm)
 {
@@ -345,42 +296,13 @@ tlist *pjf_ls(const char *path, void *mm)
 
 	n = scandir(path, &entries, filterdots, vsort);
 	for (i = 0; i < n; i++) {
-		tlist_push(ret, mmstrdup(entries[i]->d_name));
+		tlist_push(ret, mmatic_strdup(mm, entries[i]->d_name));
 		free(entries[i]);
 	}
 
-	if (n >= 0) free(entries);
-	return ret;
-}
+	if (n >= 0)
+		free(entries);
 
-int isnumber(const char *str)
-{
-	int i;
-
-	for (i = 0; str[i]; i++)
-		if (!isdigit(str[i]))
-			return 0;
-
-	return 1;
-}
-
-char *pjf_sanepath(const char *path, void *mm)
-{
-	int i, j;
-	char *ret, prev = 0;
-
-	dbg(10, "sanepath(%s)\n", path);
-	ret = mmalloc(strlen(path) + 1);
-
-	for (i = j = 0; path[i]; i++) {
-		if (path[i] == '/' && prev == '/') continue;
-		prev = ret[j++] = path[i];
-	}
-
-	dbg(12, "sanepath(): j=%d\n", j);
-	ret[j - (j > 1 && ret[j-1] == '/')] = 0;
-
-	dbg(11, "sanepath(): %s\n", ret);
 	return ret;
 }
 
@@ -394,7 +316,7 @@ char *pjf_readfile(const char *path, void *mm)
 		return NULL;
 
 	bigbufsiz = bufsiz = 4096;
-	rbuf = buf = mmalloc(bufsiz);
+	rbuf = buf = mmatic_alloc(mm, bufsiz);
 
 	for (;;) {
 		memset(buf, 0, bufsiz);
@@ -522,7 +444,10 @@ void pjf_daemonize(const char *progname, const char *pidfile)
 	openlog((progname) ? progname : "", LOG_PID, LOG_DAEMON);
 	debugcb = (void (*)()) syslog;
 
-	pjf_cd(pwd); /* XXX: will die() if fails */
+	if (chdir(pwd)) {
+		dbg(3, "chdir(%s): %s\n", pwd, strerror(errno));
+		die("Could not chdir() into %s\n", pwd);
+	}
 
 	if (pidfile && !streq(pidfile, "")) {
 		snprintf(pid, sizeof(pid), "%u\n", getpid());

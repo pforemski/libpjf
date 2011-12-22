@@ -198,9 +198,9 @@ const char *ut_err(ut *var)
 {
 	if (var && var->type == T_ERR) {
 		if (var->d.as_err->data)
-			return mmprintf("#%d: %s (%s)", var->d.as_err->code, var->d.as_err->msg, var->d.as_err->data);
+			return mmatic_sprintf(mm, "#%d: %s (%s)", var->d.as_err->code, var->d.as_err->msg, var->d.as_err->data);
 		else
-			return mmprintf("#%d: %s", var->d.as_err->code, var->d.as_err->msg);
+			return mmatic_sprintf(mm, "#%d: %s", var->d.as_err->code, var->d.as_err->msg);
 	}
 	else {
 		return "";
@@ -365,11 +365,11 @@ void ut_free(void *utarg)
 			thash_free(ut->d.as_thash);
 			break;
 		case T_ERR:
-			mmatic_freeptr(ut->d.as_err);
+			mmatic_free(ut->d.as_err);
 			break;
 	}
 
-	mmatic_freeptr(ut);
+	mmatic_free(ut);
 }
 
 /****************************************************************/

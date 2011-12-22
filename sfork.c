@@ -35,7 +35,7 @@ pid_t pjf_fork(const char *cmd, const char *args, thash *env,
 {
 	int i, fd_in[2], fd_out[2], fd_err[2];
 	pid_t child_pid;
-	char *key, *val, *combined;
+	char *key, *val;
 
 	if (pipe(fd_in) < 0) return 0;
 	if (pipe(fd_out) < 0) return 0;
@@ -45,12 +45,13 @@ pid_t pjf_fork(const char *cmd, const char *args, thash *env,
 	if (child_pid < -1) return 0;
 
 	if (child_pid == 0) { /* child */
+		char buf[BUFSIZ];
+
 		/* set environment */
 		if (env) {
 			thash_iter_loop(env, key, val) {
-				combined = pjf_malloc_printf("%s=%s", key, val);
-				putenv(combined);
-				free(combined);
+				snprintf(buf, sizeof buf, "%s=%s", key, val);
+				putenv(buf);
 			}
 		}
 
@@ -69,9 +70,8 @@ pid_t pjf_fork(const char *cmd, const char *args, thash *env,
 		close(fd_out[1]);
 		close(fd_err[1]);
 
-		combined = pjf_malloc_printf("%s %s", cmd, args ? args : "");
-		execl("/bin/sh", "sh", "-c", "--", combined, NULL);
-		free(combined);
+		snprintf(buf, sizeof buf, "%s %s", cmd, args ? args : "");
+		execl("/bin/sh", "sh", "-c", "--", buf, NULL);
 
 		_exit(127);
 	}

@@ -37,7 +37,7 @@ static int _thash_compare(const void *key1, const void *key2)
 }
 
 #define _thash_alloc(hash, size) (((hash)->mm) ? mmatic_alloc((hash)->mm, (size)) : pjf_malloc(size));
-#define _thash_free(hash, ptr)   (((hash)->mm) ? mmfreeptr(ptr) : free(ptr));
+#define _thash_free(hash, ptr)   (((hash)->mm) ? mmatic_free(ptr) : free(ptr));
 
 thash *thash_create(unsigned int (*hash_func)(const void *key),
                     int (*cmp_func)(const void *key1, const void *key2),
@@ -46,7 +46,7 @@ thash *thash_create(unsigned int (*hash_func)(const void *key),
 	thash *hash;
 
 	if (mm)
-		hash = mmalloc(sizeof(thash));
+		hash = mmatic_alloc(mm, sizeof(thash));
 	else
 		hash = pjf_malloc(sizeof(thash));
 
@@ -325,7 +325,7 @@ thash *thash_clone(thash *hash, void *mm)
 		hash->strings_mode, mm);
 
 	thash_iter_loop(hash, k, v)
-		thash_set(ret, k, mmstrdup(v));
+		thash_set(ret, k, mmatic_strdup(mm, v));
 
 	return ret;
 }

@@ -51,12 +51,9 @@ void _dbg(const char *file, unsigned int line, const char *fn, int level, char *
  * @param fmt optional (!= NULL) message format + args to show on stderr (printf-like) */
 void _die(const char *file, unsigned int line, const char *fn, char *fmt, ...);
 #define die(...) (_die(__FILE__, __LINE__, __func__, __VA_ARGS__))
-#define pjf_assert(a) do { if(!(a)) die("Assertion failed\n"); } while(0);
 #define die_errno(msg) (die("%s: %s\n", (msg), strerror(errno)))
 
-/** Macro for simple error handling */
-#define reterr(val, lvl, msg1, msg2) { dbg((lvl), "%s: %s\n", (msg1), (msg2)); return (val); }
-#define reterrno(val, lvl, msg) reterr((val), (lvl), (msg), strerror(errno))
+#define pjf_assert(a) do { if(!(a)) die("Assertion failed\n"); } while(0);
 
 /*****************************************************************************/
 
@@ -80,7 +77,7 @@ void _die(const char *file, unsigned int line, const char *fn, char *fmt, ...);
 void *pjf_malloc(size_t size);
 
 /** mmatic_printf() using pjf_malloc() */
-char *pjf_malloc_printf(const char *fmt, ...);
+char *pjf_malloc_sprintf(const char *fmt, ...);
 
 /*****************************************************************************/
 
@@ -88,15 +85,14 @@ char *pjf_malloc_printf(const char *fmt, ...);
 #include "thash.h"
 #include "mmatic.h"
 #include "tlist.h"
-#include "tsort.h"
 #include "math.h"
 #include "regex.h"
 #include "xstr.h"
 #include "unitype.h"
 #include "json.h"
-#include "rfc822.h"
-#include "encode.h"
 #include "utf8.h"
+
+/*****************************************************************************/
 
 /** I could never understand why there is no such macro by default --pjf */
 #define streq(a, b) (strcmp((a), (b)) == 0)
@@ -106,19 +102,7 @@ char *pjf_malloc_printf(const char *fmt, ...);
  * @note modifies txt and returns memory location within it */
 char *pjf_trim(char *txt);
 
-/** Checks if all str characters are digits
- * @retval 1 str is a number
- * @retval 0 str is not a number */
-int isnumber(const char *str);
-
 /*****************************************************************************/
-
-/** chdir() or die()
- * @param path directory path */
-void pjf_cd(const char *path);
-
-/** Returns current working directory */
-char *pjf_pwd(void *mm);
 
 /** Checks if file exists
  * @param  path path to file/dir
@@ -138,20 +122,20 @@ bool pjf_isexecutable(const char *path);
  * @retval -2   exists, but is not a fifo */
 int pjf_isfifo(const char *path);
 
+/** Check if path is a directory
+ * See errno for more details on negative return values
+ * @param   path   path to check
+ * @retval  1      is a dir
+ * @retval -1      does not exist
+ * @retval -2      exists, but not a dir */
+int pjf_isdir(const char *path);
+
+/*****************************************************************************/
+
 /** Parse path into a tlist
  * @param path   path to parse
  * @param lpath  a tlist to save in (already initialized) */
 void pjf_parsepath(const char *path, tlist *lpath, void *mm);
-
-/** Parse "../" in paths, trim double slashes ("//"), ie. a realpath() on
- * virtual paths
- * @param vcwd   absolute virtual current working directory
- * @param vpath  virtual path to translate, may be relative */
-char *pjf_parsedoubleslashes(const char *vcwd, const char *vpath, void *mm);
-
-/** Creates a path from a pjf_parsepath() list
- * @param pathparts list from pjf_parsepath() */
-char *pjf_makepath(tlist *pathparts, void *mm);
 
 /** Convert relative path to absolute one
  * @param  path  path to convert
@@ -162,13 +146,7 @@ char *pjf_abspath(const char *path, void *mm);
 /** Return last element after "/" in path */
 const char *pjf_basename(const char *path);
 
-/** Check if path is a directory
- * See errno for more details on negative return values
- * @param   path   path to check
- * @retval  1      is a dir
- * @retval -1      does not exist
- * @retval -2      exists, but not a dir */
-int pjf_isdir(const char *path);
+/*****************************************************************************/
 
 /** mkdir(1) -p
  * @param  path    path to create
@@ -193,9 +171,7 @@ int pjf_rmdir(const char *path, const char *skip);
  * @note        automatically skips . and .. */
 tlist *pjf_ls(const char *path, void *mm);
 
-/** Fast double slash trimmer
- * @param path   path to remove "//"s in */
-char *pjf_sanepath(const char *path, void *mm);
+/*****************************************************************************/
 
 /** Read whole file
  * @param  path  path to file
@@ -225,7 +201,7 @@ int pjf_copyfile(const char *src, const char *dst);
 /*****************************************************************************/
 
 /** Wrapper around gettimeofday() */
-void pjf_timenow(struct timeval *tv);
+void pjf_timenow(struct timeval* tv);
 
 /** Returns time difference in us vs. current time and the time given in tv */
 uint32_t pjf_timediff(struct timeval *tv);
@@ -239,10 +215,5 @@ uint32_t pjf_timediff(struct timeval *tv);
  * @param progname    program name to show in syslog messages
  * @param pidfile     path to file where to store the PID in (may be null) */
 void pjf_daemonize(const char *progname, const char *pidfile);
-
-/** Frequency -> period conversions */
-#define Hz_to_msec(f) (f ? (1.0/f * 1000.0) : 0)
-
-#define msec_to_Hz Hz_to_msec
 
 #endif /* _MISC_H_ */

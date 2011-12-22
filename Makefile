@@ -2,8 +2,8 @@ CFLAGS =
 LDFLAGS = -lm
 
 ME=libpjf
-C_OBJECTS=lib.o regex.o thash.o tlist.o xstr.o mmatic.o tsort.o \
-	unitype.o json.o rfc822.o encode.o utf8.o sfork.o
+C_OBJECTS=lib.o regex.o thash.o tlist.o xstr.o mmatic.o \
+	unitype.o sfork.o json.o utf8.o
 
 TARGETS=libpjf.so libpjf.a
 
