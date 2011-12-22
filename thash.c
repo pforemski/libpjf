@@ -293,7 +293,11 @@ void *thash_get(const thash *hash, const void *key)
 		el = el->next;
 	}
 
-	dbg(12, "thash_get(%p, %p) = %p\n", hash, key, val);
+	if (hash->strings_mode)
+		dbg(12, "thash_get(%p, %s) = %p\n", hash, key, val);
+	else
+		dbg(12, "thash_get(%p, %p) = %p\n", hash, key, val);
+
 	return val;
 }
 

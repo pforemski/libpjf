@@ -45,41 +45,67 @@ void _dbg(const char *file, unsigned int line, const char *fn, int level, char *
 	int i;
 	va_list args;
 	static char buf[BUFSIZ];
-	struct timeval tv;
+	static struct timeval now, tv, first = { 0, 0};
+	static bool nl = true;
 
-	if (level > debug || level >= sizeof(buf)) return;
-
-	gettimeofday(&tv, NULL);
+	if (level > debug) return;
 
 	va_start(args, fmt);
-	if ((void (*)()) debugcb == (void (*)()) syslog ||
-	    (void (*)()) debugcb == (void (*)()) vsyslog) {
-		/* TODO: prepend fn */
-		vsyslog(LOG_INFO, fmt, args);
-		return;
+	if ((void (*)()) debugcb == (void (*)()) syslog) {
+		buf[0] = '\0';
+		i = 0;
+
+		if (nl && level >= 0) {
+			if (debug >= 10) {
+				snprintf(buf, sizeof buf, "%s:%u %s(): ", file, line, fn);
+			} else if (debug > 5 || level >= 0) {
+				snprintf(buf, sizeof buf, "%s(): ", fn);
+			}
+
+			i = strlen(buf);
+		}
+
+		vsnprintf(buf + i, (sizeof buf) - i - 1, fmt, args);
+		syslog(LOG_INFO, "%s", buf);
+	} else {
+		if (nl && level >= 0) {
+			if (debug > 5) {
+				gettimeofday(&now, NULL);
+				if (first.tv_sec == 0) {
+					first.tv_sec  = now.tv_sec;
+					first.tv_usec = now.tv_usec;
+				}
+				timersub(&now, &first, &tv);
+			}
+
+			if (debug >= 10) {
+				snprintf(buf, sizeof(buf), "[%3u.%03u] %s:%u %s(): ",
+					(uint32_t) tv.tv_sec, (uint32_t) tv.tv_usec / 1000, file, line, fn);
+			} else if (debug > 5) {
+				snprintf(buf, sizeof(buf), "[%3u.%03u] %s(): ",
+					(uint32_t) tv.tv_sec, (uint32_t) tv.tv_usec / 1000, fn);
+			} else {
+				snprintf(buf, sizeof(buf), "%s(): ", fn);
+			}
+
+			i = strlen(buf);
+		} else {
+			buf[0] = '\0';
+			i = 0;
+		}
+
+		vsnprintf(buf + i, (sizeof buf) - i - 1, fmt, args);
+
+		if (debugcb)
+			(*debugcb)(buf);
+		else
+			fputs(buf, stderr);
 	}
 
-	for (i = 0; i < level && i < sizeof(buf); i++) buf[i] = ' ';
-
-	if (debug >= 10)
-		snprintf(buf, sizeof(buf), "[%6u.%06u] %s:%u %s(): ",
-			(uint32_t) tv.tv_sec, (uint32_t) tv.tv_usec, file, line, fn);
-	else if (debug > 5)
-		snprintf(buf, sizeof(buf), "[%6u.%06u] %s(): ",
-			(uint32_t) tv.tv_sec, (uint32_t) tv.tv_usec, fn);
-	else
-		snprintf(buf, sizeof(buf), "%s(): ", fn);
-
 	i = strlen(buf);
-	vsnprintf(buf+i, sizeof(buf)-i-1, fmt, args);
-	buf[sizeof(buf)-1] = '\0';
+	nl = (i > 0 && buf[i - 1] == '\n');
 
 	va_end(args);
-
-	if (debugcb)
-		(*debugcb)(buf);
-	else
-		fputs(buf, stderr);
 }
 #endif
 
