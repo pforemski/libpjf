@@ -203,8 +203,8 @@ int pjf_copyfile(const char *src, const char *dst);
 /** Wrapper around gettimeofday() */
 void pjf_timenow(struct timeval* tv);
 
-/** Returns time difference in us vs. current time and the time given in tv */
-uint32_t pjf_timediff(struct timeval *tv);
+/** Returns time difference in microseconds from a to b */
+uint32_t pjf_timediff(struct timeval *a, struct timeval *b);
 
 /** Return current UNIX timestamp */
 #define pjf_timestamp() ((uint32_t) time(NULL))

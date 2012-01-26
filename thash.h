@@ -152,7 +152,7 @@ void *_thash_iter(thash *hash, void **key);
 #define thash_iter(a, b) (_thash_iter((a), ((void **) (b))))
 
 /** Safe iterator in case indices are of unsigned int type */
-#define thash_iter_uint(a, b) (_thash_iter((a), ((void **) (unsigned long *) (b))))
+#define thash_uint_iter(a, b) (_thash_iter((a), ((void **) (unsigned long *) (b))))
 
 #define thash_iter_loop(hash, k, v) thash_reset(hash); while (((v) = thash_iter((hash), &(k))))
 

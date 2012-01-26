@@ -421,23 +421,20 @@ void pjf_timenow(struct timeval *tv)
 	tv->tv_usec = 0;
 }
 
-uint32_t pjf_timediff(struct timeval *tv)
+uint32_t pjf_timediff(struct timeval *a, struct timeval *b)
 {
-	static struct timeval tvnow;
-
-	pjf_assert(tv);
-
-	pjf_timenow(&tvnow);
+	pjf_assert(a);
+	pjf_assert(b);
 
 	dbg(14, "pjf_timediff: comparing now=[%u.%06u] vs. then=[%u.%06u]\n",
-		(unsigned int) tvnow.tv_sec, (unsigned int) tvnow.tv_usec,
-		(unsigned int) tv->tv_sec,   (unsigned int) tv->tv_usec);
+		(unsigned int) a->tv_sec, (unsigned int) a->tv_usec,
+		(unsigned int) b->tv_sec,   (unsigned int) b->tv_usec);
 
-	if (tvnow.tv_sec > tv->tv_sec)
-		return (tvnow.tv_sec  - tv->tv_sec) * 1000000 - tv->tv_usec + tvnow.tv_usec;
-	else if (tvnow.tv_sec == tv->tv_sec &&
-	         tvnow.tv_usec > tv->tv_usec)
-		return tvnow.tv_usec - tv->tv_usec;
+	if (a->tv_sec > b->tv_sec)
+		return (a->tv_sec  - b->tv_sec) * 1000000 - b->tv_usec + a->tv_usec;
+	else if (a->tv_sec == b->tv_sec &&
+	         a->tv_usec > b->tv_usec)
+		return a->tv_usec - b->tv_usec;
 	else
 		return 0;
 }
