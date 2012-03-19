@@ -29,6 +29,10 @@
 
 /*****************************************************************************/
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /** Debugging level for dbg() */
 extern int debug;
 
@@ -216,4 +220,7 @@ uint32_t pjf_timediff(struct timeval *a, struct timeval *b);
  * @param pidfile     path to file where to store the PID in (may be null) */
 void pjf_daemonize(const char *progname, const char *pidfile);
 
+#ifdef __cplusplus
+}
+#endif
 #endif /* _MISC_H_ */
