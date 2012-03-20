@@ -43,7 +43,7 @@ extern void (*debugcb)(const char *msg);
  * @param level message debug level
  * @param dbg message to show, in printf-style format */
 #ifndef NODEBUG
-void _dbg(const char *file, unsigned int line, const char *fn, int level, char *fmt, ...);
+void _dbg(const char *file, unsigned int line, const char *fn, int level, const char *fmt, ...);
 #define dbg(...) _dbg(__FILE__, __LINE__, __func__, __VA_ARGS__)
 #else
 #define dbg(...) do { } while(0)

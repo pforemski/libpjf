@@ -40,7 +40,7 @@
 #include "lib.h"
 
 #ifndef NODEBUG
-void _dbg(const char *file, unsigned int line, const char *fn, int level, char *fmt, ...)
+void _dbg(const char *file, unsigned int line, const char *fn, int level, const char *fmt, ...)
 {
 	int i;
 	va_list args;
