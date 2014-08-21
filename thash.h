@@ -151,7 +151,8 @@ void thash_reset(thash *hash);
 void *_thash_iter(thash *hash, void **key);
 #define thash_iter(a, b) (_thash_iter((a), ((void **) (b))))
 
-/** Safe iterator in case indices are of unsigned int type */
+/** Safe iterator in case indices are of unsigned int type
+ * @param b      address of unsigned long variable to write to */
 #define thash_uint_iter(a, b) (_thash_iter((a), ((void **) (unsigned long *) (b))))
 
 #define thash_iter_loop(hash, k, v) thash_reset(hash); while (((v) = thash_iter((hash), &(k))))
@@ -172,6 +173,10 @@ void thash_set(thash *hash, const void *key, const void *val);
 
 /** A safe thash_set in case indices are of unsigned int type */
 #define thash_uint_set(a, b, c) (thash_set((a), ((const void *) (unsigned long) b), (c)))
+
+/** A safe thash_set in case indices are of unsigned int type and values are boolean */
+#define thash_uint_set_true(a, b) (thash_set((a), ((const void *) (unsigned long) b), ((const void *) (unsigned long) 1)))
+#define thash_uint_set_false(a, b) (thash_set((a), ((const void *) (unsigned long) b), ((const void *) (unsigned long) 0)))
 
 /** Returns number of entries in a hash table.
  *

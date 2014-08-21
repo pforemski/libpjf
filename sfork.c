@@ -42,7 +42,7 @@ pid_t pjf_fork(const char *cmd, const char *args, thash *env,
 	if (pipe(fd_err) < 0) return 0;
 
 	child_pid = fork();
-	if (child_pid < -1) return 0;
+	if (child_pid < 0) return 0;
 
 	if (child_pid == 0) { /* child */
 		char buf[BUFSIZ];
